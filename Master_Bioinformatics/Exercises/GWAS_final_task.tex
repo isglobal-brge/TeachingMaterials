@@ -1,0 +1,59 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,top=3cm,bottom=3cm,left=2cm,right=2cm]{geometry}
+%\usepackage[authoryear,round]{natbib}
+\usepackage{hyperref}
+\usepackage[pdftex]{color,graphicx,epsfig}
+\DeclareGraphicsRule{.pdftex}{pdf}{.pdftex}{}
+\usepackage{amssymb,amsmath}
+\usepackage{enumerate}
+\usepackage[spanish]{babel}
+\usepackage[ansinew]{inputenc}
+
+
+
+\begin{document}
+
+
+\title{\bf Genome-wide association study}
+\date{}
+
+
+\maketitle
+
+
+\noindent \textbf{EXERCISE}: Researchers are interested in detecting  SNPs associated
+with colorectal cancer (variable {\tt cascon}). To this end, they performed a GWAS using DNA information of 2312 individuals. Data are available in the Biocloud virtual machine. Genotype information is available in PLINK format (files 'colorectal.bed', 'colorectal.bim', 'colorectal.fam'). Phenotypic information can be found in the file 'colorectal.txt' that includes these variables:
+
+\begin{verbatim}
+id: identification number
+cascon: case-control status (0: control, 1:case)
+sex: gender status (male, female)
+age: age in years
+smoke: smoking status
+bmi: body mass index
+\end{verbatim}
+
+\begin{enumerate}
+
+\item Perform a Genome-wide association study including: 
+
+\begin{itemize}
+\item Quality control (QC) at both individual and SNP level. NOTE: Skip those QC steps that cannot be performed due to memory space problems in Biocloud or try to figure out how to addressed them (if possible).  
+\item Get p-values assessing association between SNPs and colorectal cancer (e.g. GWAS analysis).
+\item Create a Manhattan plot and highlight those SNP that are statistically significant after Bonferroni correction. 
+\item Create a Locus Zoom plot for those SNPs that are significantly associated with colon cancer after Bonferroni correction. Use LocusZoom tool that is available here {\tt http://locuszoom.org/}.
+\end{itemize}
+
+
+\item \noindent \textbf{TO DELIVER}: A single pdf containing three sections: Methods, Results and Appendix. The first two sections should mimic the sections that are normally written in a manuscript (3 pages as maximum - I will not evaluate anything in other pages than the first three). Appendix should contain R code, figures and tables. The pdf canb be created  R Markdown (or {\tt knitr}). Here you can find an introduction to Markdown: 
+
+\noindent \url{https://github.com/isglobal-brge/TeachingMaterials/blob/master/Longitudinal\_data\_analysis/Reproducible\_Research/Reproducible\_Research.pdf}
+
+NOTE: Only 1 pdf file should be uploaded - anything else will be evaluated.
+\end{enumerate}
+
+
+\end{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,0 +1,69 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,top=3cm,bottom=3cm,left=2cm,right=2cm]{geometry}
+%\usepackage[authoryear,round]{natbib}
+\usepackage{hyperref}
+\usepackage[pdftex]{color,graphicx,epsfig}
+\DeclareGraphicsRule{.pdftex}{pdf}{.pdftex}{}
+\usepackage{amssymb,amsmath}
+\usepackage{enumerate}
+\usepackage[spanish]{babel}
+\usepackage[ansinew]{inputenc}
+
+
+
+\begin{document}
+
+%\setkeys{Gin}{width=0.99\textwidth}
+
+\title{\bf Ejercicios Datos Longitudinales (II)}
+\date{}
+
+%\VignetteIndexEntry{RNAseq}
+
+\maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent \textbf{PROBLEMA 1.}
+Para estudiar las diferencias entre dos procedimientos diferentes
+de recuperación de pacientes de un infarto, se consideraron dos grupos experimentales en
+sendos hospitales, de 8 pacientes cada uno. La variable respuesta es el índice de Bartel, que
+varía entre 0 y 100, y que constituye una medida de la habilidad funcional con la que se
+valoran diferentes capacidades, de forma que valores más altos se corresponden con una
+mejor situación del paciente. De cada uno de los 16 pacientes se dispone de su respuesta cada
+semana a lo largo de 5 semanas consecutivas. Los datos se pueden encontrar en el archivo
+{\tt recuperainfarto.txt}
+
+\medskip
+
+\begin{enumerate}
+\item Utiliza un modelo GEE para ver si existen diferencias estadísticamente significativas entre los dos procedimientos empleados. Explicita qué matriz de correlación has usado par contestar a esta pregunta
+
+\item Contesta a la misma pregunta utilizando un modelo lineal mixto ¿se obtiene la misma conclusión?
+\end{enumerate}
+
+\bigskip
+\bigskip
+
+\noindent \textbf{PROBLEMA 2.}
+
+En un estudio sobre la agudeza visual se dispone de la respuesta de siete
+individuos. La respuesta en cada ojo es el retraso en milisegundos entre la emisión de una luz
+y la respuesta en a la misma por el cortex. Cada ojo se somete a cuatro mediciones correspondientes a cuatro instantes consecutivos. Se tienen mediciones en el ojo izquierdo y derecho. Los datos se pueden encontrar en el archivo {\tt agudezavisual.txt}
+
+\begin{enumerate}
+\item Crea un objeto {\tt groupeData} teniendo en cuenta que dispones de datos anidados (ojo dentro de medida en cada instante de tiempo)  NOTA: Usa `/' para indicar que una observación está anidada dentro de la otra 
+\item Crea un gráfico que ilustre el perfil de cada individuo y para cada ojo    
+\item ¿Existe un efecto temporal en la respuesta ?
+\end{enumerate}
+
+
+
+
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 

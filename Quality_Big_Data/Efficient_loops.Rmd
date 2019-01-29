@@ -1,0 +1,148 @@
+---
+title: "Efficient loops"
+author:   
+  - name: Juan R Gonzalez
+    affiliation: 
+    - Bioinformatics Research Group in Epidemiology, Barcelona Institute for Global Health, Spain
+    email: juanr.gonzalez@isglobal.org
+output:
+  BiocStyle::html_document:
+    toc_depth: 2
+  BiocStyle::pdf_document:
+    toc_depth: 2
+---
+
+
+```{r style, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
+library("knitr")
+options(width=120)
+opts_chunk$set(message = FALSE, error = TRUE, warning = TRUE,
+               comment = "")
+```
+
+
+# Intro
+
+There are several packages to perform parallel computin. The reason for using `doParallel` package (and not the parallel package) is that the older parallel package, parallelization was not working entirely on Windows and you had to write different code for it to work. The doParallel package is trying to make it happen on all platforms: UNIX, LINUX and WINDOWS, so it’s a pretty decent wrapper.
+
+# Example
+
+Let us assume we want to compute the first 
+
+```{r function_primers}
+getPrimeNumbers <- function(n) {  
+   n <- as.integer(n)
+   if(n > 1e6) stop("n too large")
+   primes <- rep(TRUE, n)
+   primes[1] <- FALSE
+   last.prime <- 2L
+   for(i in last.prime:floor(sqrt(n)))
+   {
+      primes[seq.int(2L*last.prime, n, last.prime)] <- FALSE
+      last.prime <- last.prime + min(which(primes[(last.prime+1):n]))
+   }
+   which(primes)
+}
+```
+
+The function is taken from: http://stackoverflow.com/questions/3789968/generate-a-list-of-primes-in-r-up-to-a-certain-number. Now let’s see the code for each type of loops and finally compare the runtime performance in each loop type and how they perform.
+
+# for
+
+```{r for}
+forFunction <- function(x) {
+  result <- list()  
+  for (i in seq_along(x)) {  
+    result[[i]] <- getPrimeNumbers(x[i])
+  }
+  result
+}
+```
+
+# lapply
+
+```{r lapply}
+lapplyFunction <- function(x) {
+  result <- lapply(x, getPrimeNumbers)
+  result
+}
+```
+
+# doParallel::parLapply
+
+```{r doParllel_parLapply}
+library(doParallel)
+ncores <- detectCores() - 1  
+registerDoParallel(cores=ncores)  
+cl <- makeCluster(ncores)  
+
+parLapplyFunction <- function(x){
+  result <- parLapply(cl, x, getPrimeNumbers)  
+  result
+}
+stopCluster(cl)
+```  
+
+
+# doParallel::foreach
+
+```{r foreach}
+cl <- makeCluster(ncores)  
+registerDoParallel(cl)  
+foreachFunction <- function(x) {
+  result <- foreach(i=x, .export="getPrimeNumbers") %dopar%
+    getPrimeNumbers(i)
+  result
+}  
+stopCluster(cl)
+```
+
+# doParallel::mclapply
+
+```{r mclapply}
+# Only works in Linux (Windows ncores must be set equal to 1)
+result <- mclapply(x, getPrimeNumbers, mc.cores=ncores)
+```
+
+
+# Evaluation
+
+```{r system}
+x <- 10:2000
+system.time(result <- lapply(x, getPrimeNumbers))
+```
+
+
+```{r microbenchmarck}
+library(microbenchmark)
+library(doParallel)
+ncores <- detectCores() - 1  
+registerDoParallel(cores=ncores)  
+# cl <- makeCluster(ncores, type="FORK")
+cl <- makeCluster(ncores)
+registerDoParallel(cl)  
+
+x <- 10:1000
+bench <- microbenchmark(forF = forFunction(x),
+                        applyF = lapplyFunction(x),
+                        forEachF = foreachFunction(x),
+                        parLapplyF = parLapplyFunction(x),
+                        times=20)
+bench
+stopCluster(cl)
+```
+
+```{r plot}
+plot(bench)
+```
+
+
+# Session info
+
+```{r}
+sessionInfo()
+```
+
+
+
+

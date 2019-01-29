@@ -1,0 +1,721 @@
+id	month	CD4	group
+1	0	658	control
+1	2	543	control
+1	4	520	control
+1	6	563	control
+1	8	389	control
+1	10	371	control
+2	0	500	control
+2	2	419	control
+2	4	431	control
+2	6	285	control
+2	8	270	control
+2	10	223	control
+3	0	432	control
+3	2	586	control
+3	4	448	control
+3	6	418	control
+3	8	380	control
+3	10	381	control
+4	0	540	control
+4	2	545	control
+4	4	422	control
+4	6	334	control
+4	8	381	control
+4	10	396	control
+5	0	476	control
+5	2	484	control
+5	4	349	control
+5	6	301	control
+5	8	181	control
+5	10	320	control
+6	0	486	control
+6	2	443	control
+6	4	482	control
+6	6	470	control
+6	8	452	control
+6	10	278	control
+7	0	334	control
+7	2	311	control
+7	4	388	control
+7	6	316	control
+7	8	190	control
+7	10	79	control
+8	0	652	control
+8	2	462	control
+8	4	573	control
+8	6	466	control
+8	8	323	control
+8	10	425	control
+9	0	539	control
+9	2	465	control
+9	4	481	control
+9	6	324	control
+9	8	328	control
+9	10	205	control
+10	0	489	control
+10	2	416	control
+10	4	434	control
+10	6	349	control
+10	8	247	control
+10	10	176	control
+11	0	428	control
+11	2	349	control
+11	4	359	control
+11	6	336	control
+11	8	290	control
+11	10	275	control
+12	0	607	control
+12	2	392	control
+12	4	522	control
+12	6	266	control
+12	8	351	control
+12	10	332	control
+13	0	475	control
+13	2	426	control
+13	4	417	control
+13	6	340	control
+13	8	315	control
+13	10	247	control
+14	0	567	control
+14	2	421	control
+14	4	306	control
+14	6	289	control
+14	8	338	control
+14	10	275	control
+15	0	538	control
+15	2	425	control
+15	4	437	control
+15	6	355	control
+15	8	357	control
+15	10	362	control
+16	0	550	control
+16	2	503	control
+16	4	445	control
+16	6	466	control
+16	8	324	control
+16	10	306	control
+17	0	487	control
+17	2	395	control
+17	4	401	control
+17	6	489	control
+17	8	393	control
+17	10	330	control
+18	0	390	control
+18	2	478	control
+18	4	493	control
+18	6	319	control
+18	8	329	control
+18	10	289	control
+19	0	612	control
+19	2	531	control
+19	4	571	control
+19	6	315	control
+19	8	309	control
+19	10	329	control
+20	0	616	control
+20	2	536	control
+20	4	525	control
+20	6	516	control
+20	8	565	control
+20	10	332	control
+21	0	620	control
+21	2	508	control
+21	4	464	control
+21	6	567	control
+21	8	477	control
+21	10	451	control
+22	0	405	control
+22	2	346	control
+22	4	370	control
+22	6	383	control
+22	8	308	control
+22	10	264	control
+23	0	378	control
+23	2	419	control
+23	4	247	control
+23	6	252	control
+23	8	129	control
+23	10	156	control
+24	0	599	control
+24	2	487	control
+24	4	425	control
+24	6	411	control
+24	8	367	control
+24	10	366	control
+25	0	487	control
+25	2	470	control
+25	4	378	control
+25	6	531	control
+25	8	343	control
+25	10	459	control
+26	0	457	control
+26	2	340	control
+26	4	319	control
+26	6	258	control
+26	8	307	control
+26	10	150	control
+27	0	426	control
+27	2	393	control
+27	4	273	control
+27	6	347	control
+27	8	276	control
+27	10	334	control
+28	0	661	control
+28	2	490	control
+28	4	381	control
+28	6	407	control
+28	8	405	control
+28	10	384	control
+29	0	498	control
+29	2	528	control
+29	4	510	control
+29	6	387	control
+29	8	408	control
+29	10	205	control
+30	0	592	control
+30	2	530	control
+30	4	419	control
+30	6	603	control
+30	8	439	control
+30	10	375	control
+31	0	395	control
+31	2	474	control
+31	4	441	control
+31	6	255	control
+31	8	327	control
+31	10	231	control
+32	0	536	control
+32	2	605	control
+32	4	456	control
+32	6	463	control
+32	8	463	control
+32	10	376	control
+33	0	477	control
+33	2	394	control
+33	4	433	control
+33	6	432	control
+33	8	266	control
+33	10	246	control
+34	0	504	control
+34	2	696	control
+34	4	432	control
+34	6	508	control
+34	8	429	control
+34	10	349	control
+35	0	508	control
+35	2	390	control
+35	4	277	control
+35	6	251	control
+35	8	275	control
+35	10	256	control
+36	0	668	control
+36	2	561	control
+36	4	572	control
+36	6	471	control
+36	8	477	control
+36	10	448	control
+37	0	398	control
+37	2	378	control
+37	4	400	control
+37	6	284	control
+37	8	284	control
+37	10	150	control
+38	0	620	control
+38	2	714	control
+38	4	477	control
+38	6	531	control
+38	8	401	control
+38	10	375	control
+39	0	578	control
+39	2	435	control
+39	4	415	control
+39	6	284	control
+39	8	356	control
+39	10	400	control
+40	0	368	control
+40	2	428	control
+40	4	414	control
+40	6	326	control
+40	8	234	control
+40	10	298	control
+41	0	493	one drug
+41	2	467	one drug
+41	4	457	one drug
+41	6	345	one drug
+41	8	337	one drug
+41	10	401	one drug
+42	0	503	one drug
+42	2	515	one drug
+42	4	437	one drug
+42	6	427	one drug
+42	8	581	one drug
+42	10	527	one drug
+43	0	446	one drug
+43	2	453	one drug
+43	4	398	one drug
+43	6	297	one drug
+43	8	370	one drug
+43	10	333	one drug
+44	0	395	one drug
+44	2	372	one drug
+44	4	287	one drug
+44	6	354	one drug
+44	8	356	one drug
+44	10	345	one drug
+45	0	599	one drug
+45	2	566	one drug
+45	4	430	one drug
+45	6	606	one drug
+45	8	510	one drug
+45	10	499	one drug
+46	0	504	one drug
+46	2	514	one drug
+46	4	275	one drug
+46	6	499	one drug
+46	8	467	one drug
+46	10	403	one drug
+47	0	600	one drug
+47	2	595	one drug
+47	4	427	one drug
+47	6	351	one drug
+47	8	492	one drug
+47	10	257	one drug
+48	0	673	one drug
+48	2	558	one drug
+48	4	476	one drug
+48	6	395	one drug
+48	8	542	one drug
+48	10	415	one drug
+49	0	368	one drug
+49	2	172	one drug
+49	4	231	one drug
+49	6	165	one drug
+49	8	214	one drug
+49	10	182	one drug
+50	0	524	one drug
+50	2	324	one drug
+50	4	322	one drug
+50	6	217	one drug
+50	8	337	one drug
+50	10	339	one drug
+51	0	618	one drug
+51	2	436	one drug
+51	4	475	one drug
+51	6	415	one drug
+51	8	595	one drug
+51	10	469	one drug
+52	0	523	one drug
+52	2	459	one drug
+52	4	378	one drug
+52	6	360	one drug
+52	8	338	one drug
+52	10	394	one drug
+53	0	389	one drug
+53	2	361	one drug
+53	4	374	one drug
+53	6	212	one drug
+53	8	258	one drug
+53	10	301	one drug
+54	0	505	one drug
+54	2	510	one drug
+54	4	511	one drug
+54	6	465	one drug
+54	8	427	one drug
+54	10	399	one drug
+55	0	539	one drug
+55	2	473	one drug
+55	4	493	one drug
+55	6	505	one drug
+55	8	568	one drug
+55	10	439	one drug
+56	0	369	one drug
+56	2	377	one drug
+56	4	280	one drug
+56	6	374	one drug
+56	8	258	one drug
+56	10	250	one drug
+57	0	577	one drug
+57	2	610	one drug
+57	4	426	one drug
+57	6	463	one drug
+57	8	471	one drug
+57	10	410	one drug
+58	0	532	one drug
+58	2	374	one drug
+58	4	320	one drug
+58	6	384	one drug
+58	8	236	one drug
+58	10	348	one drug
+59	0	606	one drug
+59	2	558	one drug
+59	4	577	one drug
+59	6	503	one drug
+59	8	538	one drug
+59	10	552	one drug
+60	0	549	one drug
+60	2	536	one drug
+60	4	449	one drug
+60	6	571	one drug
+60	8	450	one drug
+60	10	553	one drug
+61	0	375	one drug
+61	2	560	one drug
+61	4	312	one drug
+61	6	478	one drug
+61	8	357	one drug
+61	10	403	one drug
+62	0	549	one drug
+62	2	510	one drug
+62	4	427	one drug
+62	6	416	one drug
+62	8	253	one drug
+62	10	388	one drug
+63	0	437	one drug
+63	2	458	one drug
+63	4	397	one drug
+63	6	381	one drug
+63	8	356	one drug
+63	10	443	one drug
+64	0	529	one drug
+64	2	542	one drug
+64	4	457	one drug
+64	6	457	one drug
+64	8	462	one drug
+64	10	538	one drug
+65	0	636	one drug
+65	2	521	one drug
+65	4	562	one drug
+65	6	554	one drug
+65	8	462	one drug
+65	10	432	one drug
+66	0	575	one drug
+66	2	519	one drug
+66	4	421	one drug
+66	6	406	one drug
+66	8	488	one drug
+66	10	425	one drug
+67	0	512	one drug
+67	2	442	one drug
+67	4	506	one drug
+67	6	430	one drug
+67	8	410	one drug
+67	10	550	one drug
+68	0	441	one drug
+68	2	413	one drug
+68	4	363	one drug
+68	6	438	one drug
+68	8	350	one drug
+68	10	465	one drug
+69	0	511	one drug
+69	2	393	one drug
+69	4	362	one drug
+69	6	335	one drug
+69	8	316	one drug
+69	10	239	one drug
+70	0	456	one drug
+70	2	508	one drug
+70	4	502	one drug
+70	6	529	one drug
+70	8	421	one drug
+70	10	366	one drug
+71	0	541	one drug
+71	2	454	one drug
+71	4	469	one drug
+71	6	575	one drug
+71	8	611	one drug
+71	10	456	one drug
+72	0	520	one drug
+72	2	479	one drug
+72	4	309	one drug
+72	6	382	one drug
+72	8	434	one drug
+72	10	326	one drug
+73	0	416	one drug
+73	2	480	one drug
+73	4	570	one drug
+73	6	420	one drug
+73	8	425	one drug
+73	10	430	one drug
+74	0	384	one drug
+74	2	360	one drug
+74	4	276	one drug
+74	6	318	one drug
+74	8	337	one drug
+74	10	391	one drug
+75	0	513	one drug
+75	2	550	one drug
+75	4	423	one drug
+75	6	631	one drug
+75	8	446	one drug
+75	10	445	one drug
+76	0	588	one drug
+76	2	529	one drug
+76	4	518	one drug
+76	6	505	one drug
+76	8	609	one drug
+76	10	566	one drug
+77	0	516	one drug
+77	2	486	one drug
+77	4	436	one drug
+77	6	529	one drug
+77	8	366	one drug
+77	10	472	one drug
+78	0	623	one drug
+78	2	431	one drug
+78	4	642	one drug
+78	6	503	one drug
+78	8	466	one drug
+78	10	484	one drug
+79	0	769	one drug
+79	2	536	one drug
+79	4	463	one drug
+79	6	526	one drug
+79	8	504	one drug
+79	10	484	one drug
+80	0	651	one drug
+80	2	486	one drug
+80	4	350	one drug
+80	6	388	one drug
+80	8	504	one drug
+80	10	441	one drug
+81	0	459	two drugs
+81	2	419	two drugs
+81	4	365	two drugs
+81	6	345	two drugs
+81	8	292	two drugs
+81	10	494	two drugs
+82	0	449	two drugs
+82	2	401	two drugs
+82	4	456	two drugs
+82	6	319	two drugs
+82	8	423	two drugs
+82	10	389	two drugs
+83	0	443	two drugs
+83	2	435	two drugs
+83	4	399	two drugs
+83	6	461	two drugs
+83	8	559	two drugs
+83	10	421	two drugs
+84	0	550	two drugs
+84	2	440	two drugs
+84	4	539	two drugs
+84	6	481	two drugs
+84	8	512	two drugs
+84	10	561	two drugs
+85	0	504	two drugs
+85	2	545	two drugs
+85	4	479	two drugs
+85	6	423	two drugs
+85	8	464	two drugs
+85	10	537	two drugs
+86	0	451	two drugs
+86	2	495	two drugs
+86	4	369	two drugs
+86	6	411	two drugs
+86	8	439	two drugs
+86	10	529	two drugs
+87	0	520	two drugs
+87	2	535	two drugs
+87	4	482	two drugs
+87	6	490	two drugs
+87	8	326	two drugs
+87	10	381	two drugs
+88	0	560	two drugs
+88	2	650	two drugs
+88	4	404	two drugs
+88	6	548	two drugs
+88	8	598	two drugs
+88	10	566	two drugs
+89	0	363	two drugs
+89	2	345	two drugs
+89	4	328	two drugs
+89	6	332	two drugs
+89	8	326	two drugs
+89	10	499	two drugs
+90	0	503	two drugs
+90	2	342	two drugs
+90	4	322	two drugs
+90	6	333	two drugs
+90	8	270	two drugs
+90	10	350	two drugs
+91	0	416	two drugs
+91	2	435	two drugs
+91	4	381	two drugs
+91	6	345	two drugs
+91	8	297	two drugs
+91	10	398	two drugs
+92	0	526	two drugs
+92	2	485	two drugs
+92	4	386	two drugs
+92	6	386	two drugs
+92	8	478	two drugs
+92	10	451	two drugs
+93	0	532	two drugs
+93	2	596	two drugs
+93	4	393	two drugs
+93	6	526	two drugs
+93	8	557	two drugs
+93	10	652	two drugs
+94	0	489	two drugs
+94	2	418	two drugs
+94	4	519	two drugs
+94	6	314	two drugs
+94	8	506	two drugs
+94	10	496	two drugs
+95	0	602	two drugs
+95	2	513	two drugs
+95	4	469	two drugs
+95	6	459	two drugs
+95	8	421	two drugs
+95	10	518	two drugs
+96	0	555	two drugs
+96	2	406	two drugs
+96	4	396	two drugs
+96	6	402	two drugs
+96	8	459	two drugs
+96	10	408	two drugs
+97	0	589	two drugs
+97	2	435	two drugs
+97	4	460	two drugs
+97	6	430	two drugs
+97	8	390	two drugs
+97	10	499	two drugs
+98	0	479	two drugs
+98	2	401	two drugs
+98	4	380	two drugs
+98	6	440	two drugs
+98	8	534	two drugs
+98	10	562	two drugs
+99	0	621	two drugs
+99	2	574	two drugs
+99	4	374	two drugs
+99	6	548	two drugs
+99	8	535	two drugs
+99	10	510	two drugs
+100	0	536	two drugs
+100	2	532	two drugs
+100	4	382	two drugs
+100	6	431	two drugs
+100	8	426	two drugs
+100	10	471	two drugs
+101	0	420	two drugs
+101	2	329	two drugs
+101	4	424	two drugs
+101	6	281	two drugs
+101	8	481	two drugs
+101	10	421	two drugs
+102	0	427	two drugs
+102	2	522	two drugs
+102	4	409	two drugs
+102	6	438	two drugs
+102	8	424	two drugs
+102	10	594	two drugs
+103	0	519	two drugs
+103	2	459	two drugs
+103	4	561	two drugs
+103	6	423	two drugs
+103	8	517	two drugs
+103	10	577	two drugs
+104	0	624	two drugs
+104	2	549	two drugs
+104	4	495	two drugs
+104	6	560	two drugs
+104	8	528	two drugs
+104	10	582	two drugs
+105	0	535	two drugs
+105	2	567	two drugs
+105	4	412	two drugs
+105	6	446	two drugs
+105	8	574	two drugs
+105	10	488	two drugs
+106	0	595	two drugs
+106	2	508	two drugs
+106	4	499	two drugs
+106	6	524	two drugs
+106	8	663	two drugs
+106	10	690	two drugs
+107	0	546	two drugs
+107	2	630	two drugs
+107	4	646	two drugs
+107	6	536	two drugs
+107	8	613	two drugs
+107	10	500	two drugs
+108	0	447	two drugs
+108	2	415	two drugs
+108	4	399	two drugs
+108	6	204	two drugs
+108	8	344	two drugs
+108	10	366	two drugs
+109	0	658	two drugs
+109	2	452	two drugs
+109	4	511	two drugs
+109	6	575	two drugs
+109	8	581	two drugs
+109	10	614	two drugs
+110	0	610	two drugs
+110	2	442	two drugs
+110	4	473	two drugs
+110	6	459	two drugs
+110	8	517	two drugs
+110	10	566	two drugs
+111	0	543	two drugs
+111	2	522	two drugs
+111	4	438	two drugs
+111	6	397	two drugs
+111	8	447	two drugs
+111	10	371	two drugs
+112	0	490	two drugs
+112	2	470	two drugs
+112	4	402	two drugs
+112	6	297	two drugs
+112	8	516	two drugs
+112	10	437	two drugs
+113	0	536	two drugs
+113	2	407	two drugs
+113	4	409	two drugs
+113	6	489	two drugs
+113	8	481	two drugs
+113	10	419	two drugs
+114	0	528	two drugs
+114	2	563	two drugs
+114	4	498	two drugs
+114	6	585	two drugs
+114	8	528	two drugs
+114	10	552	two drugs
+115	0	522	two drugs
+115	2	474	two drugs
+115	4	413	two drugs
+115	6	478	two drugs
+115	8	409	two drugs
+115	10	429	two drugs
+116	0	595	two drugs
+116	2	448	two drugs
+116	4	297	two drugs
+116	6	348	two drugs
+116	8	487	two drugs
+116	10	570	two drugs
+117	0	410	two drugs
+117	2	499	two drugs
+117	4	507	two drugs
+117	6	491	two drugs
+117	8	478	two drugs
+117	10	526	two drugs
+118	0	388	two drugs
+118	2	364	two drugs
+118	4	392	two drugs
+118	6	360	two drugs
+118	8	341	two drugs
+118	10	476	two drugs
+119	0	464	two drugs
+119	2	403	two drugs
+119	4	428	two drugs
+119	6	408	two drugs
+119	8	426	two drugs
+119	10	479	two drugs
+120	0	523	two drugs
+120	2	520	two drugs
+120	4	432	two drugs
+120	6	552	two drugs
+120	8	640	two drugs
+120	10	551	two drugs

@@ -1,0 +1,19 @@
+\frametitle{More than two tables}
+
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{plot}\hlstd{(resMCIA}\hlopt{$}\hlstd{mcoa}\hlopt{$}\hlstd{cov2,}  \hlkwc{xlab} \hlstd{=} \hlstr{"pseudoeig 1"}\hlstd{,}
+     \hlkwc{ylab} \hlstd{=} \hlstr{"pseudoeig 2"}\hlstd{,} \hlkwc{pch}\hlstd{=}\hlnum{19}\hlstd{,} \hlkwc{col}\hlstd{=}\hlstr{"red"}\hlstd{)}
+\hlkwd{text}\hlstd{(resMCIA}\hlopt{$}\hlstd{mcoa}\hlopt{$}\hlstd{cov2,} \hlkwc{labels}\hlstd{=}\hlkwd{rownames}\hlstd{(resMCIA}\hlopt{$}\hlstd{mcoa}\hlopt{$}\hlstd{cov2),}
+     \hlkwc{cex}\hlstd{=}\hlnum{1.4}\hlstd{,} \hlkwc{adj}\hlstd{=}\hlnum{0}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{figure}
+\begin{center}
+ \includegraphics[width=5.5cm]{figure/plot_eigen-1}
+\end{center}
+\end{figure}
+

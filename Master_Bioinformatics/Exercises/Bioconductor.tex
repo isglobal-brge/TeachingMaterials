@@ -1,0 +1,58 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,top=3cm,bottom=3cm,left=2cm,right=2cm]{geometry}
+%\usepackage[authoryear,round]{natbib}
+\usepackage{hyperref}
+\usepackage[pdftex]{color,graphicx,epsfig}
+\DeclareGraphicsRule{.pdftex}{pdf}{.pdftex}{}
+\usepackage{amssymb,amsmath}
+\usepackage{enumerate}
+\usepackage[spanish]{babel}
+\usepackage[ansinew]{inputenc}
+
+
+
+\begin{document}
+
+
+\title{\bf Bioconductor}
+\date{}
+
+
+\maketitle
+
+
+
+\begin{enumerate}
+\item Retrieve a matrix containing the gene counts located in the chromosome 7 in the region 5Mb-12Mb of airway data using  two R code: one using `[` and another using {\tt GRanges} functionalities.  
+
+\item Find the gene symbol, chromosome position and GO pathway
+ID for `1003\_s\_at` (Affymetrix probe annotated in {\tt hgu95av.db})
+
+\item Use what you have learned about {\tt biomaRt} to find the gene symbol and name for the entrez gene IDs 1, 10 and 100.
+
+\item Add the annotation of {\tt pickrell.eset} having gene symbol, chromosome start and end and entrez id. NOTES: genes are encoded using ensembl ids. Use the `Homo.sapiens` object to look up the chromosome start, chomosome end and entrez {\tt columns()}.
+
+\item Download GEO data set GSE85426 by executing:
+
+\begin{verbatim}
+library(GEOquery)
+gds <- getGEO("GSE40732")[[1]]
+gds
+\end{verbatim} 
+
+Answer the following questions using this object
+\begin{itemize}
+\item how many samples are analyzed?
+\item show the names of the variables (metadata) available in this study
+\item how many asthmatics are in the database (variable {\tt characteristics\_ch1})?
+\item how many genes are analyzed?
+\item which is the name of the annotation?
+\item create a boxplot showing the gene expression of `AB002294` (variable ID in the annoation - these are genebank numbers).
+\end{itemize}
+
+\end{enumerate}
+
+\end{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

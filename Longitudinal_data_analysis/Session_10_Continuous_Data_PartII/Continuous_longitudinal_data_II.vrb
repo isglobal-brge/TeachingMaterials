@@ -1,0 +1,10 @@
+\frametitle{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{Modelos lineales mixtos con R}
+
+Model checking
+\begin{Schunk}
+\begin{Sinput}
+> plot(mod.lme)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{Continuous_longitudinal_data_II-verificar}

@@ -1,0 +1,47 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,top=3cm,bottom=3cm,left=2cm,right=2cm]{geometry}
+%\usepackage[authoryear,round]{natbib}
+\usepackage{hyperref}
+\usepackage[pdftex]{color,graphicx,epsfig}
+\DeclareGraphicsRule{.pdftex}{pdf}{.pdftex}{}
+\usepackage{amssymb,amsmath}
+\usepackage{enumerate}
+\usepackage[spanish]{babel}
+\usepackage[ansinew]{inputenc}
+
+
+
+\begin{document}
+
+
+\title{\bf Genetic association studies - GWAS}
+\date{}
+
+
+\maketitle
+
+
+\noindent \textbf{EXERCISE}: Researchers are interested in detecting new SNPs associated
+with BMI (body mass index). To do so, they performed a GWAS using DNA information about 425 individuals.
+Genotype information is available in plink format (files 'coronary.bed', 'coronary.bim', 'coronary.fam')
+while phenotypic information can be found in the file 'coronary.txt'.
+
+
+\begin{itemize}
+\item Read genotypes using {\tt snpStats} library
+\item Verify that both data sets are in the same order (NOTE: 'id' variable in the file 'coronary.txt' must be
+used since it corresponds to the unique patient number)
+\item Remove those SNPs that do not pass QC  (HWE and low MAF)
+\item Assess association between BMI' and the SNPs  (NOTE: remember that you are analyzing a \textbf{quantitative trait})
+\item Calculate $\lambda$ and create a Q-Q plot to assess population stratification
+\item Assess association between BMI' and the SNPs adjusting for
+population stratification (variables 'ev3' and 'ev4' in the file 'coronary.txt') (NOTE: remember that you are analyzing a \textbf{quantitative trait}). Are there differences with crude analysis?
+\item Create a Manhattan plot (use {\tt qqman} library)
+\end{itemize}
+
+
+
+\end{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

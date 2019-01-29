@@ -1,0 +1,74 @@
+---
+title: "Introduction"
+subtitle: "R for Data Science"
+author: |
+  | Juan R Gonzalez
+  | juanr.gonzalez@isglobal.org
+institute: |
+  | BRGE - Bioinformatics Research Group in Epidemiology
+  | ISGlobal - Barcelona Institute for Global Health
+  | http://brge.isglobal.org
+output:
+  beamer_presentation:
+    toc: false
+    slide_level: 2
+    includes:
+      in_header: header.tex  
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment="", message=FALSE, warning=FALSE, cache=TRUE, fig.width = 4, fig.height = 4)
+options(width=80)
+```
+
+## Credits
+
+[R for Data Science:](http://r4ds.had.co.nz/index.html) http://r4ds.had.co.nz/index.html
+
+
+## Outline of the course
+
+* Day 1: Introduction (1h)
+     - Bioinformatics Research Group in Epidemiology (https://brge.isglobal.org)
+     - Course Material
+     - PCA for big data
+     - Master Thesis proposal(s)
+
+* Day 1: Reproducible Research (1h)
+     - knitr
+     - R markdown 
+
+-----
+
+* Day 2: Tidyverse - Data wrangling (1h)
+     - Data wrangling 
+     - Tibbles
+     - Data import
+     - Relational data
+     - Strings, Factors (not covered)
+   
+* Day 2: Tidyverse - Data transformation (1h)   
+     - Filter rows
+     - Arrange rows
+     - Select columns
+     - Add columns
+     - Grouped summaries
+     - Grouped mutates
+
+* Day 3: Tidyverse - Data visualization (1h)
+     - Exploratory data analysis 
+     - Advanced graphics
+     - Learning more
+
+* Day 3: Visualization Large Datasets (1h)
+     - Genomics: GViz
+     - bigvis
+
+
+## Course Material and tasks
+* Material available at [https://github.com/isglobal-brge/TeachingMaterials/tree/master/Master_Modelling](https://github.com/isglobal-brge/TeachingMaterials/tree/master/Master_Modelling)
+* Tasks
+     - Daily exercises (Slides + Moodle)
+     - Final exercise (Moodle) 
+

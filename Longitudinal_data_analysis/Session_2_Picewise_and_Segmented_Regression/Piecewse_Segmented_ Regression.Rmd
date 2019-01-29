@@ -1,0 +1,202 @@
+---
+title: "Picewise and segmented regression with `R`"
+author: "Juan R Gonzalez"
+output:
+  BiocStyle::pdf_document:
+    toc_depth: 2
+  BiocStyle::html_document:
+    toc_depth: 2
+---
+
+<!-- to compile this:
+library("rmarkdown");
+render("rr-auhtoring.Rmd", output_format="all")
+or just call make
+-->
+
+```{r style, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
+library("knitr")
+#options(width=100)
+opts_chunk$set(message = FALSE, error = TRUE, warning = TRUE)
+```
+
+
+# Introduction
+
+> **Objectives**
+>
+> * Understand the concept of picewise and segmented regression
+> * Learn how to perform picewise and segmented regression with `R`
+> * Peform data analyses where the scientific question is to determine changes in the linear relationship of two continuous variables
+
+
+# Picewise regression
+
+Piecewise regression comes about when you have `breakpoints`, where there are clearly two different linear relationships in the data with a sudden, sharp change in directionality. This crops up occasionally in biomedicine when dealing with, for example, cholesterol level and fat or calories intake. There is initially a rapid incress of cholesterol level as fat or calories consumption increases (cholesterol incressing becomes limiting at certain levels).
+
+If you Google `R piecewise regression`, you may get a variety of methods and advice on how to run a piecewise regression. Essentially, you can do it manually or use different `R` packages to run the regression. Herein, we will review two methods: brute force iterative approaches (as in `The R Book` by Crawley that can help to better understand the process of how to fit the models) and the `segmented` package. Using these approaches allows you to statistically estimate the breakpoint, which is better than just eyeballing it and fitting two models around what you think is the breakpoint. As we always comment on class, let statistics do the work for you objectively.
+
+
+Let us start by illustrating the need for using a piecewise approach to our linear regression model. Consider the following plot of the calories intake and the cholesterol level:
+
+```{r, example_piecewise}
+cholesterol <- read.delim("../data/cholesterol.txt")
+plot(cholesterol$calories, cholesterol$cholesterol, xlab="Calories intake", 
+     ylab="Cholesterol level", pch=16)
+lin.mod <- lm(cholesterol~calories, data=cholesterol)
+abline(lin.mod)
+```
+
+The estimated regression line appears to fit the data fairly well in some overall sense, but it is clear that we could do better. The residuals versus fits plot also indicates that linear model is not fine:
+
+```{r, residuals_piecewise}
+plot(lin.mod$fitted.values, lin.mod$residuals, xlab="Fitted values",
+     ylab="Standardized residuals", pch=16)
+abline(h=0, lty=2)
+```
+
+We could instead split our original scatter plot into two pieces considereing calories intake above and below 2950 aproximately, but connected lines, one for each piece. As you can see, the estimated two-piece function, connected at those points (the dashed line) appears to do a much better job of describing the trend in the data. So, let's formulate a piecewise linear regression model for our data
+
+$$y_i=\beta_0+\beta_1x_{i1}+\beta_2(x_{i1}-2950)x_{i2}+\epsilon_i$$
+
+Alternatively, we could write our formulated piecewise model as:
+
+$$y_i=\beta_0+\beta_1x_{i1}+\beta_2x^{\ast}_{i2}+\epsilon_i$$
+
+where:
+  
+* $y_i$ is the cholesterol level of individual $i$
+* $x_{i1}$ is the calories intake of individual $i$
+* $x_{i2}$ is a dummy variable $(0, \mbox{ if } x_{i1} \le 2950 \mbox{ and } 1, \mbox{ if } x_{i1} > 2950)$ of individual $i$
+* $x^{\ast}_{i2}$ denotes the $(x_{i1} - 2950)x_{i2}$ the interaction term
+
+and the independent error terms $\epsilon_i$ follow a normal distribution with mean 0 and equal variance $\sigma^2$. The model can be estimated using different methods. Let us describre two of them. 
+
+# Estimating procedures
+
+## Iterative searching
+
+For illustrating purposes and for the sake of the simplicity, let us illustrate how to estimate the first breakpoint. The key point of the iterative search procedure described by Crawley is choosing the breakpoints. In this case, we can eyeball the data and say that the second breakpoint is somewhere between 2900 and 3000. Choose a wider range than you might think, just to be safe. Create a variable called breaks to hold these breakpoints:
+
+```{r, breaks}
+breaks <- with(cholesterol, calories[which(calories >= 2850 & calories <= 2950)])
+```
+
+Now we are going to iteratively search these breakpoints for the model that has the lowest residual MSE, using that as our criteria for the best model. Create an empty container for MSE values from each model, and use an iteration to run a linear regression for each possible breakpoint. Formulate the linear model exactly like the above formula.
+
+```{r, mse}
+mse <- numeric(length(breaks))
+for(i in 1:length(breaks)){
+ piece.mod <- lm(cholesterol ~ calories*(calories < breaks[i]) + 
+                    calories*(calories>=breaks[i]), data=cholesterol)
+ mse[i] <- mean(piece.mod$residuals^2)
+}
+mse
+```
+
+If we plot MSE by breakpoints, we can visually estimate the breakpoint as the lowest point on the curve:
+
+```{r, plot_mse}
+plot(breaks, mse, xlab="calories", ylab="MSE")
+```
+
+As expected the optimal break is 2900. 
+
+```{r, optimal_break}
+breaks[which(mse==min(mse))]
+``` 
+
+The picewise regression model is then estimated by executing:
+
+```{r, picewise_model}
+piece.mod2 <- lm(cholesterol ~ calories*(calories < 2900) 
+                 + calories*(calories > 2900), data=cholesterol)
+summary(piece.mod2)
+```
+The NA values arise from singularities and can be omitted from the interpretation. The intercept for the line when calories intake $<$ 2900 is `r paste0(names(coef(piece.mod2))[1], " + ", names(coef(piece.mod2))[3])`, or `r round(coef(piece.mod2)[1] + coef(piece.mod2)[3], 2)`. The slope of the line when calories intake $<$ 2900 is `r paste0(names(coef(piece.mod2))[2], " + ", names(coef(piece.mod2))[5])`, or `r round(coef(piece.mod2)[2] + coef(piece.mod2)[5], 2)`. So, when x is less than 2900, the formula is `r paste0(round(coef(piece.mod2)[1] + coef(piece.mod2)[3], 2), " + ", round(coef(piece.mod2)[2] + coef(piece.mod2)[5], 2), "*calories")`.  For the second segmente (e.g intake $>$ 2900), the intercept is `r paste0(names(coef(piece.mod2))[1], " + ", names(coef(piece.mod2))[4])`, or `r round(coef(piece.mod2)[1] + coef(piece.mod2)[4], 2)` and the slope is just the variable `r names(coef(piece.mod2))[2]`, or `r round(coef(piece.mod2)[2], 4)`. 
+
+The predictive model can be visualy represented by executing:
+
+```{r, predictive_piece}
+with(cholesterol, plot(calories, cholesterol, pch=16,
+                       xlab="calories intake", ylab="cholesterol level"))
+curve( -1276.6 + 0.52*x, add=T, from=2600, to=2900, col="blue")
+curve(176.2 + 0.0291*x, add=T, from=2900, to=3100, col="blue")
+abline(v=2900, lty=3)
+```
+
+Notice that the segments were not constrained to _be touching_ or continuous. This is inherent in the algorithm that we used. The next method will address this problem.
+
+# Segmented regression
+
+The procedure of _segmented regression_ uses maximum likelihood to fit a somewhat different parameterization of the model:
+
+
+$$ y \sim \beta_1x + \beta_2(x-c) + \gamma I(x>c)$$
+
+$I(x > c)$ is a dummy variable as above, so when $x < c$, the model is essentially:
+
+$$ y \sim \beta_1x + \beta_2(x-c)$$
+The $\gamma$ term is simply a measure of the distance between the end of the first segment and the beginning of the next. The model converges when $\gamma$ is minimized, thus this method constrains the segments to be (nearly) continuous. This is a major difference from the iterative approach in Method  above.
+
+This approach is implemented in the `segmented` `R`package. To use this method, you first fit a generic linear model. You then use the `segmented( )` function to fit the piecewise regression. The `segmented( )` function takes for its arguments the generic linear model, `seg.Z` which is a one sided formula describing the predictor with a segment (we only have one predictor, x, which has the segment), and `psi`, which is a starting value of the breakpoint (as in other estimating methods you need to supply a best-guess estimate ot that parameter - in other words, the point you think the breakpoint can be located). More complicated models are a bit more complicated in terms of arguments, but this is a good starting example.
+
+In our case, x is the predictor with a segment (it is the only predictor) and based on the first scatterplot (the first graph on the page). One might guess that the breakpoint is 2900. Therefore, the model is fitted by executing:
+
+```{r, segmented_reg}
+library(segmented)
+lin.mod <- lm(cholesterol ~ calories, data=cholesterol)
+segmented.mod <- segmented(lin.mod, seg.Z = ~ calories, psi=2900)
+segmented.mod
+```
+
+Notice that in that case the point were the line is changing is `segmented.mod$psi[2]` which is different from the one we obainted by using iterative seraching. This will be further investigate in the Exercises you have to deliver. In this case the figure illustrates (dashed lines) that this method better fits our data. IMPORTAN NOTE: `U1.x` is not the slope of the second segment. It is the difference in slopes between the second and first segment. So if your coefficients are `r paste(names(coef(segmented.mod))[2], round(coef(segmented.mod)[2],4), sep=" = ")` and `r paste(names(coef(segmented.mod))[3], round(coef(segmented.mod)[3],5), sep=" = ")`, then the slope of the second segment is `r paste0(round(coef(segmented.mod)[2], 4), "-", round(coef(segmented.mod)[3], 4), "=", round(coef(segmented.mod)[2], 4) + round(coef(segmented.mod)[3], 4))` as you can verify it by executing 
+
+```{r, slope_seg}
+slope(segmented.mod)
+```
+
+```{r, plot_residual_seg}
+plot(cholesterol$calories, cholesterol$cholesterol, xlab="Calories intake", 
+     ylab="Cholesterol level", pch=16)
+lin.mod <- lm(cholesterol~calories, data=cholesterol)
+abline(lin.mod)
+lines(cholesterol$calories, predict(segmented.mod), lty=2)
+```
+
+Further information about the `segmented regression` can be found in this paper [Estimating regression models with unknown break-points](http://onlinelibrary.wiley.com/doi/10.1002/sim.1545/pdf)  (this is a hyperlink to the paper that is freely available at Statistics in Medicine). 
+
+# Exercise (to deliver)
+
+---------------------
+
+Data for exercises are in the repository https://github.com/isglobal-brge/TeachingMaterials/tree/master/Longitudinal_data_analysis/data
+
+**Exercise 1:** Read the paper [Estimating regression models with unknown break-points](http://onlinelibrary.wiley.com/doi/10.1002/sim.1545/pdf) (http://onlinelibrary.wiley.com/doi/10.1002/sim.1545/pdf) and answer these questions:
+
+* Can this method detect the existence of a change point?
+* What are the main limitations of this method in practice? Enumerate a couple of them
+* In the Figure 4 (bottom left) of the paper there is an example of longitudinal data where x-axis represents age and y-axis stands for the logit of having bronquitis. How many changes would you estimate to evaluate the relationship between the years of exposition and the probability of developing bronquitis? How many changes did the autor test? How many changes should the author be considered? Why does he conclude that (read pages 3067 and 3068).
+
+**Exercise 2:** By using the `cholesterol` dataset I have used in this material (this dataset is available in the folder of data for exercises) repeat the iterative searching procedure to better estimate the point of change. Explain the changes you have performed in the code and why. 
+
+**Exercise 3:** The funcion `slope` in the `segmented` package contains an argument that is called `APC` that can be used for estimating the annual percentage change of the segments. Use data available at `mamaCat.txt` to perform a joinpoint regression analysis by using `segmented` regression and estimate the APC of each segment. Remember that the data contains breast cancer mortality of females in Catalonia of the period 1975-1997. Each column contains the next variables: gender, year of mortality, number of deaths and at-risk population. NOTE: investigate whether `segmented` regression allows the use of different models than `lm`.
+
+**Exercise 4:** [**Segmented regression adjusted by other covariates**]. Researchers have performed an experiment by collecting data of plants in three different organs accross time. They are interested in determining the time when these organs stop growing (or even become smaller). NOTE: this is important since it implies that they are looking for a single change point - observe that researches have their own scientific question and you must know how to translate it into a statistical one. Data are available in the obejct `plant` that is in the `segmented` library (you can load them by using _data(plant)_ ). The organ is in the variable `group`. Perform the statistical analysis that is required to address researchers' question. Do not forget to create a plot tu visually evaluate the evolution accross time for each type of plant. Write up a little conclusion about the study (3-4 lines as much).
+
+---------------------
+ 
+
+
+# References
+
+- [`Segmented regression paper`](http://onlinelibrary.wiley.com/doi/10.1002/sim.1545/pdf)
+- The [`segmented`](https://cran.r-project.org/web/packages/segmented/) package
+
+
+# Session information
+
+```{r, echo=FALSE}
+sessionInfo()
+```
+

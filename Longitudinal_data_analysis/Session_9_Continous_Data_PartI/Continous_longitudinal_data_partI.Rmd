@@ -1,0 +1,188 @@
+---
+title: "Continuous longitudinal data analysis (Part I) - Classical models"
+author: "Juan R Gonzalez"
+output:
+  BiocStyle::pdf_document:
+    fig_caption: yes
+    toc_depth: 2
+  BiocStyle::html_document:
+    toc_depth: 2
+---
+
+<!-- to compile this:
+library("rmarkdown");
+render("rr-auhtoring.Rmd", output_format="all")
+or just call make
+-->
+
+```{r style, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
+library("knitr")
+#options(width=100)
+opts_chunk$set(message = FALSE, error = TRUE, warning = FALSE)
+```
+
+
+# Introduction
+
+> **Objectives**
+>
+> * Learn how to perform logitudinal data analysis in the presence of continuous data using classical methods 
+> * Peform data analyses where the scientific question is to determine factors associated with a continuous outcome that has been repeteadly measured over time.
+
+
+# Data
+
+Data can be in width or long format
+
+```{r, width}
+data.width <- read.table("../data/hypothetical_ancho.txt", header=TRUE)
+head(data.width)
+```
+
+```{r, long}
+data.long <- read.table("../data/hypothetical_largo.txt", header=TRUE)
+head(data.long, n=12)
+```
+
+Data are normally collected in width format since they can be easily collected in a database. You can use the function `make.rm` to transform data into long format as following
+
+```{r, width2long}
+source("../R/make.rm.R")
+data.long2 <-make.rm(constant=c("id", "group"),
+                repeated=c("time1", "time2", "time3", "time4"),
+                data=data.width)
+head(data.long2, n=12)
+```
+
+Let's check everything has been properly created
+
+```{r, check}
+data.long[data.long$id==1,]
+data.long2[data.long2$id==1,]
+```
+
+Notice that the variable time has been replaced by the variable `contrasts`.
+
+# Data visualization
+
+Individual profiles can be obtained by typing:
+
+```{r, profiles}
+with(data.long, interaction.plot(time, id, score))
+```
+
+Overall profile is represented by
+
+```{r, overall_profile}
+datos.agg <- aggregate(score ~ time, data = data.long, mean)
+with(datos.agg, plot(time, score, ylab="mean score", type="l"))
+```
+
+Both figures can be represented in the same plot by:
+
+```{r, both}
+with(data.long, interaction.plot(time, id, score))
+with(datos.agg, lines(time, score, ylab="mean score", 
+                      col="red", lwd=3))
+```
+
+If groups are present, profiles can be drawn by each group 
+
+```{r, groups}
+with(data.long, interaction.plot(time, id, score, 
+       col=c(rep("red",3), rep("blue",3)), legend=FALSE))
+legend("bottomright", lty=1, c("A","B"), col=c("red", "blue"))
+```
+
+or the overall profile in each group can be visualize by
+
+```{r, groups2}
+datos.agg <- aggregate(score ~ time + group, data = data.long, mean)
+with(datos.agg, interaction.plot(time, group, score, 
+       col=c("red", "blue"), legend=FALSE))
+legend("bottomright", lty=1, c("A","B"), col=c("red", "blue")) 
+```
+
+# Data Analysis
+
+Each type of analysis requires to have data in width or long format
+
+## Strategy 1: End-point analysis
+
+```{r, endpoint}
+mod <- aov(time4 ~ time1 + group, data.width)
+summary(mod)
+```
+
+## Strategy 2: ANOVA repeated measurements
+
+The naive version is obtained by 
+
+```{r, anova_rep}
+mod <- aov(score ~ as.factor(time)*group, data.long)
+summary(mod)
+```
+
+The proper analysis has to be performed by 
+
+```{r, anova_rep2}
+mod <- aov(score ~ as.factor(time)*group + Error(id), data.long)
+summary(mod)
+```
+
+## Strategy 3: MANOVA 
+
+```{r, manova}
+mod <- manova(cbind(time1, time2, time3, time4) ~ group, data.width)
+summary(mod)
+```
+
+Other tests can be applied 
+
+```{r, manova2}
+summary(mod, test = "Wilks")
+summary(mod, test = "Hotelling-Lawley")
+```
+
+
+# Recommended lectures
+
+In the GitHub folder there is a paper further describing classical and modern methods to analyze continuous longitudinal data (file Modelos_clasicos_y_modernos_datos_longitunidales_continuos.pdf).
+
+
+\clearpage
+
+# Exercise (to deliver)
+
+---------------------
+
+**Exercise 1:**
+
+Para estudiar las diferencias entre dos procedimientos diferentes de recuperación de pacientes de un infarto, se consideraron dos grupos experimentales en sendos hospitales, de 8 pacientes cada uno. La variable respuesta es el índice de Bartel, que
+varía entre 0 y 100, y que constituye una medida de la habilidad funcional con la que se valoran diferentes capacidades, de forma que valores más altos se corresponden con una mejor situación del paciente. De cada uno de los 16 pacientes se dispone de su respuesta cada semana a lo largo de 5 semanas consecutivas. Los datos se pueden encontrar en el archivo *recuperainfarto.txt*.
+
+1. ¿Cuál de los dos procedimientos presenta una mejor recuperación de los pacientes? ¿Es esta diferencia estadísticamente significativa? [NOTA: contesta a estas preguntas planteando la pregunta estadística que creas conveniente]
+
+
+**Exercise 2:**
+
+En un estudio sobre la agudeza visual se dispone de la respuesta de siete individuos. La respuesta en cada ojo es el retraso en milisegundos entre la emisión de una luz y la respuesta en a la misma por el cortex. Cada ojo se somete a cuatro mediciones correspondientes a cuatro instantes consecutivos. Se tienen mediciones en el ojo izquierdo y derecho. Los datos se pueden encontrar en el archivo *agudezavisual.txt*
+
+1. Crea una nueva base de datos agregando la información para cada una de la medida repetida (ojo) [NOTA: toma la media - usa la función `aggregate`]
+2. ¿Existen diferencias entre la medición final y la basal?
+3. ¿Existe un efecto temporal en la respuesta
+
+
+---------------------
+ 
+
+# References
+
+- 
+
+# Session information
+
+```{r, echo=FALSE}
+sessionInfo()
+```
+

@@ -1,0 +1,348 @@
+---
+title: "Survival analysis with `R` (Part II)"
+author: "Juan R Gonzalez"
+output:
+  BiocStyle::html_document:
+    toc_depth: 2
+  BiocStyle::pdf_document:
+    fig_caption: yes
+    toc_depth: 2
+---
+
+<!-- to compile this:
+library("rmarkdown");
+render("rr-auhtoring.Rmd", output_format="all")
+or just call make
+-->
+
+```{r style, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
+library("knitr")
+#options(width=100)
+opts_chunk$set(message = FALSE, error = TRUE, warning = TRUE)
+```
+
+
+# Introduction
+
+> **Objectives**
+>
+> * Understand the concept of survival analysis
+> * Learn how to perform survival analysis using Cox proportional hazard models with `R`
+> * Peform data analyses where the scientific question is to determine factors associated with time until event considering different covariates
+
+
+# Cox proportional hazard model
+
+## Single model
+
+The survival experience of the cohort of patients depends on several variables, whose values have been recorded for each patient at the time origin. The proportional hazards model like other regression models allows explore the relationship between this survival experience (or hospital admission-free time of a patient) and explanatory variables. The focus is modeling the hazard function (hospital admission hazard or risk of death) at any time after the time origin of the study . The Cox regression model specifies the hazard for individual $i$ as:
+
+$$\lambda_i(t)=\exp(\beta_1 x_{1i}+\beta_2 x_{2i}+\cdots \beta_p x_{pi})\lambda_0(t)$$
+where $\lambda_0(t)$ is called _baseline hazard function_ and $\beta_1,\beta_2,\cdots,\beta_p$ are coefficients to be determined.
+
+Let us illustrate how to perform such an analysis by using  Chronic Obstructive Pulmonary Disease (COPD) data that can be loaded from our repository. 
+
+```{r, load_copd}
+copd <- read.table("../data/copd.txt", head=TRUE)
+head(copd)
+```
+
+Our COPD database includes detailed information of a cohort of 2226 adults recruited from the general population, with repeated examinations every 5-10 years. During the follow-up period, hospital admissions may occur more than once for a given subject (`recurrent even`) and another kind of event like death (`terminating event`) can be observed as well. Despite the multivariate nature of these data, we start using univariate failure time methods with failure taken to be first occurrence of the recurring event (admission to hospital), where this event regarded as censored if the terminating event (death) occurs before any occurrence of the recurring event. In the next sessions this single approach will be compared with the multivariate one. 
+
+Four variables were considered for this study and collected at the moment of the first examination:  `physical activity` (`phys.act`) categorized in three levels: low, moderate and high, a lung function test, `forced expiratory volume` (`fev`) measured with an electronic spirometer, the `smoking situation` (`smoke`), categorized in never, ex and current, and finally the `age` (`age`) of the patient. The pair of variables (`time.readmission`, `status.readmission`) depicts the censoring information about the first hospital admissions where death is regarded as censor, and the pair (`time.death`, `status.death`) describes the censoring information about the terminating event (death).
+
+
+Let us then start by illustrating how survival analysis can be perfomed when our event of interest is hospital admission. We can fit the Cox proportional hazards model in `R` with the `coxph()` function (available in `survival` library). Let us investigate whether physical activity is associated with the time until hospital readmission. Next model can be considered as single analysis and it is similar to perform Kaplan-Meier estimates and log-rank test.
+
+```{r, cox_pa}
+library(survival)
+cox.pa <- coxph(Surv(time.readmission, status.readmission) ~ 
+                  as.factor(phys.act), data=copd)
+cox.pa
+```
+
+We can observe that those patients doing moderate and high physical activity (codes 1 and 2 respectively) have less risk of being readmitted than those doing low level of exercise. In all cases the p-value associated to each category are statistically significant at 5% level. 
+
+The exponentiated coefficients are interpretable as multiplicative effects on the hazard. `z` records the Wald statistic (ratio of each regression coefficient to its standard error) which is asymptotically standard normal under the hypothesis that the corresponding $\beta$ is zero. The likelihood ratio test, at the bottom of the output, is a overall test for the null hypothesis that all of the $\beta$'s are zero. Other equivalent overall tests (Wald test and Score test) could be obtained using `summary()` function.
+
+```{r, cox_summary}
+summary(cox.pa)
+````
+
+The fit shows that our variable has an impact on the hospital admission-free time of the patients. In particular, the fitted model estimates that that people with moderate and high level of physical activity reduces the risk of hospital admission by 36% (= 1 - 0.64) and 49% (= 1 - 0.51) respectively compared to people with low level of physical activity.
+
+Having fit a Cox model to the data, it is often of interest to examine the estimated distribution of survival times. The function `survfit()` estimates $S(t)$ and its confidence intervals. 
+
+```{r, plot_cox}
+plot(survfit(cox.pa))
+``` 
+
+## Multivariate model
+
+In some ocassion one might be interested in adjusting the results by other covariates. This ends up with fitting multivariate models that can be estimated as following:
+
+```{r, cox_mult}
+cox.pa.adj <- coxph(Surv(time.readmission, status.readmission) ~
+                      as.factor(phys.act) + age + fev + 
+                      as.factor(smoke), data=copd)
+cox.pa.adj
+```
+
+Here, one may see that the effect of doing physical activity is not so strong as in the univariate case. The adjusted model shows that the hazard ratio of doing high level of activity is 
+0.74 that means that the probability of being readmitted to the hospital is reduced in only 26% with respect to those people who do low level of physical activity. This risk is much lower than the one estimated using the single model probably due to the fact that the single HR was somehow confused by age, fev or skoming status. This makes perfect sense since smoking is associated with copd and probably those people who smoke normally do less exercise. 
+
+In that case one may also be interested in examining the estimated distribution of survival times. The function `survfit()` estimates $S(t)$ and confidence intervals, by default at the mean values of the covariates. This is obtained with the follow command lines:
+
+```{r, plot_mult}
+copd$smoke2 <- 1*(copd$smoke==1)
+copd$smoke3 <- 1*(copd$smoke==2)
+copd$phys.act2 <- 1*(copd$phys.act==1)
+copd$phys.act3 <- 1*(copd$phys.act==2)
+
+cox2.pa.adj <- coxph(Surv(time.readmission, status.readmission) ~
+                       age + fev + smoke2 + smoke3 + phys.act2 +
+                       phys.act3, data=copd)
+
+newdata <- data.frame(age = mean(copd$age),
+                      fev = mean(copd$fev, na.rm=TRUE),
+                      smoke2 = 0, smoke3=0,
+                      phys.act2=0, phys.act3=0)
+
+plot(survfit(cox2.pa.adj, newdata= newdata), 
+             xlab="Time (days)", 
+             ylab="Probability of not being hospitalized") 
+```
+
+This figure represents the estimated survival function for reference patients: non-smokers, with low level of physical activity, aged 54 years old and 2.4 of level of forced expiratory volume
+
+# Model selection
+
+Model selection can be carried out by using an automatic medhos by using the function `stepAIC()` from `MASS` library. We start by considering the model having all of our variables of interest
+
+```{r, stepwise}
+library(MASS)
+cox.pa.adj
+```` 
+
+Then, the procedure is performed by executing
+
+```{r, stepwise2}
+mod <- stepAIC(cox.pa.adj)
+```
+
+Here you see an error message that is due to the fact that missing data are present. One solution can be to impute data using another package like `mice`. Here, let's illustrate how to perform stepwise using complete cases. 
+
+
+```{r,stepwise3}
+copd.complete <- copd[complete.cases(copd),]
+cox.complete <- coxph(Surv(time.readmission, status.readmission) ~
+                      as.factor(phys.act) + age + fev + 
+                      as.factor(smoke), data=copd.complete)
+mod <- stepAIC(cox.complete)
+```
+
+We observe that all variables are statistically significant after performing stepwise procedure. This method basically compares nested models by using likelihood ratio test (LRT). Here you can see an example of LRT to compare a model having _age_, _phys.act_ and _smoke_ with the comple one ( _age_, _phys.act_ , _smoke_ and _fev_ )
+
+```{r, lrt}
+cox1 <- coxph(Surv(time.readmission, status.readmission) ~
+                      as.factor(phys.act) + age + as.factor(smoke),
+                      data=copd.complete)
+cox2 <- coxph(Surv(time.readmission, status.readmission) ~
+                      as.factor(phys.act) + age + as.factor(smoke) +
+                      fev, data=copd.complete)
+anova(cox1, cox2)
+```
+
+Here we see that the p-value obtained with LRT is pretty similart to the one obtained using Wald test (e.g. using z-score)
+
+```{r, wald}
+cox2
+```
+# Validation and diagnostic
+
+The aim of this section is to determine if the fitted model adequately describes the data. The model-checking procedure involves four kinds of diagnostics: for assessment of model fit,
+for checking the functional form of covariates, for identification of influential observations
+and for violation of the assumption of proportional hazards. All these model-checking procedures
+are based on the follow _residuals_: the martingale, deviance, score, Schoenfeld, dfbeta and scaled Schoenfeld residuals. This section gives a brief definition of these residuals and how use them for the model-checking procedure.
+
+## Assessment of model fit
+
+
+The _martingale_ residual for the $i$th individual is given by the expression, $$r_{M_i}=\delta_i-\hat{\Lambda}(t_i)$$ where $\delta_i$ takes the value 0 if the observation is
+censored and the value 1 if it is a failure. _Martingale_ residuals may be interpreted as the difference
+between the observed and the expected number of failures in the time interval $(0,t_i)$. So, a plot
+of these residuals will highlight those individuals with a bigger difference, and, consequently, the residuals
+will highlight individuals whose survival time is not been well fitted by the model (_outliers_). Plots of these residuals against explanatory variables can be interesting for indicate whether there are values of explanatory variables where the model does not fit well.
+
+The martingale residuals are the default output of `residuals()` on a `coxph()` fit,
+
+```{r, cox_rm}
+rm.cox2.pa.adj<- resid(cox2.pa.adj)
+plot(rm.cox2.pa.adj)
+````
+
+The _Deviance_ residual for the $i$th individual is defined by:
+$$
+r_{D_i}=
+\mbox{sign}({r_{M_i}})[-2\{r_{M_i}+\delta_i\log\,(\delta_i-r_{M_i})\}]^{\frac{1}{2}},
+$$
+where $\mbox{sgn}(\cdot)$ is the sign function, which takes the value +1
+if its argument is positive and the value -1 if it is negative.
+
+This kind of residuals are a transformation of _Martingale_ residuals and generate values that are symmetric around zero when
+the fitted model is appropriate. They are also useful to detect
+_outliers_. Plotting _deviance_ residuals against _Risk Score_, we
+may also detect those individuals with risk of failure below the mean
+value (_Risk Score_ very negative), and those above it (high _Risk Score_). Using the function `resid()` and the option `type="deviance`
+we can obtain these residuals from the fitted model. For martingale and deviance residuals,
+the returned object is a vector with one element for each subject,
+
+```{r, cox_rm2}
+rd.cox2.pa.adj<- resid(cox2.pa.adj, type="deviance")
+plot(rd.cox2.pa.adj)
+```
+
+In both plots we observe as there is no outliers and that all the residuals are constant.
+
+## Funcional form of covariates
+An improvement in the fit of a model may well be obtained by using some transformation of the values of a variable instead of the original values. The simplest approach is one examined by [Therneau and Grambsch](http://www.springer.com/gp/book/9780387987842), who suggested plotting the martingale residuals obtained from fitting the null model (model that contains no variables) against the variable, and superimposing a smoothed scatterplot. This plot should display the functional form required for the variable. In particular, a straight line plot indicates that a linear term is needed.
+
+The following code creates null residual plots for the forced expiratory volume variable:
+
+```{r, plot_var_resid}
+cox.null <- coxph(Surv(time.readmission, status.readmission) ~ 1,
+                  data = copd)
+rm.cox.null <- resid(cox.null)
+plot(copd$fev, rm.cox.null)
+smooth <- lowess(copd$fev, rm.cox.null, delta=1)
+lines(smooth, lty=2, lwd=2, col="red")
+```
+
+We observe that there is a linear relationship between residuals and our variable of interest, and hence, no further transformation are needed.
+
+
+
+## Testing Proportional Hazards
+We know that hazards are said to be proportional if ratios of
+hazards are independent of time. If there are one or more
+explanatory variables in the model whose coefficients vary with
+time, or if there are explanatory variables that are
+time-dependent, the proportional hazards assumption will be
+violated. So, it is required a method to detect this possibility:
+if there is some form of time dependency in particular
+variables.
+
+The tests and graphical diagnostics for proportional hazards are
+based on the _scaled Schoenfeld residuals_, $r_{Pji}^{*}$},
+and are useful in evaluating the assumption of proportional hazards after fitting a Cox regression model.
+
+[Therneau and Grambsch](http://www.springer.com/gp/book/9780387987842) show that the expected value
+of the $i$th _scaled Schoenfeld residual_ is given by
+$E\,(r_{Pji}^{*})\approx\hat{\beta}_j\,(t_i)-\hat{\beta}_{j}$, and
+so a plot of the values of $r_{Pji}^{*}+\hat{\beta}_{j}$ against
+the event times should give information about the form of the
+time-dependent coefficient of $X_j$, $\beta_j\,(t)$.
+
+
+The interpretation of these graphs is greatly facilitated by
+smoothing shown on each graph by a solid line. An horizontal line
+in each graph indicates no suggestion of non-proportional hazards and that the coefficients of these variables are constant (see next figure).
+
+This graphical diagnostic is supplemented by a test for each
+variable, along with a global test for the model as a whole.
+These tests for the proportional-hazards assumption are obtained from  `cox.zph()`,
+
+
+```{r, test_ph}
+cox.pa.adj.zph <- cox.zph(cox2.pa.adj)
+cox.pa.adj.zph
+```
+
+Here `rho` is the Pearson product-moment correlation between
+the _scaled Schoenfeld residuals_ and time for each variable.
+The column `chisq` gives the tests statistics for each
+variable and the last row GLOBAL gives the global test for a
+$\chi^{2}$ of 6 degree of freedom. There is strong evidence of
+non proportionality hazard for _fev_, the `GLOBAL` test gives also strong evidence of non-proportionality of **at least** one covariate.
+
+Plotting the object returned by `cox.zph` produces graphs of the scaled Schoenfeld residuals against time,
+
+```{r, fig.height=10, plot_ph}
+par(mfrow=c(3,2))
+plot(cox.pa.adj.zph)
+```
+
+We observe as _fev_ is not constant across time (we see and increase in the beta value when time increases - in other words, the risk is increasing with time) and the Cox model assumes that the risk is constant over time. 
+
+The solution to this problem is to include a time-dependent variable into Cox model, or to stratify the initial
+model according to the variable that violates the assumption of
+proportional hazard. In that case the variable _fev_ is continuos. Therefore, we can create categories by dissecting the variable into intervals. We decided to create four intervals or categories defined from the quartiles of the variable,
+
+```{r, create_quant}
+copd$fev4 <- cut(copd$fev, 4)
+table(copd$fev4)
+```
+
+A stratified Cox regression model is fit by including the `strata` term on the right hand side of the model formula. The strata divide the individuals into disjoint groups, each of which has a distinct baseline hazard function but common values for the coefficient vector $\beta$,
+
+```{r, cox.pa.strata}
+cox.pa.strata <- coxph(Surv(time.readmission, status.readmission) ~ 
+                   age + as.factor(smoke) + as.factor(phys.act) +
+                   strata(fev4), data=copd)
+cox.pa.strata
+```
+
+And now the test of proportionality is doing well:
+
+```{r, test_ph_strat}
+cox.pa.strata.zph <- cox.zph(cox.pa.strata)
+cox.pa.strata.zph
+```
+
+There is no evidence of non-proportional hazards for the remaining covariates. An advantage of this approach is that it gives most general adjustment for a confounding variable. A disadvantage is that no estimate of the effects of the stratifying covariate is produced.
+
+
+Further information about survival data analysis with `R` can be found in this tutorial [Tutorial Survival Analysis](https://folk.ntnu.no/bo/TMA4275/Download/R.tutorialDiez.pdf). 
+
+# Exercise (to deliver)
+
+---------------------
+
+Data for exercises are in the repository https://github.com/isglobal-brge/TeachingMaterials/tree/master/Longitudinal_data_analysis/data
+
+File *pulmon.sav* contains data about a survival study about lung cancer (NOTE: data can be loaded into `R`by using `read.spss` function available at `foreign` library - use argument _to.data.frame=TRUE_ ). Colums contain this information:
+
+> * TIEMPO Supervivencia (meses)
+> * ESTADO: 0 VIVO, 1 MORT
+> * EDAD4 Age at diagnosis in years (quartiles)
+> * SEXO: HOMBRES, MUJERES
+> * ESTCLIN Estadio clinico:  EST 0/I,  EST II,  EST IIIA, EST IIIB, EST IV
+> * IK Indice de estado general (100 estado perfecto, 0 muerte)
+> * CIRUGIA: 1 No operado, 2 Cirugia no radical, 3 Cirugia Radical
+> * QUIMIO: 1 No Quimio, 2 Platino
+> * RADIOTER: 1 No RT, 2 <60 Gy, 3 >60 Gy
+
+**Exercise 1:** 
+
+- Estimate a separate Cox model of each variable (univariate analysis)
+- Select those variables that are statistically significant in the previous step and fit a multivariate model including all of them
+- Is this a good model to predict survival in lung cancer?
+- If not, estimate the best model by using an automatic method (e.g. stepwise)
+- Does this model hold Cox model assumption?
+
+
+---------------------
+ 
+
+
+# References
+
+- The [`survival`] package (https://cran.r-project.org/web/packages/survival/)
+
+
+# Session information
+
+```{r, echo=FALSE}
+sessionInfo()
+```
+

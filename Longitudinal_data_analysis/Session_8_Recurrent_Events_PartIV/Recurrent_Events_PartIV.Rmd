@@ -1,0 +1,134 @@
+---
+title: "Recurrent events with `R` (Part IV) - Joint models"
+author: "Juan R Gonzalez"
+output:
+  BiocStyle::pdf_document:
+    fig_caption: yes
+    toc_depth: 2
+  BiocStyle::html_document:
+    toc_depth: 2
+---
+
+<!-- to compile this:
+library("rmarkdown");
+render("rr-auhtoring.Rmd", output_format="all")
+or just call make
+-->
+
+```{r style, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
+library("knitr")
+#options(width=100)
+opts_chunk$set(message = FALSE, error = TRUE, warning = FALSE)
+```
+
+
+# Introduction
+
+> **Objectives**
+>
+> * Understand the concept of _joint modelling_ in survival analysis with recurrent event data
+> * Learn how to perform survival analysis with recurrent event data extending the Frailty models to accomodate that the terminal event (censoring) can be related with the event of interest
+> * Peform data analyses where the scientific question is to determine factors associated with time until re-ocurrences of a repeated event where the censoring process is informative (e.g terminal event). The model also allow to deal with different covariates and addressed the heterogeneity accross individuals by using frailties.
+
+
+# Joint Frailty model
+
+In some occassions the time frame for an individual's repeated hospital admission process may depend on a terminating event, such as death. Therefore, the assumption of noninformative censoring of the recurrent event process by terminating event, can be violated. This dependence should be accounted for in the joint modelling of recurrent events and terminal events. [Rondeau et al., 2007]() proposed a non-parametric penalized likelihood method for estimating hazard functions in a general joint frailty model for recurrent events and terminal events with right censored survival data. The joint model for the hazard functions for recurrent event ($r_i(\dot)$) and terminal event ($\lambda_i(\cdot)$) is:
+
+\[
+\begin{cases}
+r_i(t|,w_i)=w_i r_0(t)exp(\beta_1'Z_i(t))=w_ir_i(t)\\
+\lambda_i(t|,w_i)=w_i^\alpha \lambda_0(t)exp(\beta_2'Z_i(t))=w_i^\alpha \lambda_i(t)\\
+\end{cases}
+\] 
+
+where the effect of the explanatory variables is assumed to be different for recurrent event and for death times. $w_i$ are frailties and again the frailty density is assumed that follows a gamma distribution with mean 1 and unknown variance $\xi$. The previous number of recurrent events can also be considered as an internal time-dependent covariate. The parameter $\alpha$ allows us to quantify the association between the recurrent event and terminal event: if $\alpha=0$ means that $\lambda_i(t)$ does not depend on $w_i$ and thus death (or the terminal event process) is not informative for the recurrent event rate $r_i(t)$, i.e, the tow rates $\lambda_i(t)$ and $r_i(t)$ are not associated, conditional on covariates; when $\alpha=1$, the effect of the frailty is identical for the recurrent events and for the terminating event; and when  $\alpha>1$, the recurrent rate and the death rate are positively associated: higher frailty will result in higher risk of recurrence and higher risk of death. 
+
+We can fit that model using the function `frailtyPenal` into the library `frailtypack`. We use _readmission_ data set to illustrate how to fit this model:
+
+```{r, load_data}
+data(readmission, package="frailtypack")
+head(readmission)
+```
+
+
+
+The model assuming gap time formulation is fitted by
+
+```{r, joint_model_gap}
+library(frailtypack)
+modJoint.gap <- frailtyPenal(Surv(time,event) ~ cluster(id) + sex + 
+                                  dukes + charlson + terminal(death),
+                            formula.terminalEvent=~sex+dukes+charlson,
+                            data=readmission, n.knots=14, 
+                            kappa=c(9.55e+9,1.41e+12),
+                            recurrentAG=FALSE)
+modJoint.gap  
+```
+Here we observe that the terminal event can also depend on other covariates, that's the reason why the argument `formula.terminalEvent` is introduced. The time scale can be changed to calendar time by executing:
+
+```{r, joint_model_calendar}
+modJoint.calendar <- frailtyPenal(Surv(t.start,t.stop,event) ~  
+                                    cluster(id) + sex + dukes +
+                                    charlson + terminal(death),
+                                    formula.terminalEvent = ~ sex + 
+                                    dukes + charlson,
+                                    data=readmission, n.knots=10,
+                                    kappa=c(9.55e9,1.41e12),
+                                    recurrentAG=TRUE)
+modJoint.calendar
+```
+Notice that in that case, the argument `recurrentAG` must be set to `TRUE`. Log-normal distribution of frailties can be assumed. The model in that case is the same just changing the argument `RandDist` to `LogN`:
+
+```{r, joint_model_LogN}
+modJoint.log <- frailtyPenal(Surv(t.start,t.stop,event) ~ cluster(id) +
+                              sex + dukes + charlson +  
+                              terminal(death),
+                              formula.terminalEvent = ~ sex + dukes +
+                                                      charlson,
+                              data=readmission, n.knots=10, 
+                              kappa=c(9.55e9,1.41e12),
+                              recurrentAG=TRUE, RandDist="LogN")
+modJoint.log
+```
+
+
+# Recommended lectures
+
+In the GitHub folder corresponding to this lecture there is a paper describing how a real data set is analyzed (read Sections 5.2 and 5.3 of the file Joint_Frailty_model_application.pdf). The file frailtypack paper (Rondeau, Mazroui and Gonzalez, 2012) that is available in the material of Sesion 7, describes how to fit these models using `frailtypack` package. 
+
+
+\clearpage
+
+# Exercise (to deliver)
+
+---------------------
+
+The folder `https://github.com/isglobal-brge/TeachingMaterials/tree/master/Longitudinal_data_analysis/data` contains the `copd_recurrent.txt` file encoding hospital readmission of patients diagnosed with chronic obstructive pulmonary disease (COPD). The variable _id_ encodes the unique patient identificator (to be used for clustering the data). The researchers are interested in studing the effect of physical activity (variable _phys.act_) with regard to the probability of being hospital readmitted (variables _time.readmission_ and _status.readmission_. They know that pulmonary capacity (variable _fev_), smoking (variable _smoke_) and age (variable _age_) also affect the likelihood of coming back to the hospital. In addition, they also have information about the terminal event (variables _time.death_ and _status.death_). 
+
+
+**Exercise:** 
+
+Analyze the data by using AG model, frailty model and joint model to determine whether physical activity changes the probability of being hospital readmitted. Compare the results and provide a biomedical conclusion.
+
+
+---------------------
+ 
+
+# References
+
+- The [`frailtypack`] package (https://cran.r-project.org/web/packages/frailtypack/)
+
+- V. Rondeau, S. Mathoulin-Pellissier, H. Jacqmin-Gadda, V. Brouste, P. Soubeyran (2007). Joint frailty models for recurring events and death using maximum penalized likelihood estimation:application on cancer events. Biostatistics 8,4, 708-721.
+
+- Y. Mazroui, S. Mathoulin-Pelissier, P. Soubeyranb, V. Rondeau (2012) General joint frailty model for recurrent event data with a dependent terminalevent: Application to follicular lymphoma data. Statistics in Medicine, 31, 11-12, 1162-1176.
+
+- V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric estimation. Journal of Statistical Software 47, 1-28.
+
+
+# Session information
+
+```{r, echo=FALSE}
+sessionInfo()
+```
+

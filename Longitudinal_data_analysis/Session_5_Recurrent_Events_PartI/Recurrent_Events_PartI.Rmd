@@ -1,0 +1,252 @@
+---
+title: "Recurrent events with `R` (Part I)"
+author: "Juan R Gonzalez"
+header-includes:
+   - \usepackage{amsmath}
+output:
+  BiocStyle::pdf_document:
+    fig_caption: yes
+    toc_depth: 2
+  BiocStyle::html_document:
+    toc_depth: 2
+---
+
+<!-- to compile this:
+library("rmarkdown");
+render("rr-auhtoring.Rmd", output_format="all")
+or just call make
+-->
+
+```{r style, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
+library("knitr")
+#options(width=100)
+opts_chunk$set(message = FALSE, error = TRUE, warning = FALSE)
+```
+
+
+# Introduction
+
+> **Objectives**
+>
+> * Understand the concept of survival analysis with recurrent events data
+> * Learn how to estimate survival function in recurrent event settings 
+> * Know how to compare survival curves between groups
+
+
+# Estimating survival function
+
+The library implementing the models described in the theoretical part is called `survrec`. It can be installed into R by typing:
+
+```{r install_package, eval=FALSE}
+devtools::install_github("isglobal-brge/survrec")
+```
+
+Then, the package is loaded in R as usually:
+
+```{r, load_package}
+library(survrec)
+```
+
+Data for illustrating purposes belong to a study about hospital readmissions. They can be loaded by:
+
+```{r, load_data}
+data(colon, package="survrec")
+head(colon)
+```
+
+Here, we observe as repeated measurements are in different rows. The variabel _hc_ encodes the identification number (in that case _hc_ stands for the `clinical record`number) to indicate that this individula is having several observations. For instance, the individual with _hc_ number 5346 is having two hospital readmissions at time 24 and 433 (_event_ = 1) and then the patient is followed up intiltime 580 without having any other hospital admission (_event_ = 0).
+
+As in the case of estimating survival function in standard survival analysis, an object encoding survival time has to be created. The object `Survr` is  similar to the one created in `survrec` with the function `Surv`. This function requires the time variable, the censored variable and a variable indicating the repeated events that must have a censored time in the last observation. If this is not happening an error message is obtained
+
+```
+> with(colon, Survr(time, event, hc))
+Error en Survr(time, event, hc) :
+Data doesn't match. Every subject must have a censored time
+```
+
+If this error is observed, a censored time to each individual has to be added. If the final of the study corresponds o the last event, this value must be 0. This can automatically be creaed by using the function `addCenTime` of library `gcmrec` that can be installed from GitHub using `devtools` package:
+
+```{r, install_gmcrec, eval=FALSE}
+devtools::install_github("isglobal-brge/gcmrec")
+```
+
+```{r, addCen}
+library(gcmrec)
+colon2 <- addCenTime(colon)
+head(with(colon2, Survr(hc, time, event)))
+```
+
+NOTE: the function `addCenTime` has by default the arguments `id=1`, `time=2` and `event=3` indicating the columns where those variables are located in your `data.frame`.
+
+## Pena-Strawderman-Hollander (PSH) estimator
+
+The estimation of survival curve using [Pena-Strawderman-Hollander](https://www.jstor.org/stable/3085901) method is estimated by 
+
+```{r, psh}
+ans.psh <- survfitr(Survr(hc, time, event) ~ 1, data=colon2,
+                    type="pena-strawderman-hollander")
+ans.psh
+```
+
+Notice that this estimation is similar to Kaplan-Meier, byt the estimation of the standard error is different since PSH considers that times are correlated
+
+```{r, comparison}
+library(survival)
+ans.km <- survfit(Surv(time, event) ~ 1, data=colon2)
+all.equal(summary(ans.km)$surv, ans.psh$surv)
+head(cbind(ans.km$std, ans.psh$std))
+```
+
+## Frailty model estimator (FRMLE)
+
+[Pena-Strawderman-Hollander](https://www.jstor.org/stable/3085901) also proposed to estimate the survival function with recurrent event data when inter-occurrence times are correlate by using a Frailty model. This model can be estimated by executing 
+
+```{r, frmle}
+ans.fra <- survfitr(Survr(hc, time, event) ~ 1, data=colon2,
+                    type="MLEfrailty")
+ans.fra
+```
+
+A large _alpha_ value would indicate that the variance of the frailty is almost 0 (_alpha_ encodes the precission of the gamma distribution by using the formulation presented in PSH). In other words, if _alpha_ is 0, the independent model (e.g PSH) is enough to fit the data. This can be visually check by comparing both survival curves as we illustrate in the next section. 
+
+## Wand-Chang estimator (WC)
+
+The method proposed by [Wang and Chang](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3826567/) can be estimated using
+
+```{r, wc}
+ans.wc <- survfitr(Survr(hc, time, event) ~ 1, data=colon2,
+                    type="wang-chang")
+ans.wc
+```
+
+# Estimator selection
+
+PSH method assumes that all inter-ocurrence times are independent, while FRMLE assumes that data are correlated and estimates such correlation by using a Frailty model. WC estimator can capture both situations. Therefore, one can decide which is the best model by comparing the survival curves estimated by using the three approaches. 
+
+```{r, curves}
+plot(ans.wc, conf.int=FALSE)
+lines(ans.psh, col="red")
+lines(ans.fra, col="blue")
+legend("topright", c("WC", "PSH", "Frailty"), col=c("black", "red", "blue"), lty=1)
+```
+
+In this plot, we can observe as FRLME and WC estimators are completely diffenrent of PSH. This indicates that data are correlated and that PSH model is underestimating the real survival function. Notice that the probability distribution function can also be estimating by changing the argument `prob=TRUE`.
+
+
+```{r, curves2}
+plot(ans.wc, conf.int=FALSE, prob=TRUE)
+lines(ans.psh, prob=TRUE, col="red")
+lines(ans.fra, prob=TRUE, col="blue")
+legend("topleft", c("WC", "PSH", "Frailty"), col=c("black", "red", "blue"), lty=1)
+```
+
+Confidence bands are depicted by default
+
+```{r, bands}
+plot(ans.wc)
+```
+
+The methodology previously described is further explained in a review written in Spanish by [Gonzalez and Pena](http://scielo.isciii.es/scielo.php?script=sci_arttext&pid=S1135-57272004000200006) which '.pdf' is also available in the teaching course material repository.   
+
+
+# Comparing survival curves
+
+## Pointwise bootstrap confidence intervals
+Let us imagine that we are interested in comparing survival curves accross groups. For example, in our datasets one may observe differences between Duke stage that encodes how advanced is the tumor:
+
+```{r, comp}
+fit.dukes <- survfitr(Survr(hc, time, event) ~ as.factor(dukes), data=colon2,
+                      type="wang-chang")
+plot(fit.dukes) 
+```
+
+In the single setting, there are methods to compare the behaviour of the overall curve such as the log-rank or Wilcoxon tests among others. In recurrent event settings, only there are methods to compare survival curves at a given time. These methods are describe in [Gonzalez, Pena and Delicado](http://upcommons.upc.edu/handle/2117/7475) and are based on bootstrap techniques. This is performed by using the `survdiffr()` function. The argument `q=0.5` indicates that we are interested in estimating confidence interval of median survival time:
+
+```{r, boot}
+fit <- survdiffr(Survr(hc, time, event) ~ as.factor(dukes), data=colon2, q=0.7)
+```
+
+Confidence intervals of median survival time to the first group of variable _dukes_ is the computed by
+
+```{r print_bootCI}
+boot.ci(fit$"1")
+```
+
+
+## Comparing the whole survival curve
+
+[Martinez et al](http://servicio.bc.uc.edu.ve/ingenieria/revista/Inge-Industrial/VolII-n6/art1.pdf) proposed a method to test
+
+\begin{equation}
+\begin{split}
+\mbox{H}_0:S_1(t)=S_2(t)  \\
+\mbox{H}_1:S_1(t) \neq S_2(t)
+\end{split}
+\end{equation}
+
+in the recurrent event settings. The methods are implemented in the package `TestSurvRec` that can be install into R by
+
+```{r install_testsurvrec, eval=FALSE}
+devtools::install_github("isglobal-brge/TestSurvRec")
+```
+
+
+# Exercise (to deliver)
+
+---------------------
+
+Data `lymphoma` is available at `gcmrec` package. It contains cancer relapses times after first treatment in patients diagnosed with low grade lymphoma. Data can be loaded into R  by  executing
+
+```{r, load_lymph, eval=FALSE} 
+data(lymphoma, package = "gcmrec")
+```
+
+NOTE: variable _time_ contains inter-occurrence times, _event_ is the censoring variable that is 1 for cancer relapses and 0 for the last follow up time indicating that the event is not observed and the variable _id_ identifies each patient.
+
+**Exercise 1:** 
+
+- Estimate survival function using Peña-Strawderman-Hollander, Wang-Chang and a Frailty model. 
+- Represent the three estimated survival curves in a figure.
+- Is there correlation among inter-ocurrence times?
+- Which is the best method to analyze these data?
+
+**Exercise 2:**
+
+- Investigate how the package `TestSurvRec` compares two whole survival curves (see References section to both package and manuscript describing how it works).
+- By using this method:  
+    - Compare cancer relapse times between males and females  (variable _sex_).
+    - Compare cancer relapse time between patiens having single lesions and localized lesions (variable _distrib_)
+    - Compare cancer relapse time between patiens having single lesions and lesions in more than one nodal site (variable _distrib_)
+
+NOTE: variable _distrib_ encodes the lesions involved at diagnosis and has 4 categories  (0=Single, 1=Localized, 2=More than one nodal site, 3=Generalized)
+
+---------------------
+ 
+
+
+# References
+
+
+- The [`survrec`](https://github.com/isglobal-brge/survrec) package (https://github.com/isglobal-brge/survrec) 
+
+- The [`gcmrec`](https://github.com/isglobal-brge/gcmrec) package (https://github.com/isglobal-brge/gcmrec)
+
+- The [`TestSurvRec`](https://github.com/isglobal-brge/TestSurvRec) package (https://github.com/isglobal-brge/TestSurvRec)
+
+- Pena, E.A., Strawderman, R. and Hollander, M. (2001). Nonparametric Estimation with Recurrent Event Data. J. Amer. Statist. Assoc 96, 1299-1315.
+
+- Wang, M.C. and Chang, S.H. (1999). Nonparametric Estimation of a Recurrent Survival Function. J. Amer. Statist. Assoc 94, 146-153.
+
+- Gonzalez, J.R and Pena, E. (2004) Estimacion no parametrica de la funcion de superviencia para datos con eventos recurrentes. Rev. Esp. Salud Publica 78(2). Available [here](https://github.com/isglobal-brge/TeachingMaterials/blob/master/Longitudinal_data_analysis/Session_5_Recurrent_Events_PartI/lectura_eventos_recurrentes_I.pdf).  
+
+- Gonzalez, J.R., Pena, E. and Delicado, P. (2010) Confidence intervals for median survival time with recurrent event data. Computational Statistics and Data Analysis, 54 (1) 78-89.
+
+- Martinez C., Ramirez, G., Vasquez M. (2009). Pruebas no parametricas para comparar curvas de supervivencia de dos grupos que experimentan eventos recurrentes. Propuestas. Revista Ingenieria U.C., Vol 16, 3, 45-55. Available [here](http://servicio.bc.uc.edu.ve/ingenieria/revista/Inge-Industrial/VolII-n6/art1.pdf).
+
+
+# Session information
+
+```{r, echo=FALSE}
+sessionInfo()
+```
+

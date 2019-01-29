@@ -1,0 +1,267 @@
+---
+title: "Recurrent events with `R` (Part III) - Frailty models"
+author: "Juan R Gonzalez"
+output:
+  BiocStyle::pdf_document:
+    fig_caption: yes
+    toc_depth: 2
+  BiocStyle::html_document:
+    toc_depth: 2
+---
+
+<!-- to compile this:
+library("rmarkdown");
+render("rr-auhtoring.Rmd", output_format="all")
+or just call make
+-->
+
+```{r style, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
+library("knitr")
+#options(width=100)
+opts_chunk$set(message = FALSE, error = TRUE, warning = FALSE)
+```
+
+
+# Introduction
+
+> **Objectives**
+>
+> * Understand the concept of _frailty_ in survival analysis with recurrent event data
+> * Learn how to perform survival analysis with recurrent event data extending the Cox proportional hazard to frailty models
+> * Peform data analyses where the scientific question is to determine factors associated with time until re-ocurrences of a repeated event considering different covariates, modelling the heterogeneity accross individuals by using frailties, taking into account the effect of accumulating events and the response of interventions after re-ocurrences.
+
+
+# Frailty model
+
+In the last lecture we use several approaches to fit recurrent event data. Each of these approaches were based on the Cox model by using robust standard errors estimations to consider correlation among repeated events observed in the same subject. Now we introduce the frailty approach. It is a statistical modeling concept which aims to account for heterogeneity, caused by unmeasured covariates by using an observed variable. Actually, the \emph{frailty} is a multiplicative random effect applied to the hazard function of each subject, which reflects the variability due to unobserved subject-specific factors. These subject-specific factors can be a source of within-subject correlation. Therefore, it can also be considered as a measurement of the dependence of correlated recurrent events within a subject. A natural way to model this dependence of clustered event times is through the introduction of a cluster-specific random effect: the \emph{frailty}.
+
+In particular, the \emph{shared frailty} model can be applied to model recurrent event data. The hazard for each \emph{k}th event of the \emph{i}th subject conditional on the frailty takes the following form:
+
+
+\begin{equation}\label{frailtyhaz}
+\lambda_{ik}(t|\textbf{Z},X_{ik}) = Z_i\,
+\lambda_{0}(t)e^{\beta'X_{ik}(t)}
+\end{equation}
+
+where where $\lambda_{0}(t)$ is the baseline hazard function,
+$\beta=(\beta_1,\ldots,\beta_p)^{'}$ is a $p\times1$ vector of unknown regression parameters, $X_{ik}$ denote the covariate vector for the $i$-th patient with respect to the $k$-th event and $Z_i$s are unobserved random variables (the frailties). It is assumed that the $Z_i$s are independently and identically distributed from a gamma distribution with mean 1 and unknown variance $\xi$ at origin time. Other parametrizations have been used such as _gaussian_ or _t_ distributions. 
+
+The use of a gamma distribution facilitates the interpretation of the fitted results. This random variable has two parameters, so that, the frailty is normally assumed that follows a $\mbox{gamma}(\xi, \xi)$. Therefore, the unobserved frailties have an expected mean value equal to 1 and variance equal to $\xi$ (or $1/\xi$ depending the parametrization). Having $\xi$ close to 0 indicates that little heterogeneity is observed accross recurrences. This can be considerd as a formal test equivalent to the visual approach we did when comparing survival curves estimated using PSH, FRMLE, and WC estimators.
+
+# Model parameter estimates
+
+It is assumed that that observations in the same cluster (i.e., observations of the same individual) share the same frailty $Z_i$. Then, survival times are assumed to be conditional independent with respect to the shared (common) frailty. 
+
+## Penalized partial likelihood
+
+The usual Cox model is estimated by maximazing the partial likelihood. Frailty model cannot be estimated unsing this approach since frailies are not observed. In such situations, the EM algorithm is the proper procedure to estimate model parameters. However, this method has a main drawback: variance of the model parameters cannot be estimated. In order to address this difficulty, [Therneau, Grambsch, and Pankratz]() showed how maximum likelihood estimation for the Cox model with a gamma frailty can be accomplished using a general penalized routine, and [Ripatti and Palmgren]() worked through a similar argument for the Cox model with a gaussian frailty. The idea is to introduce a penalization to the model parameters to avoid large estimates of $\beta$s that would provide large values of the partial likelihood.  
+
+
+This extension of the Cox model can be fitted by means of function `coxph` from the `survival()` library. Frailties are incorporated in this function through the function `frailty()`. This function requires to indicate how repeated events are clustered (this is similar to the `cluster()` function we used to AG or PWP models). Parameter estimation is performed by using the EM-algorithm. Let us illustrate how to perform such analyses using colon rehospitalization data. This data is also available in the package `frailtypack` that can be installed from CRAN. Let us use this data since it contains time scale already prepared for being analyzed using different time scales.
+
+```{r, load_data}
+data(readmission, package="frailtypack")
+head(readmission)
+```
+
+The frailty model having gamma distribution of non-observed frailties is estimated by maximizing the penalized partial likelihood by executing
+
+```{r, frailty_gamma}
+library(survival)
+coxph(Surv(time, event) ~ sex + frailty(id), data = readmission)
+```
+
+Here, we observe as the frailty is highly significant and that the variance of the frailty (e.g, variance of the random effect modelled through a gamma distribution) is far from 0. The question of determining whether this variance is statistically different from 0 cannot be addresed by using this method of estimation since this approach is not able to estimate the variance of the variance of frailty that would help to properly test this hypotesis:
+
+$$ \mbox{H}_0: \xi=0$$
+by using, for instance, a z-score test. Later on, we will see how to carried out this test by using a penalized version of the full likelihood. 
+
+We can also fit this model assuming another distrution of frailties. The `frailty()` function has an argument called `distribution` that can be change to _gaussian_ or _t_. For instance
+
+```{r, frailty_normal}
+coxph(Surv(time, event) ~ sex + frailty(id, dist="gaussian"), 
+      data = readmission)
+```
+We can observe that both methods lead with the same conclusions, altough modelling data with _gaussian_ function gets less significant results. 
+
+## Penalized full likelihood
+
+[Rondeau Commenges and Joly]() proposed to estimate the frailty model by penalizing the full likelihood. The difference with the method proposed by [Therneau, Grambsch, and Pankratz]() is that the authors penalized the baseline hazard function of the Cox model instead of model parameters. The idea is to penalize the second derivate of $\lambda_0()$ to assure having an smooth estimate of baseline hazard. Basically it requires to maximize this function ...
+
+[Rondeau and Gonzalez]() created the `frailtypack()` package that can be used to fit frailty models using this approach. The package has been extended to use the same approach to model other type of data as describe in [Rondeau, Mazroui and Gonzalez](). Both references contain a detailed description of the package, the methods as well as some illustrative data analyses. Let us describe here the main functions to model recurrent event data. Let us start by fitting the AG model and AG model with a frailty term. 
+
+
+```{r, fit_ag}
+library(frailtypack)
+mod.ag <- frailtyPenal(Surv(t.start, t.stop, event) ~ sex, 
+                       data=readmission,
+                       recurrentAG=TRUE, 
+                       n.knots=8, kappa=10000,
+                       cross.validation=TRUE)
+mod.ag
+```
+Here, the AG model requires to have interoccurrence times as a counting process. This is address by using _t.start_ and _t.stop_ variables that contains the time between hospital readmission encoded using the require counting process.`recurrentAG=TRUE` is required to fit AG model. The arguments `n.knots` and `kappa` stand for the parameters used to fit the penalized likelihood (see [Rondeu and Gonzalez]() for further details). As a any other penalization method, the smooting parameger (`kappa1`) must be provided. Here, the function includes a method based on cross-validation to estimate such parameter. This can be performed by setting `crossvalidation=TRUE`. Notice that this model can also be fitted my maximizing the partial likelihood implemented in the `coxph` function. 
+
+```{r, cox}
+mod.cox <- coxph(Surv(t.start, t.stop, event) ~ sex, 
+                       data=readmission)
+mod.cox
+```
+You can see as the effect of _sex_ variable is almost the same as well as its standard error that `fratiltyPenal` also estimate using a sandwich estimator (HIH). Therefore, the significance of this variable is equal is both models. Now, let us see the main advantage of using full penalized likelihood approach. The frailty model is fitted by adding `cluster()` into the formula. This function should call to the variable indicating the subject identification:
+
+```{r, mod_ad_fra}
+mod.ag.fra <- frailtyPenal(Surv(t.start, t.stop, event) ~ sex + cluster(id), 
+                       data=readmission,
+                       recurrentAG=TRUE, 
+                       n.knots=8, kappa=10000,
+                       cross.validation=TRUE)
+mod.ag.fra
+```
+The main difference we can observed with regard to the Cox frailty model estimated by using penalized partial likelihood is that this method provides a proper test to decide whether the variance of the frailty parameter is significant or not. In that case we observe that this variance is different from 0 with a very low p-value ($< 10^{-15}$). Let also notice that in this case the parameterization used of the gamma distribution is different from the one used in the FRMLE model proposed by [Pena, Strawderman and Hollander](). In that case $\xi$ (Theta in the output) models the variance of the gamma frailty and is the inverse of the variance of gamma frailty considered in the FRMLE model. 
+
+## General class of models
+
+[Pena and Hollander]()  proposed a new class of models (referred to as PHol model) which generalizes most of existing reliability and Cox-based models. The hazard rate process for the $k$th recurrence of the $i$th patient at time $t$ conditionally on an unobserved frailty, $Z_i$, and observed covariates $X_{ik}$ is specified via
+
+\begin{equation}\label{conditional hazard_PHol}
+\lambda(t|\textbf{Z},\textbf{X}_{ik}) = Z_i\,
+\lambda_0[\mathcal{E}_i(t)]\, \rho[k;\alpha]\,
+\exp[\beta'\textbf{X}_{ik}(t)],
+\end{equation}
+
+where $\lambda_0(\cdot)$ is an unknown baseline hazard rate function, $\rho(\cdot;\alpha)$ has a known functional form depending on unknown parameter $\alpha$ that encodes the effects of accumulating events. The authors consider $\rho(k;\alpha)=\alpha^k$ which is able to model different scenarios. For instance, if $\alpha$ is greater than unity, the increasing number of hospital admissions has a damaging effect. 
+[Gail, Santner and Brown]() proposed to model the effect of the number of events using the function $\rho(k;\alpha)=\max\{\alpha-k,0\}$ which was considered to model cancer recurrences in different sites of the body. $\beta$ is a vector of parameters associated with covariate effects that can be time-dependent. The correlation between inter-event times is modeled with $Z_i$ which are unobserved frailties. Again, we consider that $Z_i$ follows a gamma distribution with mean 1 and unknown variance $\alpha$. The model also incorporates the effect of performed interventions $\mathcal{E}_i(s)$, also called \emph{effective age} via the baseline hazard function which is not consider either in marginal, conditional or shared frailty models. There are several examples of how performed interventions after recurrences may change the probability of presenting a new event. For instance, people with cardiovascular disease are advised to do regular and moderate physical activity and stopping smoking habit. Thus, those patients who follow this advice will have less probability of presenting a new event that those that do not alter their lifestyle. Another example arises from patients with epileptic seizures, where recommendations in order to reduce the number of new seizures include sleeping 8 hours daily, avoiding exposition to flickering lights or reducing alcohol use. More examples about different \emph{effective age} formulation in cancer settings can be found in [Gonzalez, Pena and Slate]().
+
+As showed by [Pena and Hollander]() and [Pena, Slate and Gonzalez](), this class of models subsumes many existing ones. For example the PWP conditional model, considering no stratification, can be formulated to address either time since a patient entered the study or time since the last occurrence. Both cases corresponds to (\ref{conditional hazard_PHol}) with $\rho(k;\alpha)=1$, $Z_i=1, i=1,\ldots,n$, and $\mathcal{E}_i(t)=t$ or $\mathcal{E}_i(t)=t - t_{k-1}$, respectively. The counting process formulation, $\mathcal{E}_i(t)=t$, assumes that all interventions produce no improvement in the patient, that is, the disease is proceeding in a stable manner. Conversely, the gap time formulation, $\mathcal{E}_i(t)=t - t_{k-1}$, considers that all interventions lead to a complete remission of the disease. On the other hand, [Andersen and Gill]() (AG model) can be seen as a special case of PHol model taking $\rho(k;\alpha) = 1$, $Z=1$ and gap time formulation as the effective age. We consider the risk for the \emph{k}th recurrence under the common underlying hazard, $\lambda_0(t)$  among those patients who are under observation at the time \emph{t}.
+
+We can fit the parameters for the general class of models by using the package `gcmrec` that can be installed into R by typing:
+
+```{r install_gcmrec, eval=FALSE}
+devtools::install_github("isglobal-brge/gcmrec")
+```
+
+The dataframe used in the fit must contain the variables subject identification, time to inter-occurrence, and censored status (coded 1: event, 0:censored). Furthermore, we can have some covariates. Other arguments in this function are: `effageData` (list containing the information about effective age), `s` (a selected calendar time that normally is considered the maximum observed follow-up time), `rhoFunc` (A character string specifying the effects attributable to the accumulating event occurrences $\rho(k:\alpha)$, the default is "alpha to k"), `typeEffage` (effective age function, possible values are  "perfect" or "minimal" for perfect repair model or minimal repair model, respectively.  We can fit minimal or perfect repair models, with and without frailties. The model without frailties and minimal repair (e.g calendar time scale) is fitted by:
+
+```{r, gcmrec minimal}
+library(gcmrec)
+gcmrec(Survr(id, time, event) ~ sex, 
+      data = readmission, s=2175, Frailty=FALSE,
+      typeEffage="minimal")
+```
+The model without frailties and perfect repair (e.g gap time scale) is fitted by:
+
+```{r, gcmrec perfect}
+gcmrec(Survr(id, time, event) ~ sex, 
+      data = readmission, s=2175, Frailty=FALSE,
+      typeEffage="perfect")
+```
+
+We can observe that in both case the gender variable is statistically significant. Here we also can test whether the effect of accumulating events is important or not. Alpha in the $\rho$ function is 1.26 in the minimal repair model (calendar time) with an standard error of 0.0143. Therefore a score test could be performed where the null hypothesis is $\alpha=1$ since the model parameters are estimated using maximium likelihood approach. The interpretation of this parameter is that the risk of having a new recurrence increases by 26% each time you get a new hospital readmission. 
+
+The effect of effective age modelling in cancer patients can be illustrated by using `lymphoma` dataset 
+
+```{r, show_lymphoma}
+data(lymphoma)
+head(lymphoma)
+```
+The variable _effage_ contain this information that is encoding how the patients responds to the treatment after each relapse: complete remission (CR), partial remission (PR) and stable disease (SD). 
+
+```{r, show_effage}
+table(lymphoma$effage)
+```
+
+The general class of model including effective age modeling the effect of intervention after relapses is then fitted by: 
+
+
+```{r, cancer model}
+gcmrec(Survr(id,time,event) ~ as.factor(sex), data=lymphoma,
+       s=1000, Frailty=TRUE, cancer=lymphoma$effage)
+```
+
+We observe tha Alpha is lower than 1. This indicates that the probability of having a new re-occurrence decreases with the number of previous relapses (altough a forma test should be performed by using standard error that in the frailty model hast to estimated by using jackniffe method - see `se` argument in the `gcmrec` function). 
+
+
+
+# Recommended lectures
+
+In the GitHub folder (and in the Campus Virtual) there are two papers describing how to estimate frailty models using _frailtypack_ _R_ package. It also contains the paper describing the general class of models for cancer data where the effect of intervertions is introduced that is highly recommended to be read. 
+
+
+\clearpage
+
+# Exercise (to deliver)
+
+---------------------
+
+Data `lymphoma` is available at `gcmrec` package. It contains cancer relapses times after first treatment in patients diagnosed with low grade lymphoma. Data can be loaded into R  by  executing
+
+```{r, load_lymph, eval=FALSE} 
+data(lymphoma, package = "gcmrec")
+```
+
+NOTE: variable _time_ contains inter-occurrence times, _event_ is the censoring variable that is 1 for cancer relapses and 0 for the last follow up time indicating that the event is not observed and the variable _id_ identifies each patient.
+
+**Exercise 1:** 
+
+Estimate a frailty model (using the general class of models proposed by Pena and Hollander) to investigate whether there are differences in the risk of having a cancer relapse with regard to the number of lesions at diagnosis variable {\tt distrib}) to the following models: 
+
+NOTE: variable _distrib_ encodes the lesions involved at diagnosis and has 4 categories  (0=Single, 1=Localized, 2=More than one nodal site, 3=Generalized)
+
+1. Gap inter-occurrence time scale and no effect of accumulating previous relapses
+
+2. Calendar inter-occurrence time scale and no effect of accumulating previous relapses
+
+3. Gap time inter-occurrence time scale and effect of accumulating previous relapses
+
+4. Calendar inter-occurrence time scale and effect of accumulating previous relapses
+
+5. Effect of intervention after relapses without effect of accumulating previous relapses
+
+6. Provide an interpretation of model parameters of this last model
+
+7. Which is the most adequate model? Why? (HINT: use the Akaike criteria since the {\tt gcmrec} function is providing likelihood of each model)
+
+**Exercise 2:** 
+
+Repeat previous analyses (except the model in 5.) by using {\tt frailtypack} library and compare both types of analyses (provide a global conclusion and which model would you use to analyze this data without considering the effect of interventions after cancer relapses).
+
+---------------------
+ 
+
+# References
+
+- The [`survival`] package
+(https://cran.r-project.org/web/packages/survival/)
+
+- The [`frailtypack`] package (https://cran.r-project.org/web/packages/frailtypack/)
+
+- The [`gcmrec`] package (https://github.com/isglobal-brge/gcmrec)
+
+- Gail, M., Santner, T., and Brown, C. (1980). An analysis of comparative carcinogenesis experiments based on multiple times to tumor. Biometrics, 36:255-266.
+
+- Gonzalez, J. R., Pena, E. A., and Slate, E. H. (2005). Modelling intervention effects after cancer relapses. Statistics in Medicine, 24(24):3959-3975.
+
+- Pena, E. A. and Hollander, M. (2004). Models for Recurrent Events in
+Reliability and Survival Analysis. T. Mazzuchi, N. Singpurwalla and
+R. Soyer, Kluwer Academic Publishers, Dordrecht.
+
+- Pena, E. A., Slate, E. H., and Gonzalez, J. R. (2007). Semiparametric inference for a general class of models for recurrent events. Journal of Statistical Planning and Inference, 137(6):1727-1747.
+
+- V. Rondeau, D. Commenges, and P. Joly (2003).  Maximum penalized likelihood estimation in a gamma-frailty model. Lifetime Data Analysis
+9, 139-153.
+
+- Rondeau, V. and Gonzalez, J. R. (2005). frailtypack: A computer program for the analysis of correlated failure time data using penalized likelihood estimation. Computer Methods and Programs in Biomedicine, 80:154-164.
+
+- V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012).  Frailtypack:  An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric
+estimation.Journal of Statistical Software 47, 1-28.
+
+- S Ripatti and J Palmgren, Estimation of multivariate frailty models using penalized partial likelihood, Biometrics, 56:1016-1022, 2000.
+
+- T Therneau, P Grambsch and VS Pankratz, Penalized survival models and frailty, J Computational and Graphical Statistics, 12:156-175, 2003.
+
+# Session information
+
+```{r, echo=FALSE}
+sessionInfo()
+```
+

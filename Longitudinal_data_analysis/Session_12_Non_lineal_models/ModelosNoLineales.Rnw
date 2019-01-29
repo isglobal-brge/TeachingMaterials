@@ -1,0 +1,539 @@
+\documentclass[10pt,xcolor=dvipsnames]{beamer}
+\setbeamertemplate{navigation symbols}{}
+
+
+\usepackage[spanish]{babel}
+%\usepackage[ansinew]{inputenc}
+\usepackage{color}
+\usepackage{CREAL_slides}
+
+\AtBeginSection[]{%
+  \begin{frame}<beamer>{Índice}
+    \tableofcontents
+  \end{frame}}
+
+
+\SweaveOpts{keep.source=TRUE}
+\setkeys{Gin}{width=0.8\textwidth}
+
+\title[Análisis de datos longitudinales - Grado de Estadística, UAB]{Tema 3 - Sesión 12 \\ Modelos no lineales}
+\author[Juan R González]{Juan Ramón González \\ (\href{mailto:jrgonzalez@creal.cat}{jrgonzalez@creal.cat})}
+\institute[UAB]{Departamento de Matemáticas, Universidad Autónoma de Barcelona (UAB) \\ Centro de Investigación en Epidemiología Ambiental (CREAL)}
+\date{Barcelona, Marzo-Junio de 2012}
+
+\DeclareMathOperator{\SNP}{SNP}
+
+
+\begin{document}
+                            
+<<setup, echo=FALSE>>=
+options(width = 80)
+@ 
+
+
+\frame{\titlepage}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+\begin{itemize}
+\item Los modelos no lineales son una generalización del modelo lineal de regresión
+en los que la media condicionada de la variable respuesta, no es una función lineal de 
+los parámeros
+\item En algunos problemas, basta con trasformar los predictores o la variable respuesta
+y considerar una relación lineal
+\item Esta aproximación es aceptable en muchas ocasiones, pero el problema radica en la
+interpretación de los parámetros
+\item Así, si el objetivo no es estimar el efecto, si no conocer aquellas variables predictoras
+asociadas a la variable resultado, estas transformaciones pueden ser una buena aproximación.
+\end{itemize}
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+<<ejemplo, results=hide>>=
+library(car)
+mod <- lm(population ~ year, data=USPop)
+plot(population ~ year, data=USPop)
+abline(mod)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+<<ejemplo, echo=FALSE, fig=TRUE>>=
+library(car)
+mod <- lm(population ~ year, data=USPop)
+plot(population ~ year, data=USPop)
+abline(mod)
+@
+\end{frame}
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+La transformación raíz cúbica puede ser adecuada 
+
+<<busca_transformacion>>=
+trans <- powerTransform(mod)
+@
+
+<<linerizacion>>=
+population.trans <- bcPower(USPop$population,
+                       coef(trans, round=TRUE))
+
+mod.trans <- lm(population.trans ~ year, data=USPop)
+plot(population.trans ~ year, data=USPop)
+abline(mod.trans)
+@
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+
+<<linerizacion, echo=FALSE, fig=TRUE>>=
+population.trans <- bcPower(USPop$population,
+                       coef(trans, round=TRUE))
+
+mod.trans <- lm(population.trans ~ year, data=USPop)
+plot(population.trans ~ year, data=USPop)
+abline(mod.trans)
+@
+
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+Sin embargo la idea de los modelos lineales es que podemos estimar la relación 
+
+$$ y = m(x, \pmb{\theta}) + \epsilon $$
+
+donde $m$ puede ser cualquier función. En el caso anterior se pude utilizar el \emph{modelo
+logístico de crecimiento}
+
+$$ m(x, \pmb{\theta}=(\theta_1, \theta_2, \theta_3) = \frac{\theta_1}{1 + 
+     \exp[-(\theta_2 + \theta_3 x)]} $$
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+Esta función tiene el siguiente aspecto
+
+<<funcion_logistica_crecimiento>>=
+curve(1/(1+exp(-(-1 + 1*x))), from=-5, to=5, main="(b)")
+abline(h=1/2, lty=2)
+abline(v=1, lty=2)
+@
+
+\end{frame}
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+Esta función tiene el siguiente aspecto
+
+<<funcion_logistica_crecimiento, echo=FALSE, fig=TRUE>>=
+curve(1/(1+exp(-(-1 + 1*x))), from=-5, to=5)
+abline(h=1/2, lty=2)
+abline(v=1, lty=2)
+@
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+\begin{itemize}
+\item Cambiando los parámetros $\pmb{\theta}=(\theta_1, \theta_2, \theta_3)$ podemos
+extender o estrechar los ejes 
+\item también se puede cambiar la velocidad a la que varía la curva entre su valor inferior
+y superior
+\item Si $\theta_3 > 0$ entonces cuando $x$ aumenta, el término $\exp[-(\theta_2 + \theta_3 x)]$
+se acerca a 0, entonces $m(x, \pmb{\theta})$ se aproximará al valor $\theta_1$ como
+una \emph{asíntota} [se asume un tamaño máximo de población]
+\item El parámetro $\theta_3$ controla cómo de rápida es la transición de la curva desde 
+0 a $\theta_1$. Entonces, se interpreta como el parámetro de tasa de crecimiento.
+\item Ejemplo de uso?
+\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+Podemos estimar $\pmb{\theta}$ minimizando la suma de los residuales al cuadrado
+
+$$S(\pmb{\theta}) = \sum w[y-m(x, \pmb{\theta})]^2$$
+
+Para ello se necesita llevar a cabo el siguiente proceso iterativo
+
+\begin{enumerate}
+ \item Dar unos valores inciales para $\pmb{\theta}$. Este paso puede ser crucial, aunque existen
+métodos para dar valores \emph{razonables} [existen funciones `self-starting' en {\tt R}]
+ \item en la iteración $j \ge 1$, se da una solución $t_j$ actualizando $t_{j-1}$. Si $S(t_j)$
+es menor que $S(t_{j-1})$ dada una cierta cantidad (tolerancia), entonces se aumenta $j$ en
+una unidad y se repite el paso anterior. Si no, entoces $t_{j-1}$ se considera el estimador.
+\end{enumerate}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+El algoritmo anterior debe cumplir:
+\begin{enumerate}
+ \item Se necesita un método que garantice que en cada paso obtengamos un valor menor de
+$S$ (o al menos que no aumente). Existen varios algoritmos para mínimos cuadrados no lineales
+[ver Bates and Watts (1998). Nonlinear Regression Analysis and Its Applications. Wiley, New York]
+Una de ellas es utilizar un algoritmo de la forma Gauss-Newton pero que en cada iteración
+estima las derivadas mediante métodos numéricos [métodos quasi-Newton]
+ \item La función $S$ puede tener múltiples mínimos y el algoritmo podría escoger un mínimo local
+Una estrategia es empezar con varios puntos iniciales y ver que siempre converge a la misma solución
+ item Puede ser que en cada iteración se mejore $S$ y el proceso puede hacerse largo. Por ello
+a veces también se considera un número máximo de iteraciones como criterio para acabar el proceso
+de estimación. Esto podría dar problemas de encontrar mínimos locales
+
+\end{enumerate}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+En {\tt R} existe la función {\tt nls} que tiene implementados estos métodos
+
+<<nls>>=
+args(nls)
+@
+
+Los parámetros de control del algoritmo de minimización son:
+
+<<nls_control>>=
+args(nls.control)
+@
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+\textcolor{OliveGreen}{Parametros iniciales}
+
+Cada problema debe tratarse de forma inidividual. Para el caso del modelo logístico de crecimiento
+se puede ver que:
+    
+\begin{subequations}
+\begin{align}
+y& \approx \frac{\theta_1}{1 + \exp[-(\theta_2 + \theta_3 x)]}\\
+y/\theta_1 & \approx \frac{1}{1 + \exp[-(\theta_2 + \theta_3 x)]}\\
+\log \left[ \frac{ y/\theta_1} {1 - y/\theta_1 }   \right] & \approx \theta_2 + \theta_3 x
+\end{align}
+\end{subequations}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+De esta forma, basta con conocer un valor inicial para $\theta_1$. Sabemos que este parámetro
+corresponde a la asíntota superior (máxima población en este caso). 400 parece un valor razonable
+teniendo en cuenta que la población estimada para 2010 era de 307 millones de habitantes).
+
+\medskip
+
+Entonces la equación anterior se puede resolver de la siguiente forma:
+
+<<parametros_iniciales>>=
+lm(logit(population/400) ~ year, USPop)
+@
+
+Así nuestro vector de valores inciciales podría ser $\pmb{\theta_1} = (400, -49, 0.025) $
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+<<modelo_nolineal>>=
+mod.nl <- nls(population ~ theta1/(1 + exp(-(theta2 + theta3*year))),
+ start=list(theta1 = 400, theta2 = -49, theta3 = 0.025),
+ data=USPop, trace=TRUE)
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+<<summary>>=
+ summary(mod.nl)
+@
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+En este tipo de modelos hay una medida que es muy importante. Esta medida es en qué punto
+de la variable {\tt x} se encuentra la mitad de la asíntota de la variable {\tt y} (la mitad
+del máximo que puede tomar. En este caso, en qué año observamos la mitad de la población.
+
+\medskip
+
+En los estudios dosis-respuesta con fármacos, esta medida se conoce como \emph{la dosis
+mediana} y nos da el valor de dosis para que la mitad de los individuos fallecen. En otros
+estudios también se conoce como valor $IC_{50}$. 
+
+
+\medskip
+
+Este valor se estima como $-\hat{\theta_2}/\hat{\theta_3}$, que en nuestro caso toma el valor
+
+<<ic50>>=
+-coef(mod.nl)[2]/coef(mod.nl)[3]
+@
+
+que se puede interpretar como el año en el que la población alcanzará la mitad de su máximo valor. Notar que cuando se analizan modelos de "decrecimiento" este valor es muy relevante ya que es el valoren el cuál la mitad de la población a desaparecido.
+
+El error estandar para este ic50 se puede estimar mediante el método delta. NOTA: para el caso univariante sería $\mbox{Var}(g(\theta_1)) = \sigma^2_{\theta_1} g'(\theta_1)^2 $
+
+<<ee_ic50>>=
+deltaMethod(mod.nl, "-theta2/theta3")
+@
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+Podemos comprobar que el  modelo es adecuado para realizar predicciones
+
+<<prediccion>>=
+ plot(population ~ year, USPop, xlim=c(1790, 2100), ylim=c(0,450))
+ with(USPop, lines(seq(1790, 2100, by=10),
+  predict(mod.nl, data.frame(year=seq(1790, 2100, by=10))), lwd=2))
+ points(2010, 307, pch="x", cex=1.3)
+ abline(h=0, lty=2)
+ abline(h=coef(mod.nl)[1], lty=2)
+ abline(h=.5*coef(mod.nl)[1], lty=2)
+ abline(v= -coef(mod.nl)[2]/coef(mod.nl)[3], lty=2)
+@
+
+\end{frame}
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+<<prediccion, echo=FALSE, fig=TRUE>>=
+ plot(population ~ year, USPop, xlim=c(1790, 2100), ylim=c(0,450))
+ with(USPop, lines(seq(1790, 2100, by=10),
+  predict(mod.nl, data.frame(year=seq(1790, 2100, by=10))), lwd=2))
+ points(2010, 307, pch="x", cex=1.3)
+ abline(h=0, lty=2)
+ abline(h=coef(mod.nl)[1], lty=2)
+ abline(h=.5*coef(mod.nl)[1], lty=2)
+ abline(v= -coef(mod.nl)[2]/coef(mod.nl)[3], lty=2)
+@
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+\textcolor{OliveGreen}{\emph{Self-Starting values}} (Pinheiro, J. C. and Bates, D. M. (2000). Mixed-E
+ects Models in S and S-PLUS. Springer, New York)
+
+<<summary self_starting>>=
+mod.ss <- nls(population ~ SSlogis(year, phi1, phi2, phi3), data=USPop)
+summary(mod.ss)
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+\textcolor{OliveGreen}{\emph{Self-Starting values}} (Pinheiro, J. C. and Bates, D. M. (2000). Mixed-E
+ects Models in S and S-PLUS. Springer, New York)
+
+\medskip
+
+El problema es que hay que leer cómo están parametrizados los modelos. En este caso como $-\hat{\theta_3}/\hat{\theta_2}$
+es una medida interesante, la función se parametriza como
+$\phi_1=\theta_1$, $\phi_2= - \theta_2 / \theta_3$, $\phi_3= 1/\theta_3$, por lo que tenemos
+
+$$ m(x, \pmb{\phi}=(\phi_1, \phi_2, \phi_3)) = \frac{\phi_1}{1 + 
+     \exp[-(x - \phi_2) / \phi_3)]} $$
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+Comprobamos que ambas parametrizaciones y el método delta dan los mismos resultados
+
+<<compara parametrizaciones>>=
+summary(mod.ss)
+deltaMethod(mod.nl, "1/theta3")
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+Estos son los modelos que están implementados en {\tt R}
+
+
+\includegraphics[scale=1.1]{modelosSS.pdf}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+\textcolor{OliveGreen}{Modelos con Covariables}
+
+\medskip
+
+Muchas veces queremos estimar un modelo lineal con la misma función para distintos grupos de datos.
+Por ejemplo podemos comparar la población Canadiense y la de U.S. 
+
+<<combina>>=
+datos <- data.frame(rbind(data.frame(country="US", USPop[,1:2]),
+                data.frame(country="Canada", CanPop)))
+some(datos)
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+\textcolor{OliveGreen}{Modelos con Covariables}
+
+\medskip
+
+Podemos visualizar los datos de la siguiente forma (usando la librería {\tt car}). Poniendo
+{\tt box} y {\tt reg} igual a {\tt FALSE} eliminamos los boxplots y la linea de regresión.
+Las lineas que se observan son suavizados no paramétricos.
+
+<<plot_combina, eval=FALSE>>=
+scatterplot(population ~ year|country, data=datos, 
+      box=FALSE,  reg=FALSE)
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+\textcolor{OliveGreen}{Modelos con Covariables}
+
+<<plot_combina, echo=FALSE, fig=TRUE>>=
+scatterplot(population ~ year|country, data=datos, 
+      box=FALSE,  reg=FALSE)
+@
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+\textcolor{OliveGreen}{Modelos con Covariables}
+
+\medskip
+
+Podemos estimar un modelo logístico de crecimiento de forma separada para cada grupo usando
+la librería {\tt nlme}. La función {\tt nlsList} asume la misma varianza para los
+errores en todos los grupos, pero para nuestro caso no es apropiado ya que 
+la variabilidad en U.S es mayor que en Canada. Para forzar varianzas distintas, usamos
+el argumento {\tt pool}
+
+<<dos_modelos_logisticos>>=
+library(nlme)
+mod.list <- nlsList(population ~ SSlogis(year, phi1, phi2, phi3)|country,
+                     data=datos, pool=FALSE)
+summary(mod.list)
+@
+
+\end{frame}
+
+
+
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+Podemos usar la función {\tt deltaMethod} para calcular el error estándard de la diferencia
+de la tasa de crecimiento entre ambos países. Para ello tenemos en cuenta que el objeto
+{\tt mod.list} es una lista de objetos de clase {\tt nls}.
+
+\medskip 
+
+Obtenemos los coeficientes
+<<coeficientes>>=
+phis <- unlist(lapply(mod.list, coef))
+phis
+@
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+Y sus varianzas-covarianzas
+<<varianzas>>=
+vars <- lapply(mod.list, vcov)
+vars
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+Creamos la matriz de varianzas-covarianzas
+
+<<varianza-covarianza>>=
+zero <- matrix(0, nrow=3, ncol=3)
+var <- rbind( cbind(vars[[1]], zero), cbind(zero, vars[[2]]))
+var
+@
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos No Lineales}
+
+Calculamos la diferencia y su error estandard
+
+<<diferencias>>=
+deltaMethod(phis, "US.phi3 - Canada.phi3", vcov=var)
+deltaMethod(phis, "US.phi2 - Canada.phi2", vcov=var)
+@
+
+\end{frame}
+
+
+
+
+
+
+\end{document}

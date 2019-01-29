@@ -1,0 +1,549 @@
+\documentclass[10pt,xcolor=dvipsnames]{beamer}
+\setbeamertemplate{navigation symbols}{}
+
+
+\usepackage[spanish]{babel}
+%\usepackage[ansinew]{inputenc}
+\usepackage{color}
+\usepackage{CREAL_slides}
+
+\AtBeginSection[]{%
+  \begin{frame}<beamer>{Índice}
+    \tableofcontents
+  \end{frame}}
+
+
+
+\setkeys{Gin}{width=0.6\textwidth}
+
+\title[Análisis de datos longitudinales - Grado de Estadística, UAB]{Análisis de datos longitudinales continuos (II)}
+\author[Juan R González]{Juan Ramón González \\ (\href{mailto:juanr.gonzalez@isglobal.org}{juanr.gonzalez@isglobal.org})}
+\institute[UAB]{Departamento de Matemáticas, Universidad Autónoma de Barcelona (UAB) \\ Insituto de Salud Global Barcelona (ISGlobal)}
+
+
+\usepackage{Sweave}
+\begin{document}
+\input{Continuous_longitudinal_data_II-concordance}
+                            
+
+
+\frame{\titlepage}
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+
+\begin{itemize}
+\item Datos longitudinales recogen observaciones repetidas de la variable respuesta
+a lo largo del tiempo, en un mismo individuo
+\item El análisis correcto de estos datos contempla que la correlación entre las medidas de 
+cada sujeto es tenida en cuenta
+\item A parte de las aproximaciones tradicionales (vistas en la clase anterior), también se puede:
+  \begin{itemize}
+   \item Utilizar \emph{Ecuaciones de Estimación Generalizadas}: GEE
+   \item Modelos lineales mixtos
+  \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{GEE}
+\begin{itemize}
+ \item Modelan la esperanza marginal o poblacional incorporando la correlación entre las
+observaciones correspondientes a un mismo individuo, y se asume independencia de los individuos
+ \item Admiten que la variable respuesta siga una distribución distinta a la Gausiana
+ \item Consideran una ecuación de estimación que se escribe en dos partes: una para modelar los
+parametros de regresión y la segunda para modelar la correlación
+\item son bastante flexibles ya que el modelo sólo necesita explicitar una función "link", una
+función de varianza y una estructura de correlación
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{GEE}
+\begin{itemize}
+ \item Funcionan bien cuando:
+  \begin{itemize}
+    \item el número de observaciones por sujeto es pequeño y el número de sujetos es grande
+    \item se tratan estdios longitudinales donde las medidas siempre se toman en el mismo instante
+          de tiempo para todos los sujetos
+  \end{itemize}
+ \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{GEE}: Formulación
+
+\begin{enumerate}
+ \item Parte sistematica [lo mismo que un GLM]
+    $$ g(E(Y_{ij})) = g(\mu_{ij}) = \beta' X_{ij} $$
+  donde $i=1, \ldots, n$ y $j=1, \ldots, n_i$, y $n$ denota el número de individuos, y $n_i$ 
+el número de medidas repetidas para el individuo $i$-ésimo
+ \item Parte aleatoria
+    $$ V(Y_{ij})=\nu(\mu_{ij}) \phi $$
+ donde $\nu$ es la función de la varianza y $\phi$ el parámetro de escala
+
+ \item Además se tiene que explicitar la estructura de la correlación mediante la 
+  \emph{working correlation matrix}, $R(\alpha)$
+
+\end{enumerate}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{GEE}
+\begin{itemize}
+ \item No es necesaria la especificación de un modelo estadístico. Es decir, no es necesario
+conocer $f(y|parámetros)$. Así, son flexibles, pero:
+  \begin{itemize}
+   \item la estimación de las $\beta$'s no tiene porqué se la mejor posible
+   \item la inferencia está basada en resultados asintóticos
+   \item los métodos de validación son complicados
+  \end{itemize}
+ \item La estimación de los parámetros se puede encontrar en muchos sitios (ver por ejemplo
+Liang y Zeger, Biometrika, 1986  o Zeger et al, Biometrics, 1988)
+ \item si hay datos faltantes (missing) la estimación sólo es correcta si los missing son MCAR (missing
+completely at Random)
+\end{itemize}
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{GEE con R}
+
+Para realizar todos los análisis se necesitan los datos en formato largo. Usaremos los del seminario anterior
+
+\begin{Schunk}
+\begin{Sinput}
+> datos <- read.table("../data/hypothetical_largo.txt", header=TRUE)
+> datos[1:12,]
+\end{Sinput}
+\begin{Soutput}
+   id time score group
+1   1    1    31     A
+2   1    2    29     A
+3   1    3    15     A
+4   1    4    26     A
+5   2    1    24     A
+6   2    2    28     A
+7   2    3    20     A
+8   2    4    32     A
+9   3    1    14     A
+10  3    2    20     A
+11  3    3    28     A
+12  3    4    30     A
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{GEE con R}
+
+Cargamos la librería
+\begin{Schunk}
+\begin{Sinput}
+> library(gee)
+\end{Sinput}
+\end{Schunk}
+
+Usaremos la función {\tt gee}
+\begin{Schunk}
+\begin{Sinput}
+> args(gee)
+\end{Sinput}
+\begin{Soutput}
+function (formula = formula(data), id = id, data = parent.frame(), 
+    subset, na.action, R = NULL, b = NULL, tol = 0.001, maxiter = 25, 
+    family = gaussian, corstr = "independence", Mv = 1, silent = TRUE, 
+    contrasts = NULL, scale.fix = FALSE, scale.value = 1, v4.4compat = FALSE) 
+NULL
+\end{Soutput}
+\end{Schunk}
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{GEE con R}
+
+Antes de estimar el modelo: 
+
+\begin{itemize}
+ \item La función {\tt gee} \textbf{asume} que los datos están ordenados segun el individuo 
+ \item La esctructura de correlación puede ser: independence, fixed, stat\_M\_dep, 
+    non\_stat\_M\_dep, exchangeable, AR-M and unstructured
+
+ \begin{itemize}
+  \item[independence] Es la elección más sencilla e ineficiente, ignorando las medidas repetidas.
+   \item[exchangeable] es la también llamada estructura de simetría compuesta o esférica, o
+estructura de efectos aleatorios $Cov(X_{il}, Y_{ik})=\alpha$. En este caso todas las correlaciones se suponen iguales:
+
+\item[AR-M] de orden uno (M=1): $Cov(X_{il}, Y_{ik})=\alpha^{|l-k|}$
+\item[unestructured] Todas las correlaciones pueden ser diferentes. Adecuada si hay datos suficientes para
+estimar todas las varianzas-covarianzas
+ \end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{GEE con R}
+
+El modelo que asume independencia se puede estimar mediante la instrucción: 
+
+\begin{Schunk}
+\begin{Sinput}
+> mod.gee.indep <- gee(score ~ group + time, 
++                      data = datos, id = id,
++                      family = gaussian, 
++                      corstr = "independence")
+\end{Sinput}
+\end{Schunk}
+
+Un modelo autoregresivo
+
+\begin{Schunk}
+\begin{Sinput}
+> mod.gee.AR <- gee(score ~ group + time, 
++                   data = datos, id = id,
++                   family = gaussian, 
++                   corstr = "AR-M")
+\end{Sinput}
+\end{Schunk}
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{GEE con R}
+
+Guardamos el summary (es largo)
+\begin{Schunk}
+\begin{Sinput}
+> ss.indep <- summary(mod.gee.indep)
+> ss.AR <- summary(mod.gee.AR)
+> names(ss.AR)
+\end{Sinput}
+\begin{Soutput}
+ [1] "call"                "version"             "nobs"               
+ [4] "residual.summary"    "model"               "title"              
+ [7] "coefficients"        "working.correlation" "scale"              
+[10] "error"               "iterations"         
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{GEE con R}
+
+...y comparamos. Por ejemplo los efectos de las variables
+
+\footnotesize
+\begin{Schunk}
+\begin{Sinput}
+> ss.indep$coef
+\end{Sinput}
+\begin{Soutput}
+              Estimate Naive S.E.   Naive z Robust S.E.  Robust z
+(Intercept) 23.2916667   3.258980 7.1469197    3.265145 7.1334259
+groupB       4.5833333   2.463557 1.8604534    2.042375 2.2441192
+time         0.5833333   1.101736 0.5294673    1.099095 0.5307398
+\end{Soutput}
+\begin{Sinput}
+> ss.AR$coef
+\end{Sinput}
+\begin{Soutput}
+              Estimate Naive S.E.   Naive z Robust S.E.  Robust z
+(Intercept) 23.3112357   3.245726 7.1821338    3.266573 7.1362980
+groupB       4.5786421   2.444581 1.8729759    2.041405 2.2428880
+time         0.5726056   1.098854 0.5210936    1.101360 0.5199076
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{GEE con R}
+
+O la \emph{working correlation matrix}
+
+\footnotesize
+\begin{Schunk}
+\begin{Sinput}
+> ss.indep$working.correlation
+\end{Sinput}
+\begin{Soutput}
+     [,1] [,2] [,3] [,4]
+[1,]    1    0    0    0
+[2,]    0    1    0    0
+[3,]    0    0    1    0
+[4,]    0    0    0    1
+\end{Soutput}
+\begin{Sinput}
+> ss.AR$working.correlation
+\end{Sinput}
+\begin{Soutput}
+              [,1]          [,2]          [,3]          [,4]
+[1,]  1.000000e+00 -0.0102881605  0.0001058462 -1.088963e-06
+[2,] -1.028816e-02  1.0000000000 -0.0102881605  1.058462e-04
+[3,]  1.058462e-04 -0.0102881605  1.0000000000 -1.028816e-02
+[4,] -1.088963e-06  0.0001058462 -0.0102881605  1.000000e+00
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{Modelos lineales mixtos}
+Como vimos en la sesión anterior, se podría usar un modelo lineal, pero:
+\begin{itemize}
+\item Las observaciones repetidas en cada grupo o cluster, no son necesariamente
+independientes.
+\item Con frecuencia, no solo se quieren tomar decisiones respecto de los grupos o cluster
+observados, sino que se quiere valorar el efecto de las variables explicativas en una
+población de la que los grupos son una muestra.
+\item Puede ser de interés valorar la variación del efecto de x de un grupo a otro.
+\item La estimación del efecto medio de las variables explicativas en cada grupo puede ser
+muy deficiente si no se recoge la posible variabilidad entre los grupos.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{Modelos lineales mixtos}
+\begin{itemize}
+ \item Modeliza la realación entre la variable dependiente y las covariables
+ \item Estima la correlación intra-individuo (se puede especificar una estructura)
+ \item Se pueden aplicar a muchas situaciones (datos multinivel, ANOVA, datos longitudinales)
+ \item No requieren puntos equidistantes (son covariables - se modeliza el efecto)
+ \item Son robustos ante los missing  
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{Modelos lineales mixtos}
+
+
+Un modelo mixto se puede representar como:
+
+$$\ y = X \beta + Zu + \epsilon\,\!$$
+
+\bigskip
+
+donde
+\begin{itemize}
+
+\item[$y$] son las observaciones, con media $E(y)=X\beta$
+
+\item[$\beta$] es un vector de efectos fijos
+
+\item[$u$] is un vector i.i.d de variables aleatorias con media
+ $E(u)=0$ y matriz de varianza-covarianza $\operatorname{var}(u)=G$
+
+\item[$\epsilon$] es un vector de términos i.i.d. correspondientes al error aleatorio con media $E(\epsilon)=0$ y varianza $\operatorname{var}(\epsilon)=R$
+
+\item[$X$ and $Z$] son matrices de regresores que relacionan las observaciones
+$y$ con $\beta$ y $u$
+
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{Modelos lineales mixtos con R}
+
+\begin{itemize}
+
+\item Modelo sencillo para interpretar (modelo lineal mixto con intercept aleatorio)
+  
+$$y_{ij} = \beta_0 + \beta_1 X_{ij} + a_{ij} + \epsilon_{ij}$$
+$$ a_i ~ N(0, \tau_{a}^2) \mbox{ ,} \tau_{a}^2 \ge 0 $$
+$$ \epsilon_{ij} ~ N(0, \tau^2) \mbox{ ,} \tau^2 > 0 $$
+
+\item El modelo presenta ahora un intercept aleatorio (centrado en 0) que depende del individuo
+$i$-ésimo
+
+\item La varianza del efecto aleatorio recoge la variabilidad entre los diferentes individuos
+\item La varianza del error recoge la variabilidad dentro de cada individuo no 
+explicada por el modelo. NOTA: si la varianza del efecto aleatorio fuese nula, el modelo
+coincidiría con el modelo de efectos fijos o de regresión lineal.
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{Modelos lineales mixtos con R}
+
+Necesitamos la librería {\tt nlme}
+\begin{Schunk}
+\begin{Sinput}
+> library(nlme)
+\end{Sinput}
+\end{Schunk}
+
+Debemos especificar la estructura de los datos mediante la función {\tt groupedData}
+\begin{Schunk}
+\begin{Sinput}
+> datos.s <- groupedData(score ~ time | id, datos)
+> head(datos.s)
+\end{Sinput}
+\begin{Soutput}
+Grouped Data: score ~ time | id
+  id time score group
+1  1    1    31     A
+2  1    2    29     A
+3  1    3    15     A
+4  1    4    26     A
+5  2    1    24     A
+6  2    2    28     A
+\end{Soutput}
+\end{Schunk}
+
+\end{frame}
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{Modelos lineales mixtos con R}
+
+Usa la librería {\tt trellis} para graficar (muy potente)
+\begin{Schunk}
+\begin{Sinput}
+> plot(datos.s)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{Continuous_longitudinal_data_II-grafica}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{Modelos lineales mixtos con R}
+
+El modelo de intercept aleatorio puede estimarse con:
+
+\footnotesize
+\begin{Schunk}
+\begin{Sinput}
+> mod.lme <- lme(score ~ time + group, datos.s, random =  ~ 1)
+> mod.lme
+\end{Sinput}
+\begin{Soutput}
+Linear mixed-effects model fit by REML
+  Data: datos.s 
+  Log-restricted-likelihood: -71.72926
+  Fixed: score ~ time + group 
+(Intercept)        time      groupB 
+ 23.2916667   0.5833333   4.5833333 
+
+Random effects:
+ Formula: ~1 | id
+        (Intercept) Residual
+StdDev:   0.5899484 6.012446
+
+Number of Observations: 24
+Number of Groups: 6 
+\end{Soutput}
+\end{Schunk}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{Modelos lineales mixtos con R}
+
+Comparamos con un modelo lineal
+
+\footnotesize
+\begin{Schunk}
+\begin{Sinput}
+> mod.lm <- lm(score ~ time + group, datos)
+> summary(mod.lm)
+\end{Sinput}
+\begin{Soutput}
+Call:
+lm(formula = score ~ time + group, data = datos)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-13.625  -3.708   0.375   3.938   9.542 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  23.2917     3.2590   7.147 4.78e-07 ***
+time          0.5833     1.1017   0.529   0.6020    
+groupB        4.5833     2.4636   1.860   0.0769 .  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 6.034 on 21 degrees of freedom
+Multiple R-squared:  0.1512,	Adjusted R-squared:  0.07039 
+F-statistic: 1.871 on 2 and 21 DF,  p-value: 0.1788
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{Modelos lineales mixtos con R}
+
+El modelo con intercept y pendiente aleatoria puede estimarse con:
+
+\footnotesize
+\begin{Schunk}
+\begin{Sinput}
+> mod.lme2 <- lme(score ~ time + group, datos.s)
+\end{Sinput}
+\end{Schunk}
+
+\normalsize
+¿cuál es necesario?
+
+\footnotesize
+\begin{Schunk}
+\begin{Sinput}
+> anova(mod.lme, mod.lme2)
+\end{Sinput}
+\begin{Soutput}
+         Model df      AIC      BIC    logLik   Test  L.Ratio p-value
+mod.lme      1  5 153.4585 158.6811 -71.72926                        
+mod.lme2     2 10 161.6750 172.1203 -70.83752 1 vs 2 1.783475  0.8782
+\end{Soutput}
+\end{Schunk}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Modelos GEE y modelos lineales mixtos}
+\textcolor{OliveGreen}{Modelos lineales mixtos con R}
+
+Model checking
+\begin{Schunk}
+\begin{Sinput}
+> plot(mod.lme)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{Continuous_longitudinal_data_II-verificar}
+\end{frame}
+
+
+
+\end{document}

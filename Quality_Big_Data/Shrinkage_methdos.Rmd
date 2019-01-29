@@ -1,0 +1,91 @@
+---
+title: "Shrinkage-based regression"
+author: "Juan R Gonzalez"
+output:
+  BiocStyle::html_document:
+    toc_depth: 2
+  BiocStyle::pdf_document:
+    toc_depth: 2
+---
+
+```{r style, echo=FALSE}
+library("knitr")
+opts_chunk$set(message = FALSE, error = TRUE, 
+               warning = FALSE, cache=TRUE, comment = "")
+```
+
+
+# Background
+
+The standard linear model (or the ordinary least squares method) performs poorly in a situation, where you have a large multivariate data set containing a number of variables superior to the number of samples. This is the case, for instance, of genomic, transcriptomic or epigenomic studies where the number of variables (SNPs, genes, CpGs) exceed the number of samples (i.e. transcriptomic analysis deals with ~20,000 genes on hundreds of individuals).
+
+A better alternative is the penalized regression allowing to create a linear regression model that is penalized, for having too many variables in the model, by adding a constraint in the equation. This is also known as shrinkage or regularization methods.
+
+The consequence of imposing this penalty, is to reduce (i.e. shrink) the coefficient values towards zero. This allows the less contributive variables to have a coefficient close to zero or equal zero. This is an assumption that holds in omic data analysis where most of the fetaures (e.g. variables) are expected to be unaltered.
+
+The shrinkage requires the selection of a tuning parameter ($\lambda$) that determines the amount of shrinkage. This can be estimated using cross-validation. There are two main commonly used penalized regression methods, including ridge regression, lasso regression and elastic net regression. Here we illustrate how to evaluate these models in R and how to extend this to the case of dealing with big datasets.
+
+## Ridge regression
+
+Ridge regression shrinks the regression coefficients, so that variables, with minor contribution to the outcome, have their coefficients close to zero. The shrinkage of the coefficients is achieved by penalizing the regression model with a penalty term called L2-norm, which is the sum of the squared coefficients.
+
+The amount of the penalty can be fine-tuned using a constant ($\lambda$). Good selection of this parameter is critial. When $\lambda=0$, the penalty term has no effect, and ridge regression will produce the classical least square coefficients. However, as $\lambda$ increases to infinite, the impact of the shrinkage penalty grows, and the ridge regression coefficients will get close zero.
+
+Note that, in contrast to the ordinary least square regression, ridge regression is highly affected by the scale of the predictors. Therefore, it is better to standardize (i.e., scale) the predictors before applying the ridge regression, so that all the predictors are on the same scale. Normal standardization can be applied (use for instance `scale` function). In omic data this is not required since all the variables have the same nature and are usually normallized before performing data analysis. 
+
+One disadvantage of the ridge regression is that, it will include all the predictors in the final model, unlike the stepwise regression methods are previosly peformed. In other workds, ridge regression shrinks the coefficients towards zero, but it will not set any of them exactly to zero. The lasso regression is an alternative that overcomes this drawback.
+
+## Lasso
+
+Lasso stands for Least Absolute Shrinkage and Selection Operator. It shrinks the regression coefficients toward zero by penalizing the regression model with a penalty term called L1-norm, which is the sum of the absolute coefficients.
+
+In the case of lasso regression, the penalty has the effect of forcing some of the coefficient estimates, with a minor contribution to the model, to be exactly equal to zero. This means that, lasso can be also seen as an alternative to the subset selection methods for performing variable selection in order to reduce the complexity of the model. As in ridge regression, selecting a good value of $\lambda$ is critical.
+
+One obvious advantage of lasso regression over ridge regression, is that it produces simpler and more interpretable models that incorporate only a reduced set of the predictors. However, neither ridge regression nor the lasso will universally dominate the other. Generally, lasso might perform better in a situation where some of the predictors have large coefficients, and the remaining predictors have very small coefficients.
+
+Ridge regression will perform better when the outcome is a function of many predictors, all with coefficients of roughly equal size that is also a reasonable assumption in omic problems.
+
+## Elastic Net
+
+Elastic Net produces a regression model that is penalized with both the L1-norm and L2-norm. The consequence of this is to effectively shrink coefficients (like in ridge regression) and to set some coefficients to zero (as in LASSO). 
+
+this methodology was developed since the use of the LASSO penalty function has several limitations.For example, in the "large p, small n" case (high-dimensional data with few examples), the LASSO selects at most n variables before it saturates. Also if there is a group of highly correlated variables, then the LASSO tends to select one variable from a group and ignore the others. To overcome these limitations, the elastic net adds a quaquadratic part to the penalty (L2-norm), which when used alone is ridge regression. 
+
+This figure provides a visual idea of each type of penalization procedure in the naive example of having two variables
+
+![]("figures/lasso_ridge.png")
+
+
+# Analysis with R
+
+http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/153-penalized-regression-essentials-ridge-lasso-elastic-net/
+
+```{r load_libraries}
+library(tidyverse)
+library(caret)
+library(glmnet)
+```
+
+Train data
+
+```{r load_data}
+load("data/GSE41037.Rdata")
+```
+
+Test data
+
+```{r load_data}
+load("data/GSE58045.Rdata")
+```
+
+
+You need to create two objects:
+
+- `y` for storing the outcome variable
+- `x` for holding the predictor variables. 
+
+```{r get}
+x <- t(exprs(gse41037))
+y <- gse41037$`age:ch1`
+```
+

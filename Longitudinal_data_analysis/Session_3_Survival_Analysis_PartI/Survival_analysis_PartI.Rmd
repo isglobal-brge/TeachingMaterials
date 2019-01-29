@@ -1,0 +1,215 @@
+---
+title: "Survival analysis with `R` (Part I)"
+author: "Juan R Gonzalez"
+output:
+  BiocStyle::html_document:
+    toc_depth: 2
+  BiocStyle::pdf_document:
+    toc_depth: 2
+---
+
+<!-- to compile this:
+library("rmarkdown");
+render("rr-auhtoring.Rmd", output_format="all")
+or just call make
+-->
+
+```{r style, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
+library("knitr")
+#options(width=100)
+opts_chunk$set(message = FALSE, error = TRUE, warning = TRUE)
+```
+
+
+# Introduction
+
+> **Objectives**
+>
+> * Understand the concept of survival analysis
+> * Learn how to perform survival analysis (Kaplan-Meier estiamtor and log-rank test) with `R`
+> * Peform data analyses where the scientific question is to determine factor associated with time until event
+
+
+# Survival analysis
+
+To illustrate how to carry out different survival data analyses a real dataset is going to be used. The database belongs to the data presented in a paper that analysed 686 women enrolled in a clinical trial on breast cancer. The reference is _W. Sauerbrei and P. Royston. Building multivariable prognostic and diagnostic models: 
+transformation of the predictors by using fractional polynomials. 
+Journal of the Royal Statistics Society, Series A, 1999;162:71-94._ The information available is:
+
+> * Running-ID 
+> * Hormonal Therapy (0- no treatment, 1-treatment) 
+> * age (X1; in years) 
+> * menopausal status (X2; 1- premenopausal,2- postmenopausal) 
+> * Tumour size (X3; in mm) 
+> * Tumour grade (X4; 1,2,3) 
+> * Number of positive nodes (X5) 
+> * Progesterone receptor (X6; in fmol) 
+> * Estrogen receptor (X7; in fmol) 
+> * Survival time (in days) 
+> * Censoring Indicator (0- censored, 1- event ).
+
+Data can be loaded by executing:
+
+```{r, get_data}
+library(survival)
+datos <- read.table("../data/sauerbre.txt", header=TRUE)
+head(datos)
+```
+
+Survival analysis requires an object of class `Surv` where "+" denotes the individual is right-censored. 
+
+```{r, surv, eval=FALSE}
+Surv(datos$time, datos$event)
+```
+
+```{r, surv2, echo=FALSE}
+Surv(datos$time, datos$event)[1:40]
+```
+
+
+# Survival time estimates using Kaplan-Meier estimator
+
+The survival function can be estimated by using `survfit` function
+
+```{r, km}
+ans <- survfit(Surv(time, event)~1, datos)
+ans
+```
+
+The Kaplan-Meier table can be obtained by:
+
+```{r, table_km}
+summary(ans)
+```
+
+The survival curve can be visualized by
+
+```{r, plotkm}
+plot(ans, xlab="Time", ylab="Survival probability")
+```
+
+# Comparing survival curves
+
+Let us illustrate how to compare survival curves for two groups. Researchers are interested in comparing the survival between patients who received or not a new thepary. The `R` code is:
+
+```{r, km_twogroups}
+ans.ther <- survfit(Surv(time, event)~as.factor(therapy), datos)
+ans.ther
+```
+
+In this case we observe that there are statistically significant differences between the median survival of the two groups since their confidence intervals do not overlap. However we are normally interested in determining differences at any time. This can be visualized by comparing survival curves between groups
+
+```{r, logrankplot}
+plot(ans.ther)
+```
+
+The plot can be improved by
+
+```{r, logrankplot2}
+plot(ans.ther, xlab="Time", ylab="Survival probability", 
+               col=c("red", "blue"))
+legend("bottomleft", c("No treatment", "Treatment"),
+               col=c("red", "blue"), lty=c(1,1))
+```
+
+The comparison across time is computed by using log-rank test
+
+```{r, logrank}
+ans.logrank<-survdiff(Surv(time, event)~as.factor(therapy), datos,
+                              rho=0) 
+ans.logrank
+````
+
+We observe that the differences we observe in the curves, are statistically significant at 5% level. Notice that the argument `rho` is not necessary since it is the default value. It corresponds to the log-rank test. Wilcoxon test is computed by setting `rho=1`
+
+```{r, wilcox}
+ans.wilcox<-survdiff(Surv(time, event)~as.factor(therapy), datos,
+                              rho=1) 
+ans.wilcox
+```
+
+We observe that both tests are providing the same conclusion. 
+
+# Adjusting for other covariates: stratified analysis
+
+In some occassions researchers are interested in comparing survival curves between two groups of patients but they know that there are differences in the survival due to a third variable. For instance, in this data, menopausal status influence survival. Therefore, observed differences between women receiven therapy or not must be adjusted for this third variable. This can be performed by using an stratified test
+
+```{r, stratified}
+ans.strat<-survdiff(Surv(time, event)~as.factor(therapy)
+                      +strata(meno.status), datos)
+ans.strat
+
+ans.logrank
+```
+
+We can observe as both tests are providing similar answer. In both cases the differences in survival times after receiving or not the therapy are statistically significant. This implies that the menopausal status is not confounding the results.
+
+# Trend test
+
+In other occassions researchers are interested in addressing the next scientific question: Is there any linear relationship between the survival and the tumor grade? In other words, the worse tumor grade implies worse survival? This question makes sense in the situations where the independent variable has any order. In this figure we also check whether this question is well addressed. 
+
+```{r, trend}
+ans.grade<-survfit(Surv(time, event)~as.factor(tumor.grade), datos)
+plot(ans.grade, xlab="Time", ylab="Survival probability", col=1:3)
+legend("bottomleft", c("grado 1", "grado 2", "grado 3"), 
+                     col=1:3, lty=1)
+```
+
+The statistical test is performed by considering `tumor.grade` variable as numeric. This cannot be performed by using `survfit` function since it assumes that the covariates are categorical. These type of question can be answered by fitting Cox proportional hazards models (this will be seen in Part II). Here can also addressed he question: Are there statistical differences between tumoral grades?
+
+```{r, trend2}
+survdiff(Surv(time, event)~as.factor(tumor.grade), datos)
+```
+
+Further information about survival data analysis with `R` can be found in this tutorial [Tutorial Survival Analysis](https://folk.ntnu.no/bo/TMA4275/Download/R.tutorialDiez.pdf). 
+
+# Exercise (to deliver)
+
+---------------------
+
+Data for exercises are in the repository https://github.com/isglobal-brge/TeachingMaterials/tree/master/Longitudinal_data_analysis/data
+
+File *pulmon.sav* contains data about a survival study about lung cancer (NOTE: data can be loaded into `R`by using `read.spss` function available at `foreign` library - use argument _to.data.frame=TRUE_ ). Colums contain this information:
+
+> * TIEMPO Supervivencia (meses)
+> * ESTADO: 0 VIVO, 1 MORT
+> * EDAD4 Age at diagnosis in years (quartiles)
+> * SEXO: HOMBRES, MUJERES
+> * ESTCLIN Estadio clinico:  EST 0/I,  EST II,  EST IIIA, EST IIIB, EST IV
+> * IK Indice de estado general (100 estado perfecto, 0 muerte)
+> * CIRUGIA: 1 No operado, 2 Cirugia no radical, 3 Cirugia Radical
+> * QUIMIO: 1 No Quimio, 2 Platino
+> * RADIOTER: 1 No RT, 2 <60 Gy, 3 >60 Gy
+
+**Exercise 1:** Survival function estimation
+
+- Estimate global survival time
+- Draw survival curve
+- Estimate median survival time and its confidence interval
+- Which is the time where 75% of people have died?
+- Estimate survival curve for the covariates sex, surgery, chemotherapy and radiotherapy
+
+**Exercise 2:** Comparing survival curves
+
+- Draw survival curves of patients receiveing chemotherapy and not
+- Compare survival curves of patients receiving chemotherapy, radiotherapy, surgery and clinical stage by using log-rank test. Identify those variables significantly assoicuated with survival
+- Are there statistical differences depending on chemotherapy after adjusting by clinical stage?
+- Is there any trend in the survival with regard to the Karnofski index. Answer this question by visualy inspecting the required plot
+\end{enumerate}
+
+
+---------------------
+ 
+
+
+# References
+
+- The [`survival`] package (https://cran.r-project.org/web/packages/survival/)
+
+
+# Session information
+
+```{r, echo=FALSE}
+sessionInfo()
+```
+

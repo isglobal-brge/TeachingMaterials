@@ -1,0 +1,62 @@
+\usepackage[noae]{Sweave}
+\usepackage{color, graphics}
+\usepackage{latexsym, amsmath, amssymb}
+
+
+%% CREAL's style
+%\usepackage{beamerthemeshadow}
+\usetheme{Warsaw}
+\usecolortheme[named=OliveGreen]{structure}
+\usebackgroundtemplate{\centering \includegraphics[width=\paperwidth]{simbolCREALclar2.jpg}}
+\setbeamercovered{transparent}
+\usepackage[latin1]{inputenc}
+\usepackage{amssymb}
+%\usepackage{epsfig}
+\usepackage{amsfonts}
+%\usepackage{amsthm}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+\usepackage{wasysym}
+%\usepackage{slashbox}
+\usepackage{pifont}
+%\usepackage[hang,footnotesize,bf]{caption}
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{,}{num.1}}
+\usepackage{booktabs}
+\usepackage{multicol}
+\usepackage{epstopdf}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+
+%% simple macros from Bioconductor
+\newcommand{\software}[1]{\textsl{#1}}
+\newcommand\R{\textsl{R}}
+\newcommand\Bioconductor{\textsl{Bioconductor}}
+\newcommand\Rpackage[1]{{\textsl{#1}\index{#1 (package)}}}
+\newcommand\Biocpkg[1]{%
+  {\href{http://bioconductor.org/packages/release/bioc/html/#1.html}%
+    {\textsl{#1}}}%
+  \index{#1 (package)}}
+\newcommand\Rpkg[1]{%
+  {\href{http://cran.fhcrc.org/web/packages/#1/index.html}%
+    {\textsl{#1}}}%
+  \index{#1 (package)}}
+\newcommand\Biocdatapkg[1]{%
+  {\href{http://bioconductor.org/packages/release/data/experiment/html/#1.html}%
+    {\textsl{#1}}}%
+  \index{#1 (package)}}
+\newcommand\Robject[1]{{\small\texttt{#1}}}
+\newcommand\Rclass[1]{{\textit{#1}\index{#1 (class)}}}
+\newcommand\Rfunction[1]{{{\small\texttt{#1}}\index{#1 (function)}}}
+\newcommand\Rmethod[1]{{\texttt{#1}}}
+\newcommand\Rfunarg[1]{{\small\texttt{#1}}}
+\newcommand\Rcode[1]{{\small\texttt{#1}}}
+
+\AtBeginSection[]
+{
+  \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
