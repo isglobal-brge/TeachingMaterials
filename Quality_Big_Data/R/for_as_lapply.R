@@ -1,4 +1,4 @@
-x <- matrix(rnorm(100000000), nrow=100)
+x <- matrix(rnorm(10000), nrow=100)
 dim(x)
 
 
