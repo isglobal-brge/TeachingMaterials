@@ -17,7 +17,7 @@ opts_chunk$set(message = FALSE, error = TRUE,
 
 # Introducción
 
-Los algorithmos de machine learning permiten crear un modelo capaz de representar los patrones presentes en los datos de entrenamiento y generalizarlos a nuevas observaciones (predicción). Encontrar el mejor modelo no es fácil, existen multitud de algoritmos, cada uno con unas características propias y con distintos parámetros que deben ser ajustados. Por lo general, las etapas seguidas para obtener un buen modelo son:
+Los algoritmos de machine learning permiten crear un modelo capaz de representar los patrones presentes en los datos de entrenamiento y generalizarlos a nuevas observaciones (predicción). Encontrar el mejor modelo no es fácil, existen multitud de algoritmos, cada uno con unas características propias y con distintos parámetros que deben ser ajustados. Por lo general, las etapas seguidas para obtener un buen modelo son:
 
 - **Ajuste/entrenamiento**: consiste en aplicar un algoritmo de machine learning a los datos de entrenamiento para que el modelo aprenda.
 
