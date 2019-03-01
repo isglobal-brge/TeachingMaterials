@@ -369,21 +369,44 @@ Mode sav (2,4] </code></pre>
 <pre class="r"><code># Partimos los datos: 80% training, 20% test
 set.seed(123)
 training.samples &lt;- credit$Status %&gt;%
-  createDataPartition(p = 0.8, list = FALSE)</code></pre>
-<pre><code>Error in createDataPartition(., p = 0.8, list = FALSE): no se pudo encontrar la función &quot;createDataPartition&quot;</code></pre>
-<pre class="r"><code>train.data  &lt;- credit[training.samples, ]</code></pre>
-<pre><code>Error in `[.tbl_df`(credit, training.samples, ): objeto 'training.samples' no encontrado</code></pre>
-<pre class="r"><code>test.data &lt;- credit[-training.samples, ]</code></pre>
-<pre><code>Error in `[.tbl_df`(credit, -training.samples, ): objeto 'training.samples' no encontrado</code></pre>
-<pre class="r"><code># Creamos el modelo (linear discriminat analysis - LDA)
-model &lt;- lda(Status ~., data = train.data)</code></pre>
-<pre><code>Error in lda(Status ~ ., data = train.data): no se pudo encontrar la función &quot;lda&quot;</code></pre>
-<pre class="r"><code># Calulamos predicciones y las medidas de 
-predictions &lt;- model %&gt;% predict(test.data) </code></pre>
-<pre><code>Error in eval(lhs, parent, parent): objeto 'model' no encontrado</code></pre>
-<pre class="r"><code>confusionMatrix(data = as.factor(predictions$class), 
+  createDataPartition(p = 0.8, list = FALSE)
+train.data  &lt;- credit[training.samples, ]
+test.data &lt;- credit[-training.samples, ]
+
+# Creamos el modelo (linear discriminat analysis - LDA)
+library(MASS)
+model &lt;- lda(Status ~., data = train.data)
+
+# Calulamos predicciones y las medidas de 
+predictions &lt;- model %&gt;% predict(test.data) 
+confusionMatrix(data = as.factor(predictions$class), 
                 reference = as.factor(test.data$Status))</code></pre>
-<pre><code>Error in confusionMatrix(data = as.factor(predictions$class), reference = as.factor(test.data$Status)): no se pudo encontrar la función &quot;confusionMatrix&quot;</code></pre>
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction bad good
+      bad  141   58
+      good 108  581
+                                          
+               Accuracy : 0.8131          
+                 95% CI : (0.7858, 0.8382)
+    No Information Rate : 0.7196          
+    P-Value [Acc &gt; NIR] : 7.155e-11       
+                                          
+                  Kappa : 0.5065          
+ Mcnemar's Test P-Value : 0.0001429       
+                                          
+            Sensitivity : 0.5663          
+            Specificity : 0.9092          
+         Pos Pred Value : 0.7085          
+         Neg Pred Value : 0.8433          
+             Prevalence : 0.2804          
+         Detection Rate : 0.1588          
+   Detection Prevalence : 0.2241          
+      Balanced Accuracy : 0.7377          
+                                          
+       'Positive' Class : bad             
+                                          </code></pre>
 </div>
 <div id="leave-one-out-cross-validation---loocv" class="section level2">
 <h2><span class="header-section-number">2.2</span> Leave one out cross validation - LOOCV</h2>

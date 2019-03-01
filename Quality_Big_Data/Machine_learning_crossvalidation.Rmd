@@ -76,6 +76,7 @@ train.data  <- credit[training.samples, ]
 test.data <- credit[-training.samples, ]
 
 # Creamos el modelo (linear discriminat analysis - LDA)
+library(MASS)
 model <- lda(Status ~., data = train.data)
 
 # Calulamos predicciones y las medidas de 
