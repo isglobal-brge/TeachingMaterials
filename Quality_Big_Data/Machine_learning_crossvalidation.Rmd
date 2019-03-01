@@ -246,7 +246,7 @@ control_train <- trainControl(method = "repeatedcv",
 # =============================================================
 set.seed(12345)
 mod.C50Tree <- train(diagnosis ~ ., 
-                        data = datos_test,
+                        data = datos_train,
                         method = "C5.0Tree",
                         tuneGrid = hiperparametros,
                         metric = "Accuracy",

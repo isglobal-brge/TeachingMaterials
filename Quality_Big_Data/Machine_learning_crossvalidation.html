@@ -586,7 +586,7 @@ control_train &lt;- trainControl(method = &quot;repeatedcv&quot;,
 # =============================================================
 set.seed(12345)
 mod.C50Tree &lt;- train(diagnosis ~ ., 
-                        data = datos_test,
+                        data = datos_train,
                         method = &quot;C5.0Tree&quot;,
                         tuneGrid = hiperparametros,
                         metric = &quot;Accuracy&quot;,
@@ -594,17 +594,17 @@ mod.C50Tree &lt;- train(diagnosis ~ .,
 mod.C50Tree</code></pre>
 <pre><code>Single C5.0 Tree 
 
-113 samples
+456 samples
  29 predictor
   2 classes: 'B', 'M' 
 
 No pre-processing
 Resampling: Cross-Validated (10 fold, repeated 5 times) 
-Summary of sample sizes: 102, 102, 101, 102, 102, 101, ... 
+Summary of sample sizes: 410, 411, 410, 411, 410, 411, ... 
 Resampling results:
 
-  Accuracy   Kappa   
-  0.9063403  0.801407</code></pre>
+  Accuracy   Kappa    
+  0.9385604  0.8676955</code></pre>
 <p>También podemos evaluar el comportamiento en un test set</p>
 <pre class="r"><code>pred.c50Tree &lt;- mod.C50Tree %&gt;% 
                    predict(datos_test) %&gt;% as.vector()
