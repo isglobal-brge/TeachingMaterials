@@ -1,0 +1,172 @@
+---
+title: "Tidyverse and Data Visualization Exercises"
+author: "Juan R Gonzalez"
+date: "1 March 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment="",
+                      message = FALSE, warning = FALSE)
+```
+```{r loadLibraries, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(nycflights13)
+library(readr)
+library(scales)
+library(corrplot)
+```
+##Exercises (tibbles)
+
+1. You can tell whether an obect is a tibble simply by printing it. When printing regular data frames the full content of the data frame is printed to screen and the data types of columns are not shown. In contrast printing a tibble only prints the first 10 rows and also shows the data type of each column.
+
+2. You can extract the reference variable either by object$var or object[["var"]]
+
+3. The "n_extra" option in the print function controls how many additional columns are printed at the footer of a tibble.
+
+4. 
+
+
+```{r tibbles4, fig.dim=c(3,3)}
+tbl <- tibble(
+  age = c(14, 18, 22, 12, 16, 19, 21, 24),
+  chol = c(172, 180, 185, 170, 175, 188, 190, 192),
+  sex = c("male", "male", "female", "female", "female", "male", "male", "male")
+)
+
+tbl[["sex"]]
+
+ggplot(data = tbl, mapping = aes(x = age, y = chol)) + geom_point() + 
+  labs(title = "Age vs Chol") + theme(plot.title = element_text(hjust=0.5))
+
+mutate(tbl, chol2 = chol^2)
+rename(tbl,  one = age,  two = chol, three = sex)
+```
+
+##Exercises (data transform)
+
+1. 
+```{r dataTransform1}
+
+filter(flights, arr_delay >= 120)
+
+filter(flights, (dest == "IAH" |  dest == "HOU") & arr_delay > 120 & dep_delay <= 0)
+
+filter(flights, dep_delay >= 60 & arr_delay < 30)
+
+```
+
+2. The dplyr "between" function determines if a numeric vector falls within a specified range. It would not help in simplifying the code in the previous exercises due to the fact that we are never checking if a variable falls between two values. Rather, for all the exercises we check if a variable is greater/less than or equal to just one value.
+
+3. 
+
+```{r dataTransform3}
+arrange(flights, air_time)
+```
+
+4. 
+
+```{r dataTransform4}
+(dep_info <- select(flights, contains("dep")))
+```
+
+5. 
+
+```{r dataTransform5}
+(dep_hr_min <- transmute(flights, dep_hour = dep_time%/%100, dep_min = dep_time%%100))
+```
+
+6. 
+
+```{r dataTransform6}
+delay_data <- flights %>% 
+  group_by(carrier) %>%
+  summarise(
+    no_of_flights = n(),
+    average_delay = mean(dep_delay + arr_delay, na.rm = TRUE),
+    median_delay = median(dep_delay + arr_delay, na.rm = TRUE),
+    delay_IQR = IQR(dep_delay + arr_delay, na.rm = TRUE),
+    delay_variance = sd(dep_delay + arr_delay, na.rm = TRUE)
+) 
+
+arrange(delay_data, average_delay, median_delay, delay_variance)
+```
+
+Based on the summary statistics generated, the AS carrier is the best airline. 
+
+##Exercises (data visualization)
+
+1. 
+```{r dataVis1}
+ggplot(flights, aes(sched_dep_time, colour = is.na(dep_time))) + geom_density() + 
+  labs(title = "Scheduled Departure Times for Cancelled vs Non-Cancelled Flights", 
+       colour = "Flight Status") + scale_colour_manual(labels = c("Not Cancelled", "Cancelled"), 
+       values = c("blue", "red")) + scale_x_continuous("Time (HHMM)", c(0, 500, 1000, 1500, 2000, 2400), 
+       labels = c("00:00", "05:00", "10:00", "15:00", "20:00", "24:00"), limits = c(0, 2500))
+```
+
+2.
+```{r dataVis2}
+cor_mat <- round(cor(mutate(diamonds, cut = as.numeric(cut), color = as.numeric(color),  
+          clarity = as.numeric(clarity))), 4)
+cor_mat
+corrplot(cor_mat, type = "upper")
+
+```
+The carat of a diamond is the most important variable for predicting its price. Carat has a weak negative correlation with the cut of a diamond. As a result some diamonds which have a higher carat value (weigh more) but have a less valuable cut (lower quality) may be more expensive than lower carat diamonds with a significantly better cut. 
+
+
+3. 
+
+```{r dataVis3}
+flights_by_month <- flights%>%
+  group_by(month, carrier) %>%
+  summarise(
+    no_of_flights = n()
+    
+  )
+
+ggplot(data = flights_by_month, mapping = aes(x = month.abb[month] , y = no_of_flights, 
+      group = carrier)) + geom_line(aes(colour = carrier)) + geom_point(aes(colour = carrier)) + 
+      labs(title = "Flight Volumes by Airline Over 12 Months", y = "Number of Flights", x = "Month") +    
+      scale_x_discrete(limits = month.abb) + theme(plot.title = element_text(hjust=0.5))
+```
+
+4. 
+
+When using cut_width() vs cut_number() you need to consider the density distribution of the data. This impacts the 2D visualization of data as areas of varying data density on the graph will be more or less prominent depending on whether cut_width() or cut_data() is used. 
+
+For example if there are outlying clusters of more sparse data these will be displayed disproportionately large on the graph when using cut_number() as it forms the specified number of groups with an approximately equal number of data points. In contrast when using cut_width() these areas will be less prominent on the graph than the densely populated areas.  
+
+5. 
+
+```{r dataVis5}
+ggplot(data = diamonds,  mapping = aes(x = carat)) + 
+  geom_freqpoly(mapping = aes(colour = cut_number(price, 8))) +
+  labs(title = "Distribution of Diamond Carats by Price", colour = "Price Range ($USD)") + 
+  theme(plot.title = element_text(hjust=0.5))
+```
+
+6.
+
+```{r dataVis6}
+gd <- read_delim("../../Master_Modelling/data/genome.txt", delim = "\t")
+
+#Log.R.Ratio and B.Allele.Freq expected values by chromosome
+gd %>% 
+  group_by(Chr) %>% 
+  summarise(
+    ex.log.ratio <- mean(Log.R.Ratio, na.rm = TRUE),
+    ex.allele.frew <- mean(B.Allele.Freq, na.rm = TRUE)
+    )
+
+#Facet plot of Log.R.Ratio for each chromosome
+ggplot(gd, aes(x = Log.R.Ratio)) + geom_histogram(bins = 30) + 
+  facet_wrap(. ~ Chr, ncol = 5, scales = "free_y")
+
+#Facet plot of B.Allele.Freq for chromosomes 1-6
+ggplot(filter(gd, Chr %in% c(as.character(1:6))), aes(x = B.Allele.Freq)) + 
+  geom_histogram(colour = "black", fill = "red", bins =15) + facet_wrap(. ~ Chr, ncol = 3) 
+```
+

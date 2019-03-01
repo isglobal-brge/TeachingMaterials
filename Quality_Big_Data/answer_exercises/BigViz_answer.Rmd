@@ -1,0 +1,45 @@
+---
+title: "Tidyverse and Data Visualization Exercises"
+author: "Juan R Gonzalez"
+date: "1 March 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment="",
+                      message = FALSE, warning = FALSE)
+```
+
+```{r load_libraries}
+library(bigvis)
+library(tidyverse)
+```
+
+
+## 2014 UBER Trips
+
+```{r uberTrips}
+ff <- "https://raw.githubusercontent.com/fivethirtyeight/uber-tlc-foil-response/master"
+trip.data <- read_csv(file.path(ff, "uber-trip-data/uber-raw-data-sep14.csv"))
+  
+NBin <- 300
+con.trip.data <- with(trip.data, condense(bin(Lat, find_width(Lat, NBin)), 
+                                          bin(Lon, find_width(Lon, NBin))))
+ggplot(con.trip.data, aes(Lat, Lon, fill = .count)) + geom_tile() 
+
+```
+
+Applying the **peel** function to the data we can see that it strips away outliers making the higher density regions which we are interested in for this problem, more prominent. 
+
+```{r peel}
+last_plot() %+% peel(con.trip.data)
+```
+
+
+
+
+```{r smoothed_data}
+smoothed_data <- smooth(con.trip.data, h=c(0.115, 0.15))
+autoplot(smoothed_data) + theme_dark()
+```
+
