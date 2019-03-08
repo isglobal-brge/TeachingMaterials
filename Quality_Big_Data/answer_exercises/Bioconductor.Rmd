@@ -1,0 +1,56 @@
+---
+title: "Respuestas ejercicio Bioconductor"
+author: "Juan R Gonzalez"
+date: "8 de marzo de 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache=TRUE, 
+                      comment= "")
+```
+
+# Instalación de la librería
+
+Instala la librería en R mediante:
+
+```
+install.packages("BiocManager") # si no está instalada
+BiocManager::install("GEOquery")
+```
+
+# Obtención de datos
+
+Baja los datos de GEO correspondientes al estudio GSE85426 mediante
+
+```{r get_data}
+library(GEOquery)
+gds <- getGEO("GSE40732")[[1]]
+gds
+```
+
+# Preguntas
+
+    
+## ¿Cuántas muestras han sido analizadas?
+    
+## Muestra los nombres de las variables fenotípicas (metadatos) accesibles en el estudio
+
+## ¿Cuántos asmáticos hay en la base de datos? (variable characteristics ch1)
+
+## ¿Cuántos genes han sido analizados?
+
+## ¿Cuál es la anotación de estos genes? (nombre de la base de datos)
+
+## Crea un boxplot mostrando la expresión del gen `AB002294`
+
+## Repite el gráfico anterior para asmáticos y no asmáticos
+
+
+
+
+# Información de la sesión
+
+```{r sesion_info}
+sessionInfo()
+```
