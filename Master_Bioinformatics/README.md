@@ -19,7 +19,6 @@ This material can be reproduced with some required packages that can be intalled
                            "snpStats", "GenomicRanges", "annotate",
                            "GO.db", "biomaRt", "Homo.sapiens","hgu95av2.db",
                            "SummarizedExperiment", "airway", "ALL",
-                           "EnrichmentBrowser", "regionR",
                            "TxDb.Hsapiens.UCSC.hg19.knownGene"))
     ```
 
@@ -27,7 +26,8 @@ This material can be reproduced with some required packages that can be intalled
 
     ``` 
     BiocManager::install(c("snpStats", "tweeDEseq", "tweeDEseqCountData",
-                           "limma", "DESeq", "DESeq2", "edgeR"))
+                           "limma", "DESeq", "DESeq2", "edgeR", 
+                           "GOstats", "EnrichmentBrowser", "regionR"))
     
     install.packages("devtools")                       
     devtools::install_github("isglobal-brge/SNPassoc")
