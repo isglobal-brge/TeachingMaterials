@@ -3,7 +3,7 @@
 Repository with the material corresponding to the course __Creating Shiny Apps for biostatisticians and bioinformaticians__ given at 
 [ISGlobal](http://www.isglobal.org) (former CREAL). Each folder contains slides, R code, data and exercises of each topic.
 
-The course will be given in Spanish. In this [link]() you can also find the course's description including how to be registered in Spanish. 
+The course will be given in Spanish. In this [link](https://github.com/isglobal-brge/TeachingMaterials/blob/master/Shiny/Sniny_segunda_edicion.pdf) you can also find the course's description including how to be registered in Spanish. 
 
 ## License
  
