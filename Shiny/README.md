@@ -3,6 +3,7 @@
 Repository with the material corresponding to the course __Creating Shiny Apps for biostatisticians and bioinformaticians__ given at 
 [ISGlobal](http://www.isglobal.org) (former CREAL). Each folder contains slides, R code, data and exercises of each topic.
 
+The course will be given in Spanish. In this [link]() you can also find the course's description including how to be registered in Spanish. 
 
 ## License
  
@@ -12,50 +13,56 @@ This means you are free to copy, distribute and transmit the work,
 adapt it to your needs as long as you cite its origin and, if you do
 redistribute it, do so under the same license.
 
-# Introducción y Objetivos
-[Shiny](http://shiny.rstudio.com) es un paquete del programa [R](http://www.r-project.org/) desarrollado por [RStudio](http://www.rstudio.com/) que permite crear páginas webs dinámicas sin que sea necesario ningún conocimiento de HTML ni de Javascript o PHP, y se basa únicamente en código R.
+# Introduction and objectives
 
-Gracias a Shiny se pueden construir y personalizar de manera rápida y sencilla interfaces gráficas sobre páginas web con pocas líneas de código. De esta manera, es fácil compartir funciones escritas en R con otros usuarios no familiarizados con él y que quieran usarlas de manera interactiva, o sea, "cliqueando" en lugar de tener que escribir los comandos. Por ejemplo, grupos que no disponen de programadores, bioinformáticos y/o bioestadísticos.
-
-# Dirigido a
-Estudiantes, profesores e investigadores que utilizan R en su trabajo diario, con escaso o nulo conocimiento de HTML, PHP o Javascript y quieran aprender a crear interfaces gráficas dinámicas sobe páginas web. 
-
-# Metodología del curso
-El curso será eminentemente práctico. La temática se irá introduciendo mediante ejemplos. Al final de cada bloque (cada 2 o 3 horas) se propondrá un ejercicio que los alumnos deberán resolver en clase. A lo largo del curso, se irán discutiendo los ejemplos modificando alguno de ellos y dando posibles alternativas para que se asimilen mejor los conceptos. Los alumnos dispondrán de las diapositivas del curso así como el código utilizado tanto en la presentación como para resolver los ejercicios. 
-
-# Fechas y horario
-Las fechas del curso son el 13 y 14 de febrero y se realizará en el Instituto de Salud Global Barcelona-Campus Mar (ISGlobal) (www.isglobal.org) [antiguo CREAL] situado en el Parque de Investigación Biomédica de Barcelona (www.prbb.org ). El número de plazas para el curso está limitado a 20 y las plazas se adjudicarán ESTRICTAMENTE por orden de llegada de pre-inscripción, rellenando el [formulario de pre-inscripción](https://docs.google.com/forms/d/e/1FAIpQLSfP7UdNb9dlz7DKbTnIbLS56fuai0U1HuNJaNenUeslFV1O3w/viewform?c=0&w=1) 
-
-El horario del curso es el siguiente:
-Mañanas: de 9:00 a 13:30h / Tardes: de 15:00 a 18:00h
-
-# Temario
+[Shiny](http://shiny.rstudio.com) is an [R](http://www.r-project.org/) package developed by [RStudio](http://www.rstudio.com/) which allows to create dynamic web-based applications without HTML, Javascript, PHP or other web specific languages. Thanks to Shiny, it is possible to rapidly and easily build and customize graphical interfaces with few lines of R code uniquely. In this way, it is feasible to share functions written in R with other users not familiar with it and who want to use them interactively, that is, by _clicking_ instead of having to write the
+commands. It is really useful, for instance, to groups that do not have programmers, bioinformatics and/or biostatistics.
 
 
-**Día 1:**
-- Parte I (1 hora) -  Introducción de Shiny y primeros ejemplos.
-- Parte II (2 horas) - Disposición de los elementos del formulario: paneles, botones, desplegables, etc.
-- Parte III (2 horas) - Funcionamiento de Shiny.
-- Ejercicios (1'5 horas)
+# Addressed to 
+Graduate or PhD students, professors or investigators who use R in their daily work, with low or null knowledge of web specific languages such as HTML, PHP or Javascript, and who want learn how to create web-based graphical interfaces.
 
-**Día 2:**
-- Parte IV (2'5 horas) - Técnicas para mejorar el aspecto y la funcionalidad de la aplicación.
-- Parte V (2 horas) - Aspectos avanzados.
-- Práctica (2 horas) - Creación de una aplicación.
+# Methodology
+The course will be eminently practical. Its contents will be introduced by examples. At the end of each block (every 1 or 2 hours) an exercise that the students must solve in class will be proposed. Throughout the course, the examples will be discussed modifying some of them and
+giving possible alternatives so that the concepts are better assimilated. Students will have the slides of the course as well as the code used both in the presentation and to solve the exercises. 
 
-Los ejemplos que se presentarán durante el curso incluirán, entre otros tópicos:
+# Schedule
+The course will take place in the Campus Mar del Instituto de Salud Global de Barcelona, [ISGlobal](www.isglobal.org) locateed at the Biomedical Research Park of Barcelona (PRBB) on May 21 st
+and 22nd (Room: Ramon y Cajal, ground floor). 
 
-> *	Creación de tablas y gráficos dinámicos.
-> *	Parrillas donde introducir datos de forma interactiva.
-> *	Confección de cuestionarios para alimentar bases de datos.
-> *	Selección de variables de ficheros subidos por el usuario.
-> *	Aplicaciones sólo visibles después de introducir un password.
+The number of places for the course is limited to 20 and the places will be awarded STRICTLY in order of arrival of pre-registration, sending an email to gemma.punyet@isglobal.org specifying your name and institution.
 
-# Material y Requisitos
-Las clases se realizarán en un aula del ISGlobal en el que los alumnos deberán traer sus propios portátiles. Dicha aula tendrá acceso WiFi a Internet y los alumnos dispondrán de acceso previo a todo el material del curso que incluye las librerías, el código R y los datos necesarios para seguir las clases y realizar los ejercicios. 
+The schedule of the course is the following:
 
-Se recomienda tener el paquete shiny instalado antes de empezar el curso. Para comprobar el correcto funcionamiento, al ejecutar el siguiente código debería lanzarse la aplicación mostrada en la figura de más abajo.
+- 21st: from 10h to 18 h.
+- 22nd: from 9h to 18 h.
 
+# Outline
+
+**Day 1:**
+
+- Part I (1h) â€“ Introduction to Shiny and first examples (+ exercises).
+- Part II (2h and 30min.) â€“ Layout of the form elements: panels, buttons, dropdown lists, â€¦ (+ exercises)
+- Part III (3h) â€“ How Shiny works (+ exercises).
+
+**Day 2:**
+
+- Part IV (2h and 30min) â€“ How to improve the appearance and functionality of the application.
+- Part V (2h) â€“ Advances issues.
+- Exercise (2h) â€“ Creating a real application.
+
+The examples introduced throughout the course will include among other topics:
+
+> *	Creating dynamic tables and plots.
+> *	Analyzing selected variables from a dataset uploaded by the user.
+> *	Building forms to add new registers in a query data base.
+> *	Making apps only visible after entering a password.
+
+
+# Material and requirements
+Students must bring their own laptops. The classroom will have WiFi access to the Internet and students will have access to all course material including the packages, the R code and the necessary data to follow the classes and perform the exercises.
+
+It is recommended to have the shiny package (available on CRAN) installed before starting the course. To check the correct functioning, when executing the following code, the application shown in the figure below should be launched.
 ```
 library(shiny)
 runExample("01_hello")
@@ -63,32 +70,42 @@ runExample("01_hello")
 
 ![](figures/shiny.png)
 
-
-El curso utilizará como herramienta principal Rstudio. Todos los alumnos deberán tener instalado una semana antes del curso la última version de [R](https://cloud.r-project.org/) y de [Rstudio](https://www.rstudio.com/products/rstudio/download/). Durante esa semana anterior al curso, se enviará unas instrucciones para que todos los alumnos tengan una misma configuración y puedan seguir las clases de forma eficiente.
-
-# Organización del curso
-El curso está organizado por el Grupo de Bioinformática en Epidemiología Genética [BRGE](http://brge.isglobal.org) del ISGlobal liderado por Juan R González que ha organizado varias ediciones de cursos similares al que aquí se presenta entre los que destacan la realización de 14 ediciones del curso sobre análisis de datos en estudios de asociación genética o 4 ediciones de cómo crear librerías en R entre otros.
-
-# Profesorado
-
-Isaac Subirana es licenciado en "Ciencias y Técnicas Estadísticas" por la Universitat Politècnica de Catalunya (UPC) y Doctorado en "Estadística" por la Universitat de Barcelona (UB). Desde el 2007, trabaja como profesor asociado en el Departamento de Estadística de la Facultad de Biología de la UB. Además, es Técnico Investigador en el campo de la Epidemiología Cardiovascular en el grupo REGICOR del "Parque de Investigación Biomédica de Barcelona" (PRBB) desde el 2003. Es el creador y responsable del paquete [compareGroups](www.comparegroups.eu) de R para el que se implementó una aplicación diseñada a partir de las herramientas de Shiny.
+The course will use Rstudio as the main tool. All students must have installed the latest version of R and Rstudio one week before the course. Also, Chrome is recommended as the internet explorer to be used.
+One week before the course begins, instructions will be sent so that all students have the same configuration and can follow classes efficiently.
+To download RStudio, go to https://www.rstudio.com/products/rstudio/download/, and to
+download R use https://cloud.r-project.org/.
 
 
-# Coste del curso y forma de pago
-El coste del curso es de 290 euros que incluye el desayuno que se realizará a mitad de la mañana, así como todo el material del curso en soporte electrónico (funciones, librerías y ejercicios resueltos) las diapositivas y material bibliográfico presentado en las clases.  Los socios del BIB tendrán un descuento del 10% pero sólo a los dos primeros miembros que lo soliciten. El resto si quieren asistir al curso deberán abonar el coste total del curso.
 
-Una vez sea confirmada la inscripción al curso se deberá realizar el pago a través de transferencia bancaria, al número de cuenta CAIXABANK, S.A número ES79 2100 0801 1102 0052 1586. Una vez realizado el ingreso el alumno tendrá que enviar el comprobante de la transferencia a gemma.punyet@isglobal.org.
+# Organization
+The course is organized by the Bioinformatics Research Group in Epidemiology [BRGE](http://brge.isglobal.org) lead by Juan R Gonzalez who organized serveral R/Bioconductor courses includin 16 editions of a course on genetic association analyses or 4 editions teaching how to create R packages. 
+
+# Lecturer
+Isaac Subirana is an Adjunct Professor at the UB working full-time as a Research Technician in the field of Cardiovascular Epidemiology in the REGICOR group at the PRBB.
+
+He is the creator and maintainer of the R package compareGroups (www.comparegroups.eu) for which an application designed from the Shiny tools was implemented.
 
 
-# Acceso a ISGlobal - Campus Mar (PRBB)
-El Instituto de Salud Global Barcelona (ISGlobal) se encuentra en el Parque de Investigación Biomédica de Barcelona (PRBB) situado en la calle Doctor Aiguader, 88 de Barcelona, en la primera planta del PRBB, delante del Paseo Marítimo de Barcelona, entre el Hospital del Mar y el Hotel Arts de la Villa Olímpica. 
+# Course cost and payment
+The cost of the course is 290â‚¬ (10% discount to the first two BIB members to be pre-registered) which includes a small lunch that will take place in the middle of the morning as well as all the material of the course in electronic support (functions, packages and exercises solved) the slides and bibliographic material presented in the classes. 
+
+The number of students will be of a maximum of 20 and the requests will be attended by strict order of registration. Payments must be made by bank transfer, to the account: 
+
+CAIXABANK, S.A number ES96 2100 0555 3102 0201 5342. 
+
+Once the deposit is made, the student will have to send the proof of the transfer to gemma.punyet@isglobal.org, along with the registration form with the participant that can be found [here](https://docs.google.com/forms/d/e/1FAIpQLSeUkYFlXuEKEAqR5S8p-3ilRlus2pQaKRt6xVcI_oYfV-Nl_A/viewform). 
+
+
+
+# Access to ISGlobal - Campus Mar (PRBB)
+The  Instituto de Salud Global Barcelona (ISGlobal) is located at PRBB:
 
  ![PRBB localization](figures/prbb_loc.png)
 
 
-Se puede llegar a través de varias vías. Si necesitáis más información podéis consultar la web de Transportes Metropolitanos de Barcelona ( www.tmb.net ).
+Se puede llegar a trav?s de varias v?as. Si necesit?is m?s informaci?n pod?is consultar la web de Transportes Metropolitanos de Barcelona ( www.tmb.net ).
 
-Paradas de Metro cercanas al centro: Línea 4 (amarilla) Barceloneta y Ciutadella.
+Paradas de Metro cercanas al centro: L?nea 4 (amarilla) Barceloneta y Ciutadella.
 
 
 
