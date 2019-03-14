@@ -1,4 +1,4 @@
-# Creating Shiny Apps for biostatisticians and bioinformaticians
+# Creating Shiny Apps for biostatisticians and bioinformaticians (2nd Edition, 21-22 May 2019)
 
 Repository with the material corresponding to the course __Creating Shiny Apps for biostatisticians and bioinformaticians__ given at 
 [ISGlobal](http://www.isglobal.org) (former CREAL). Each folder contains slides, R code, data and exercises of each topic.
