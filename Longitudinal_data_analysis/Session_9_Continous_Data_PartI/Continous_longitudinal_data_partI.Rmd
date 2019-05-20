@@ -161,7 +161,7 @@ In the GitHub folder there is a paper further describing classical and modern me
 Para estudiar las diferencias entre dos procedimientos diferentes de recuperación de pacientes de un infarto, se consideraron dos grupos experimentales en sendos hospitales, de 8 pacientes cada uno. La variable respuesta es el índice de Bartel, que
 varía entre 0 y 100, y que constituye una medida de la habilidad funcional con la que se valoran diferentes capacidades, de forma que valores más altos se corresponden con una mejor situación del paciente. De cada uno de los 16 pacientes se dispone de su respuesta cada semana a lo largo de 5 semanas consecutivas. Los datos se pueden encontrar en el archivo *recuperainfarto.txt*.
 
-1. ¿Cuál de los dos procedimientos presenta una mejor recuperación de los pacientes? ¿Es esta diferencia estadísticamente significativa? [NOTA: contesta a estas preguntas planteando la pregunta estadística que creas conveniente]
+1. ???Cu???l de los dos procedimientos presenta una mejor recuperaci???ón de los pacientes? ???Es esta diferencia estadísticamente significativa? [NOTA: contesta a estas preguntas planteando la pregunta estad???stica que creas conveniente]
 
 
 **Exercise 2:**
@@ -170,7 +170,7 @@ En un estudio sobre la agudeza visual se dispone de la respuesta de siete indivi
 
 1. Crea una nueva base de datos agregando la información para cada una de la medida repetida (ojo) [NOTA: toma la media - usa la función `aggregate`]
 2. ¿Existen diferencias entre la medición final y la basal?
-3. ¿Existe un efecto temporal en la respuesta
+3. ¿Existe un efecto temporal en la respuesta?
 
 
 ---------------------
