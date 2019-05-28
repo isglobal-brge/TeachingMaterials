@@ -34,3 +34,13 @@ cache/
 
 # LaTeX
 *.synctex.gz
+
+# others
+*.toc
+*.vrb
+*.snm
+*.out
+*.nav
+*.log
+*.aux
+*.synctex.gz

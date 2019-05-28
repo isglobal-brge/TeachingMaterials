@@ -1,6 +1,0 @@
-\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
-\beamer@sectionintoc {2}{Multi-staged analysis}{11}{0}{2}
-\beamer@sectionintoc {3}{Meta-dimensional analysis}{29}{0}{3}
-\beamer@subsectionintoc {3}{1}{One omic dataset: dimensionality reduction}{32}{0}{3}
-\beamer@subsectionintoc {3}{2}{Integrating two or more omic datasets}{56}{0}{3}
-\beamer@sectionintoc {4}{Recommended lectures}{81}{0}{4}
