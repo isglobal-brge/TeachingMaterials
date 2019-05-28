@@ -44,3 +44,7 @@ cache/
 *.log
 *.aux
 *.synctex.gz
+Sweave.sty
+CREAL_slides.sty
+simbolCREALclar2.jpg
+
