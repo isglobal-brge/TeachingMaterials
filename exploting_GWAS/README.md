@@ -4,16 +4,16 @@ SNP array data are mainly used to perform GWAS with the aim of discovering new g
 
 The LLR is used to get genotypes calls which are obtained by using clustering methods
 
-![](figures/allele_intensities_2.png){width=60%}
+![](figures/allele_intensities_2.png)
 
 The joint representation of LRR and BAF may help to call CNVs and genetic mosaicisms
 
-![](figures/CNV_mosaicism.png){width=80%}
+![](figures/CNV_mosaicism.png)
 
 
 Lastly, running PCA or MDS of SNPs located in a candidate inversion region may help to call inversion genotypes
 
-![](figures/invCallCEU.png){width=50%}
+![](figures/invCallCEU.png)
 
 In this workshop, we illustrate how to perform of these analysis using R/Bioconductor packages. The required packages are:
 
