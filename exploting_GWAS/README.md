@@ -34,31 +34,9 @@ The datasets used in the presentation and in the exercises are available at BioC
 
 # CNVs
 
-- The vignette describing how to perform CNV calling can be found [here](https://htmlpreview.github.io/?https://github.com/isglobal-brge/R-GADA/blob/master/vignettes/R-GADA.html).
-
-- **Exercise:** Perform CNV calling of the samples available in the folder `data` from this repository.
-
 # Genetic Mosaicisms
 
-- The vignette describing how to perform mosaic calling can be found [here](https://htmlpreview.github.io/?https://github.com/isglobal-brge/R-GADA/blob/master/vignettes/MAD.html).
-
-- **Exercise:** Perform mosaic calling of the samples available in the folder `data` from this repository.
-
-# Mosaic loss of chromosome Y (mLOY)
-
-- The vignette describing how to perform mLOY calling can be found [here](https://htmlpreview.github.io/?https://github.com/isglobal-brge/R-GADA/blob/master/vignettes/MADloy.html).
-
+# Loss of Chromosome Y
 
 # Polymorphic inversions
 
-- The vignette describing how to perform polymorphic inversion calling can be found [here](https://htmlpreview.github.io/?https://github.com/isglobal-brge/R-GADA/blob/master/vignettes/scoreInvHap.html).
-
-
-- **Exercise:** Call inversion genotypes of inversion 8p23.1 from PLINK data `obesity.bed`, `obesity.fam`, `obesity.ped` which are available in the `brgedata` package. Assess the association between inversion genotypes and obesity status which is available at `obesity.txt` file (NOTE: samples are in the proper order - you do not need to sort the samples). 
-
-Data can be downloaded into your computer by:
-
-```
-path <- system.file("extdata", package="brgedata")
-snps <- read.plink(file.path(path, "obesity"))
-```
