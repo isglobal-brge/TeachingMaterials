@@ -4,7 +4,7 @@ SNP array data are mainly used to perform GWAS with the aim of discovering new g
 
 The LLR is used to get genotypes calls which are obtained by using clustering methods
 
-![](figures/allele_intensities_2.png)
+![](figures/allele_intensities_2.png | width=4, height=2)
 
 The joint representation of LRR and BAF may help to call CNVs and genetic mosaicisms
 
