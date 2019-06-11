@@ -76,3 +76,5 @@ library(snpStats)
 path <- system.file("extdata", package="brgedata")
 snps <- read.plink(file.path(path, "obesity.bed"))
 ```
+
+or donwnloaded from [here](https://drive.google.com/open?id=1PMWciIl7Y1lBeWcBdsB7bCuBFSpWcruA)
