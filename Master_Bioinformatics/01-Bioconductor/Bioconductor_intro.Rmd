@@ -26,13 +26,6 @@ library(Biostrings)
 library(snpStats)
 library(GenomicRanges)
 library(SummarizedExperiment)
-library(annotate)
-library(hgu95av2.db)
-library(org.Hs.eg.db)
-library(GO.db)
-library(Homo.sapiens)
-library(biomaRt)
-library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 ```
 
 # Project Overview
@@ -519,9 +512,11 @@ Operations
 - between-range: act on two separate `GRanges` or `GRangesList`
   objects
       - e.g., `findOverlaps()`, `nearest()`
+      
+
+Here you can find some examples:      
 
 ```{r ranges, message=FALSE}
-require(GenomicRanges)
 gr <- GRanges("chr1", IRanges(c(10, 20, 22), width=5), "+")
 gr
 
@@ -531,12 +526,12 @@ shift(gr, 3)
 # inter-range
 range(gr)    
 
-# creates the smallest range set of unique, non-overlapping intervals
-reduce(gr)                      
+            
 
 # two Granges: knowing the intervals that overlap with a targeted region
 snps <- GRanges("chr1", IRanges(c(11, 17), width=1))
 snps
+
 gr.ov <- findOverlaps(snps, gr)
 gr.ov
 
