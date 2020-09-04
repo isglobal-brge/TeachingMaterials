@@ -1,0 +1,1804 @@
+# Regresión lineal
+
+ 
+```{r include=FALSE}
+knitr::opts_chunk$set(cache=F, warning=FALSE, message=FALSE)
+library(arm)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+options(scipen = 0)
+```
+ 
+
+Este capítulo presenta la regresión lineal, el método de regresión paramétrica que usamos cuando la variable de resultado o respuesta es continua. Cuando el resultado es binario, utilizamos la regresión logística, tema de un capítulo posterior.
+
+ 
+
+Qué pretendemos aprender en este capítulo:
+
+- Entender qué pretende y cuándo se usa la regresión lineal
+- Cómo estimar los parámetros de un modelo de regresión
+- Familiarizarnos con algunas medidas usadas en la regresión lineal para valorar la utilidad del modelo
+- Tener una idea de otros aspectos a tener encuenta para estos modelos (suposiciones del modelo, colinealidad, valores atípicos, ...)
+
+
+Existen numerosos recursos en la red para complementar este curso. Aquí tenéis algunos tutoriales/cursos en Datacamp:
+ 
+
+-- [DataCamp: Correlación y regresión] (https://www.datacamp.com/courses/correlation-and-regression)
+
+-- [DataCamp: Intro to Statistics with R: Correlation and Linear Regression] (https://www.datacamp.com/courses/intro-to-statistics-with-r-correlation-and-linear-regression)
+
+-- [Intro to Statistics with R: Multiple Regression] (https://www.datacamp.com/courses/intro-to-statistics-with-r-multiple-regression)
+
+ 
+
+## Preliminares
+
+ 
+
+¿Qué son los modelos? Los modelos simplifican la realidad con fines de comprensión o predicción. Si bien pueden ser herramientas poderosas, debemos tener en cuenta que, después de todo, no son la realidad. En consecuencia, como se dice que dijo el estadístico George Box, "Todos los modelos son incorrectos, pero algunos son útiles". 
+
+ 
+
+En términos generales, el modelado estadístico tiene estos dos objetivos a veces divergentes: 
+
+ 
+
+1. *Descripción*: usar un modelo para describir la relación entre una variable de resultado de interés y una o más variables predictoras. 
+
+ 
+
+2. *Predicción*: uso de un modelo para predecir instancias desconocidas de la variable de resultado de manera que se minimice el error predictivo fuera de la muestra.
+
+ 
+
+En el modelado, es posible centrarse en la descripción e ignorar la predicción, y viceversa. Por ejemplo, muchos algoritmos de aprendizaje automático son cajas negras: crean modelos que hacen un buen trabajo de predicción, pero son difíciles, si no imposibles, de interpretar y, en consecuencia, a menudo no nos ayudan a comprender las relaciones entre variables. La regresión lineal puede no ser la técnica más sofisticada, pero si se usa correctamente, su precisión predictiva compara bien con otros algoritmos más avanzados que veremos en este curso. Además, ofrece información descriptiva, en forma de coeficientes para cada variable, que son de gran utilida. La regresión lineal hace un buen trabajo con *tanto* descripción como predicción. En este capítulo aprenderemos estos usos de la regresión lineal.
+
+ 
+
+## Conceptos básicos
+
+ 
+
+Comencemos por presentar brevemente el modelo lineal junto con algunos de los conceptos y terminología que usaremos a lo largo del curso.  
+
+ 
+
+Un modelo lineal es *paramétrico* porque asumimos que la relación entre dos variables es lineal y puede ser definida por los *parámetros* de una recta (el intercept y la pendiente). Comenzaremos considerando un modelo lineal simple.
+
+ 
+
+### Modelo lineal simple
+
+ 
+
+Un modelo lineal simple tiene un resultado (outcome, variable predictiva), $y$, y un predictor, $x$. Está definido por la siguiente ecuación.
+
+ 
+
+$$
+y_i = \beta_0 + \beta_1x_i + \epsilon_i,
+$$
+
+donde $i = 1, \ldots, n.$
+
+ 
+El subíndice en esta ecuación, $i$, indexa las observaciones $n$ en el conjunto de datos. (Pensemos en $i$ como un número de fila que corresponde a los datos de un individuo). La ecuación se puede leer de la siguiente manera: el valor de la $i$-ésima variable  resultado, $y_i$, está definido por una intercept, $\beta_0$, más una pendiente, $\beta_1$, multiplicada por la variable predictora $i$-ésima, $x_i$. Estos elementos definen la parte *sistemática* o *determinista* del modelo. Sin embargo, debido a que el mundo es incierto y contiene aleatoriedad, sabemos que el modelo será incorrecto (estará sujeto a error). Para describir completamente los datos, necesitamos un término de error, $\epsilon_i$, que también está indexado por fila. El término de error es la parte *estocástica* o *aleatoria* del modelo. $\epsilon_i$ mide la distancia entre los valores ajustados o esperados del modelo --- calculados a partir de la parte determinista del modelo --- y los valores reales. Los errores en un modelo lineal, también conocidos como residuales del modelo, son la parte de los datos que permanece sin explicar por la parte determinista del modelo. Uno de los supuestos clave de un modelo lineal es que los residuos se distribuyen normalmente con media = 0 y varianza = $\sigma^2$, que denotamos, en notación matricial, como $N (0, \sigma ^ 2)$.
+
+ 
+
+### Regresión lineal multivariante
+
+ 
+
+Podemos agregar predictores adicionales, $p$, a un modelo lineal simple, convirtiéndolo en un modelo lineal multivariante, que definimos de la siguiente manera:
+
+ 
+
+$$
+y_i = \beta_0 + \beta_1 x_ {i1} + \cdots + \beta_p x_ {ip} + \varepsilon_i,
+$$
+
+donde $i = 1, \ldots, n$ y $p = 1, \ldots, p.$ En esta ecuación $y_i$ es nuevamente la variable resultado $i$-ésima, $\beta_0$ es la intersección, $\beta_1$ es el coeficiente de la primera variable predictora, $x_{1}$, $\beta_p$ es el coeficiente de la variable predictora $p$-ésima, $x_{p}$, y $\epsilon_i$ representa la parte estocástica del modelo, los residuos, indexados por fila. La parte determinista del modelo se puede resumir como $X \beta$, una matriz $p$ x $n$, que llamaremos el "predictor lineal".
+
+ 
+
+### Incertidumbre
+
+ 
+
+La incertidumbre es intrínseca al modelado estadístico. Distinguimos entre *Incertidumbre de estimación* e *Incertidumbre fundamental *:
+
+ 
+- La incertidumbre de la estimación se deriva del desconocimiento de los parámetros $\beta$. Disminuye a medida que $n$ aumenta y los $SE$s se reducen.
+
+ 
+- La incertidumbre fundamental se deriva del componente estocástico del modelo, $\epsilon$. Existe sin importar lo que haga el investigador, sin importar como de grande sea el tamaño muestral $n$. Podemos reducir la incertidumbre fundamental con predictores elegidos inteligentemente, pero nunca podremos eliminarla.
+
+ 
+
+## Ajuste de un modelo lineal
+
+Para ajustar un modelo lineal usamos la función `lm()`. (La función `glm()` también se ajusta a un modelo lineal por defecto, definido por `family = gaussian`. También usaremos`glm()` para ajustar una regresión logística, con` family = binomial`). Por ejemplo, usemos el conjunto de dataos mtcars para averiguar si el consumo de combustible (mpg) está correlacionado con el peso del automóvil (wt). En R deberíamos ejecutar:
+
+
+```{r}
+data(mtcars)
+(simple_model <- lm(mpg ~ wt, data = mtcars))
+```
+ 
+
+La ecuación del modelo es: $\widehat {mpg} = 37.285 - 5.344wt$. (La notación del sombrero, $\widehat {mpg}$, significa "estimación de"). Sin embargo, con el término de error incluido, ya no estamos *estimando* mpg sino describiéndolo exactamente: $mpg = 37.285 - 5.344wt + error$ (Por lo tanto, no hay notación de sombrero). Los componentes del modelo se pueden extraer del objeto del modelo usando `adjust()`, o, de manera equivalente en este caso, `predict()` y `residuals()`:
+
+ 
+
+```{r }
+mtcars_new <- mtcars %>% 
+  mutate(cars = rownames(mtcars),
+         fitted = fitted(simple_model),
+         residuals = residuals(simple_model)) %>%
+  dplyr::select(cars, mpg, wt, fitted, residuals)
+
+head(mtcars_new)
+```
+
+
+ 
+
+El modelo se puede utilizar para calcular valores ajustados para automóviles individuales en el conjunto de datos. Por ejemplo, el valor ajustado para el Mazda RX4, $\widehat {mpg_1}$, se puede derivar de la ecuación del modelo, $\beta_0 + \beta_1 x_ {i1}$: 37.29 - 5.34 x 2.62 = `r round(37.285 - 5.344 * 2.62, 2) `. (El valor *real* del Mazda RX4, calculado a partir del modelo, sería: 37.29 - 5.34 x 2.62 + 2.28 = `r round(37.285 - 5.344 * 2.62 - 2.2826106, 2)`). El modelo también se puede utilizar para la predicción. ¿Cuál sería el mpg para un automóvil que pesa 5000 libras?  Según el modelo: 37,29 - 5,34 x 5 = `r round(37.285 - 5.344 * 5, 2)`. 
+
+ 
+
+### Residuos
+
+ 
+
+Los residuales del modelo --- representados por los segmentos de línea vertical en el gráfico siguiente --- son las diferencias entre los valores ajustados y reales de mpg.
+
+ 
+```{r}
+ggplot(mtcars_new, aes(x = wt, y = mpg)) +
+  geom_smooth(method = "lm", se = FALSE, color = "lightgrey") +   
+  geom_segment(aes(xend = wt, yend = fitted), alpha = .2) + 
+  geom_point() +
+  geom_point(aes(y = fitted), shape = 1) +
+  ggtitle("Model residuals for mpg ~ wt")
+```
+
+ 
+
+Podemos resumir los residuos con una medida llamada suma de cuadrados residual (RSS), que se calcula restando los resultados reales, $y_i$, de los valores ajustados, $\hat {y} _i$, elevando al cuadrado esas diferencias, luego sumando los cuadrados.
+
+ 
+
+$$
+\operatorname {RSS} = \sum_ {i = 1} ^ n ((\beta_0 + \beta_1x_i) - y_i) ^ 2 = \sum_{i = 1}^n(\hat {y} _i - y_i) ^ 2
+$$
+
+ 
+
+Al resumir los errores del modelo, RSS nos permite cuantificar el rendimiento del modelo con un solo número:
+
+ 
+
+```{r}
+rss <- function(fitted, actual){
+  sum((fitted - actual)^2)
+}
+
+rss(fitted(simple_model), mtcars$mpg)
+```
+
+
+ 
+
+ 
+
+### Coeficientes de interpretación
+
+ 
+
+¿Cómo interpretamos la salida de la función `lm()`? Comencemos con el modelo simple de mpg.
+
+ 
+
+- *Intercept*: 37.29 representa el valor predicho de mpg cuando wt es 0. Dado que wt no puede ser igual a 0. El intercept no es interpretable en este modelo. Para hacerlo interpretable, necesitamos centrar la variable wt en 0, lo que podemos hacer fácilmente restando la media de wt de cada observación ($x_ {centrado} = x - \ bar {x}$). Esta es una transformación lineal que cambiará la escala del predictor y, por lo tanto, $\beta_0$ también, pero no el ajuste del modelo: $\beta_1$ permanecerá igual (-5,34) al igual que RSS (278,32). Después de la transformación, el peso promedio del automóvil es 0 y la intersección representa las millas por galón pronosticadas para automóviles de peso promedio.
+
+ 
+
+```{r}
+mtcars$wt_centered <- mtcars$wt - mean(mtcars$wt)
+(simple_model <- lm(mpg ~ wt_centered, data = mtcars))
+rss(fitted(simple_model), mtcars$mpg)
+```
+
+Ahora la intersección, 20.09, es significativa y representa el valor predicho de mpg cuando wt_centered es 0 --- es decir, cuando wt es promedio.
+
+ 
+
+Hay dos formas de interpretar los coeficientes en un modelo lineal:
+
+ 
+
+1. *Contrafactual*: el coeficiente representa el cambio predicho en el resultado asociado con un aumento de 1 unidad en el predictor, mientras se mantienen constantes los demás predictores (en el caso multivariable).
+
+ 
+
+2. *Predictivo*: el coeficiente representa la diferencia pronosticada en el resultado entre dos grupos que difieren en 1 unidad en el predictor, mientras se mantienen constantes los otros predictores.
+
+ 
+
+Normalmente los coeficientes del modelo se suelen interpretar de acuerdo con el paradigma contrafáctico. Por lo tanto,
+
+ 
+
+- *wt_centered*: -5.34 representa el cambio previsto en el resultado, mpg, asociado con un aumento de 1 unidad en wt_centered. 
+
+ 
+
+Agreguemos un segundo predictor al modelo, una versión binaria de caballos de fuerza (hp_bin), que definiremos como 0 para valores de hp que están por debajo del promedio y 1 para valores mayores o iguales que el promedio.
+
+ 
+
+```{r}
+mtcars$hp_bin <- ifelse(mtcars$hp < mean(mtcars$hp), 0, 1)
+
+(multivariable_model <- lm(mpg ~ wt_centered + hp_bin , data = mtcars))
+
+rss(fitted(multivariable_model), mtcars$mpg)
+```
+
+
+ 
+
+Este modelo multivariante es una mejora con respecto al modelo simple ya que tiene un RSS menor. 
+
+ 
+
+- *Intercept*: 21,65 representa el mpg predicho cuando los predictores continuos o binarios son iguales a 0 o (no aplicable en este caso) cuando las variables de los factores están en su nivel de referencia. La intersección es el mpg pronosticado por el modelo para autos de peso promedio que tienen caballos de fuerza por debajo del promedio.
+
+ 
+
+- *wt_centered*: -4,17 representa el cambio previsto en mpg asociado con un aumento de 1 unidad en wt_centered (digamos, de 1 a 2) mientras se mantiene constante el otro predictor, hp_bin. *Los coeficientes de regresión multivariable capturan cómo el resultado varía de manera única con un predictor dado, después de tener en cuenta los efectos de todos los demás predictores.* En la práctica, esto significa que el coeficiente que describe la relación entre mpg y wt_centrado se ha promediado en los niveles hp_bin, por lo que es igual en cada nivel de hp_bin.
+
+ 
+- *hp_bin*: -3.32 representa el cambio previsto en mpg asociado con un aumento de 1 unidad en hp_bin (de 0 a 1) mientras se mantiene constante el otro predictor, wt_centered.
+
+ 
+
+### Interacciones
+
+ 
+
+Podemos agregar una interacción a este modelo. A menudo, la relación entre un predictor y un resultado puede depender del nivel de otra variable predictiva. Por ejemplo, la pendiente de la línea de regresión que define la relación entre wt_centrado y mpg puede variar con los niveles de hp_bin. Si es así, decimos que existe una interacción entre wt_centered y hp_bin al predecir mpg. Para incluir una interacción entre dos variables en la fórmula del modelo, simplemente reemplazamos "+" por "\*" en la fórmula del modelo. Esta fórmula, `mpg ~ wt_centered * hp_bin`, es exactamente equivalente a ` mpg ~ wt_centered + wt_centered * hp_bin`, o a ` mpg ~ wt_centered + hp_bin + wt_centered*hp_bin` ya que `lm ()` agrega automáticamente el efecto principal junto con la interacción. También se puede usar ":" para el término exacto de la interacción `` mpg ~ wt_centered + hp_bin + wt_centered:hp_bin`. Por "efecto principal" nos referimos a los términos que interactúan entre si. En este modelo, el efecto de interacción es wt_centered:hp_bin, mientras que wt_centered y hp_bin por sí mismos son los efectos principales.
+
+ 
+
+```{r}
+(multivariable_model <- lm(mpg ~ wt_centered  * hp_bin, data = mtcars))
+
+rss(fitted(multivariable_model), mtcars$mpg)
+
+```
+
+RSS mejora una vez más. 
+
+Las interacciones pueden ser difíciles de interpretar es por ello que la visualización ayuda a comprender qué está sucediendo.
+
+ 
+
+```{r}
+ggplot(mtcars, aes(wt_centered, mpg, col = factor(hp_bin), group = factor(hp_bin))) +
+  geom_point() +
+  stat_smooth(method="lm", se = F) +
+  ggtitle("mpg ~ wt_centered * hp_bin")
+
+```
+
+
+Podemos ver que la relación entre wt y mpg depende de los niveles de hp_bin: las pendientes de las líneas de regresión difieren. *Las líneas de regresión no paralelas indican la presencia de una interacción*. Observamos una relación más fuerte entre el peso y las millas por galón entre los autos con caballos de fuerza por debajo del promedio (una relación *negativa* más fuerte) que entre los autos con más caballos de fuerza. Las líneas de regresión para hp_bin se vuelven más planas a medida que aumenta wt_centrado.
+
+ 
+
+*NOTA: la presencia de una interacción cambia la interpretación de los efectos principales*. En un modelo sin interacción, los efectos principales son independientes de los valores particulares de los otros predictores. Por el contrario, una interacción hace que los efectos principales dependan de valores particulares de los otros predictores.
+
+ 
+
+- *wt_centered:hp_bin*: 3.95 representa la diferencia en la pendiente de wt_centered para hp_bin = 1 en comparación con hp_bin = 0. En otras palabras, cuando aumentamos hp_bin de 0 a 1, se predice que la pendiente de la línea de regresión para wt_centered aumentar en 3,95. O, cuando aumentamos wt_centrado en 1, se predice que la línea de regresión para hp_bin aumentará en 3,95.
+
+ 
+
+- *wt_centered*: -6.39 representa el cambio predicho en mpg asociado con un aumento de 1 unidad en wt *entre aquellos coches donde hp_bin = 0.* 
+
+ 
+
+- *hp_bin*: -3.16 representa el cambio previsto en mpg asociado con un aumento de 1 unidad en hp_bin de 0 a 1 *entre los coches con wt_centered = 0* (promedio). 
+
+ 
+
+Puede resultar instructivo ver qué está haciendo `lm ()` en segundo plano para ajustarse a este modelo. El comando `model.matrix ()` muestra cómo se ha reformateado la matriz del predictor para la regresión:
+
+ 
+
+```{r}
+head(model.matrix(multivariable_model))
+```
+ 
+
+La intersección es un vector de 1s. El vector para el término de interacción, wt_centered: hp_bin, consiste simplemente en el producto de los dos vectores con las componentes de cada variable
+
+ 
+
+## Estimación por mínimos cuadrados
+
+
+Para el modelo $y = X \beta + \epsilon$, donde $\beta$ es el vector de coeficientes ajustados y $\epsilon $ es el vector de residuos del modelo, la estimación de mínimos cuadrados es $\hat {\beta}$ que minimiza RSS para los datos dados $X, y$. Podemos expresar la estimación de mínimos cuadrados como $\ hat {\beta} = (X'X) ^ {- 1} X'y$, donde $X'$ es la transposición de la matriz de $X$. A continuación podemos ver cómo se deriva esta fórmula^[De Fox, John (2016). * Regresión aplicada y modelos lineales generalizados. * Sage: Los Ángeles.]
+
+ 
+
+$$
+RSS = \epsilon ^ 2 = (y - X \beta) '(y - X \beta)
+$$
+
+ 
+
+$$
+RSS = y'y - y'X \beta - \beta'X'y + \beta'X'X \beta
+$$
+
+$$
+RSS = y'y - (2y'X) \beta + \beta '(X'X) \beta
+$$
+
+Según apunta el autor: "Aunque la multiplicación de matrices generalmente no es conmutativa, cada producto [arriba] es 1 x 1, por lo que $y'X \beta = \beta'X'y$".
+
+Para minimizar RSS encontramos la derivada parcial con respecto a $\beta$:
+
+ 
+$$
+\frac{\partial RSS}{\partial\beta}= 0  - 2X'y + 2X'X\beta
+$$
+
+Establecemos esta derivada igual a 0 y resolvemos $\beta $: 
+
+ 
+
+$$
+X'X \beta = X'y
+$$
+
+ 
+
+$$
+\beta = (X'X) ^ {- 1} X'y
+$$
+
+Podemos usar esta ecuación y la matriz del modelo para el modelo multivariable para estimar $\hat{\beta}$ para `mpg ~ wt_centered * hp_bin + hp_centered`:
+
+ 
+
+```{r}
+X <- model.matrix(multivariable_model)
+y <- mtcars$mpg
+
+solve(t(X) %*% X) %*% t(X) %*% y
+
+```
+
+
+ 
+
+Este método devuelve las mismas estimaciones de coeficientes que `lm ()`.
+
+ 
+
+## Medidas adicionales de ajuste del modelo
+
+ 
+
+Como hemos visto, RSS nos permite comparar qué tan bien se ajustan los modelos a los datos. Una medida relacionada es la raíz del error cuadrático medio (RMSE por sus siglas en inglés), la raíz cuadrada del promedio de los errores cuadráticos:
+
+ 
+
+ 
+
+$$
+\operatorname{RMSE}= \sqrt{\frac{\sum_{i=1}^n ((\beta_0 + \beta_1x_i) - y_i)^2}{n}} 
+$$
+
+$$
+= \sqrt{\frac{\sum_{i=1}^n (\hat{y}_i - y_i)^2}{n}}
+$$
+
+ 
+
+Lo bueno de RMSE es que, a diferencia de RSS, devuelve un valor que está en la escala del variable resultado.
+
+ 
+
+```{r}
+rss(fitted(multivariable_model), mtcars$mpg)
+
+rmse <- function(fitted, actual){
+  sqrt(mean((fitted - actual)^2))
+}
+
+rmse(fitted(multivariable_model), mtcars$mpg)
+  
+```
+ 
+
+ 
+
+En promedio, entonces, este modelo tiene una diferencia de aproximadamente 2.31 mpg por cada automóvil.
+
+ 
+
+$R^2$ es otra medida de ajuste del modelo que es conveniente porque es una medida estandarizada --- escalada entre 0 y 1 --- y, por lo tanto, es comparable en todos los contextos.
+
+ 
+
+$$
+R^2 = 1 - \frac{SS_\text{resid}}{SS_\text{tot}}, 
+$$
+
+donde $SS_\text{tot} = \sum_i (y_i- \bar{y}) ^ 2$ y $SS_\text{res} = \sum_i (y_i - \hat {y} _i) ^ 2$. En resumen: $R^2$ representa la variación en la variable de resultado explicada por el modelo como una proporción de la variación total. En la gráfica de abajo, el panel de la izquierda, TSS, sirve como denominador para calcular $R^2$, y el panel de la derecha, RSS, es el numerador.
+
+ 
+
+```{r include=F}
+(tss <- round(sum((mtcars$mpg - mean(mtcars$mpg))^2)))
+(rss <- round(sum((mtcars$mpg - fitted(lm(mpg ~ wt, data = mtcars)))^2)))
+
+1 - rss/tss
+
+```
+
+```{r }
+require(gridExtra)
+
+mtcars$mean <- mean(mtcars$mpg) 
+plot1 <- ggplot(mtcars, aes(wt, mpg)) +
+  geom_hline(yintercept=mean(mtcars$mpg), col = 2) +  
+  geom_segment(aes(xend = wt, yend = mean), alpha = .2) +  geom_point() +
+  ggtitle(paste("Total Sum of Squares (TSS) \n",tss))
+
+plot2 <- ggplot(mtcars, aes(wt, mpg)) +
+  geom_smooth(method = "lm", se = FALSE, col=2) +  
+  geom_segment(aes(xend = wt, yend = fitted(lm(mpg~wt, data=mtcars))), alpha = .2) +  
+  geom_point() +
+  ggtitle(paste("Residual Sum of Squares (RSS) \n",rss))
+
+grid.arrange(plot1, plot2, ncol=2)
+```
+
+ 
+
+Para nuestro modelo lineal simple, mpg ~ wt, $R^2$ era de .75, que coincide con nuestro cálculo aquí: 1 - 278/1126 = .75. Esto significa que wt explica el 75% de la variación total en mpg. Cuanto mejor se ajusta la regresión lineal a los datos en comparación con el promedio simple, más se acerca el valor de $R^2$ a 1. Para la regresión lineal simple, $R^2$ es como la correlación al cuadrado entre el resultado y el predictor.
+
+ 
+
+```{r}
+cor(mtcars$mpg, mtcars$wt)^2
+```
+
+ 
+
+Un problema con el $R^2$ es que agregar variables al modelo tiende a mejorarlo aunque las nuevas variables no sean relevantes. Añadir más variables puede conducir a un sobreajuste. Se ha desarrollado una variante de $R^2$ que penaliza la medida para predictores adicionales: $R^2$ajustados.
+
+ 
+
+$$
+\bar R^2 = {1-(1-R^2){n-1 \over n-p-1}} 
+\bar R^2 = {R^2-(1-R^2){p \over n-p-1}},
+$$
+ 
+
+donde $n$ es el número de observaciones en el conjunto de datos y $p$ es el número de predictores en el modelo.
+
+ 
+
+## Sesgo, variación, sobreajuste
+
+ 
+
+¿Qué entendemos por "sobreajuste"? Los siguientes son conceptos clave para pensar en el rendimiento del modelo, a los que volveremos a lo largo del curso:
+
+ 
+
+- *Rendimiento en la muestra*: cómo se comporta el modelo en los datos que se utilizaron para construirlo.
+
+- *Rendimiento fuera de la muestra*: cómo se comporta el modelo cuando encuentra nuevos datos.
+
+- Si el modelo funciona mejor dentro de la muestra que fuera de la muestra, entonces decimos que el modelo *sobreajusta* los datos de la muestra o de entrenamiento.
+
+- El sobreajuste ocurre cuando un modelo se ajusta a la muestra *demasiado bien*: el modelo ha sido optimizado para capturar las idiosincrasias --- el ruido aleatorio --- de la muestra.
+
+- *Sesgo* se refiere a una alta precisión predictiva en la muestra. El sesgo bajo es bueno.
+
+- *Varianza* se refiere a una mayor precisión predictiva dentro de la muestra que fuera de la muestra. La varianza baja es buena.
+
+- Un modelo que sobreajusta tiene un sesgo bajo y una gran varianza.
+
+- *La compensación de sesgo-varianza* se refiere a la idea de que no se puede tener un sesgo bajo y una varianza baja a la vez.
+
+ 
+Nos protegeremos contra --- o evaluaremos la cantidad de --- sobreajuste usando una técnica llamada validación cruzada que veremos más adelante.
+
+ 
+
+## Regresión como estimación de una media condicional
+
+Dadas las complejidades anteriores, se podría pensar que el uso de la regresión lineal sólo es útil para nada más (¡y nada menos!) estimar una media condicional. Pero, ¿qué es una media condicional? 
+
+ 
+
+Consideremos el siguiente ejemplo. En 2011 se inició un programa de uso compartido de bicicletas en USA y se recopilaron datos durante 2011 y 2012 sobre el uso estacional de bicicletas y las condiciones climáticas. Estos datos se encuentran recogidos en el fichero [day.csv](). La variable de resultado que nos interesa es " contar "--- el número total de ciclistas que alquilan bicicletas en un día determinado. El conjunto de datos tiene una fila para cada día, con variables para (entre otras) estación, año, mes, feriado, día de la semana, temperatura, temperatura percibida, humedad y velocidad del viento.
+
+ 
+
+```{r }
+day <- read.csv("data/day.csv")
+
+day <- day %>%
+  dplyr::select(count = cnt,
+         season,
+         year= yr,
+         month = mnth,
+         holiday,
+         weekday,
+         temperature = temp,
+         atemp,
+         humidity = hum,
+         windspeed)
+```
+
+
+```{r}
+glimpse(day)
+```
+
+
+ 
+
+Una pregunta exploratoria inicial es: ¿cómo varía el uso de la bicicleta por año? Podemos responder a esta pregunta simplemente calculando un promedio para cada año:
+
+ 
+
+
+```{r 1}
+day %>%
+  mutate(year = ifelse(year == 0, 2011, 2012)) %>%
+  group_by(year) %>%
+  dplyr::summarize(`average ridership` = round(mean(count)))
+```
+
+ 
+
+El número de pasajeros promedio en este resumen representa una media condicional: la media de la variable de recuento, condicional al año. ¿Qué nos dice la regresión lineal sobre el promedio de pasajeros por año?
+
+ 
+```{r temp0}
+lm(count ~ year, data = day)
+```
+
+ 
+
+La salida del modelo incluye una intersección y un coeficiente para el año. La intersección es el promedio de la variable de resultado cuando los predictores numéricos son iguales a cero. Por lo tanto, 3406 es el número de pasajeros promedio cuando año = 0 (es decir, 2011), y el coeficiente para el año, 2194, es el aumento esperado en el número de pasajeros asociado con un aumento de 1 unidad en el año (es decir, cuando el año pasa de 0 a 1 ). Por lo tanto, el número promedio de pasajeros en el año 1 (2012) es solo la suma de los dos coeficientes --- 3406 + 2194 = `r 3406 + 2194` --- que es idéntica a la media condicional para 2012 que calculamos anteriormente usando` dplyr` .
+
+ 
+
+En general, dadas dos variables aleatorias, X e Y (piense: año y número de pasajeros), podemos definir la media condicional como el valor esperado o promedio de Y dado que X está restringido a tener un valor específico, $x $, a partir de su rango: $\ mathbf {E} [Y \ mid X = x] $. Ejemplo: $\ mathbf {E} [Ridership \ mid Year = 2012] $es el número promedio de pasajeros dado ese año = 2012. Una media condicional tiene un valor descriptivo --- sabemos que el coeficiente $\beta $para el año de nuestro modelo, 2194, representa la relación entre el número de pasajeros y el año, con la magnitud o el valor absoluto del coeficiente que indica la fuerza de la relación, positiva o negativa. Los coeficientes también se pueden utilizar para la predicción. ¿Cuántos ciclistas más deberíamos esperar en 2013? Utilice el modelo: $\ mathbf {E} [número de pasajeros \ mid year = 2013] $es igual al número en 2012, 5600, más el coeficiente del año: 5600 + 2194 = `r 5600 + 2194`. 
+
+ 
+
+El modelo nos permite predecir, pero debemos recordar que no hay nada mágico en la predicción. Deberíamos pensar críticamente al respecto. Por un lado, asume una tendencia constante año tras año. ¿Es esta una suposición razonable?
+
+ 
+
+## La función de regresión
+
+ 
+
+Consideremos la cantidad media de pasajeros condicionada a la temperatura (que en este conjunto de datos se ha normalizado y convertido a grados Celsius). Podemos definir una función que devolverá la media condicional. Para cualquier temperatura, $t $, defina $\ mu (t) = \ mathbf {E} [Riders \ mid Temperature = t] $, que es el número medio de pasajeros cuando temperatura = $t $. Dado que podemos variar $t $, esto es de hecho una función, y se conoce como la * función de regresión * que relaciona a los pasajeros con la temperatura. Por ejemplo, $\ mu (.68) $es el número medio de pasajeros cuando $t $= .68 y $\ mu (.05) $es el número medio de pasajeros cuando $t $= .05, etc.
+
+ 
+
+Tenga en cuenta que el valor real de $\ mu (.68) $se desconoce porque es un valor de población. Existe, pero no en nuestra muestra. Entonces, nuestra estimación, $\ hat {\ mu} (. 68) $, debe basarse en los pares de ciclistas-temperatura que tenemos en nuestros datos: $(r_ {1}, t_ {1}), ..., ( r_ {731}, t_ {731}) $. ¿Cómo exactamente? Un enfoque sería simplemente calcular las medias condicionales relevantes a partir de nuestros datos. Para encontrar $\ hat {\ mu} (t) $usando este método, simplificaremos los datos redondeando la temperatura a dos lugares decimales.
+
+ 
+
+```{r temp1}
+day %>% 
+  group_by(temperature = round(temperature, 2)) %>%
+  dplyr::summarize(mean = round(mean(count))) 
+```
+ 
+
+Sin embargo, observe que faltan valores en la secuencia. Aquí hay un gráfico que muestra las brechas en los datos.
+
+ 
+
+```{r temp2, warning = F}
+
+day %>% 
+  group_by(temperature = round(temperature, 2)) %>%
+  dplyr::summarize(mean = round(mean(count))) %>%
+  dplyr::right_join(data.frame(temperature=seq(.01, .9, .01)), by = "temperature") %>%
+  ggplot(aes(temperature, mean)) +
+  geom_line() +
+  ggtitle("Estimated mean daily riders (with missing observations)") +
+  labs(x = "temperature", y = "mean riders")
+```
+
+ 
+
+ 
+
+Este enfoque para estimar la función de regresión, $\ hat {\ mu} (t) $, se encontrará con problemas cuando, por ejemplo, queremos predecir el número de pasajeros a una temperatura para la que no tenemos datos.
+
+ 
+
+Usar medios condicionales para estimar $\ hat {\ mu} (t) $es un enfoque * no paramétrico *. Es decir, no asumimos nada sobre la forma de la función desconocida $\ mu (t) $si se trazara en un gráfico, sino que simplemente la estimamos directamente a partir de nuestros datos. La regresión de K-vecinos más cercanos (KNN) es una generalización de este enfoque no paramétrico.
+
+ 
+
+Tenga en cuenta que podríamos hacer algunas suposiciones sobre esa forma, posiblemente mejorando nuestras estimaciones, lo que haría que nuestro enfoque sea * paramétrico *, como en el caso de la regresión lineal.
+
+ 
+
+## Estimación no paramétrica de la función de regresión: regresión KNN
+
+ 
+
+A veces no es posible calcular buenas medias condicionales para el resultado debido a la falta de valores de predicción. Supongamos que queremos encontrar $\ hat {\ mu} (. 12) $. ¡No hubo días en nuestro conjunto de datos en los que la temperatura fuera de .12! El algoritmo KNN resuelve este problema usando $k $observaciones más cercanas a $t $= .12 para calcular la media condicional, $\ hat {\ mu} (. 12) $. Si definimos $k $= 4, entonces tomaríamos los * cuatro * valores más cercanos a .12 en el conjunto de datos --- quizás .1275, .134783, .138333, .1075. ("Más cercano" en este caso se define como la distancia euclidiana, que en un espacio unidimensional, una recta numérica, es simplemente: $\ sqrt {(xy) ^ 2} $.) Estos $k $= 4 valores más cercanos de la La función entonces se promediaría para calcular $\ hat {\ mu} (. 12) $. 
+
+ 
+
+Establecer el valor de $k $es obviamente una decisión crítica. Si usamos $k $= 100, por ejemplo, nuestras estimaciones podrían no ser muy buenas. Y quizás $k $= 4 sea demasiado bajo --- podría llevar a un sobreajuste. En el caso de $k $= 4, el error dentro de la muestra (sesgo) puede ser bajo, pero el error al predecir nuevas observaciones (varianza) puede ser alto.
+
+ 
+
+Aquí, por ejemplo, hay una gráfica de los valores ajustados de un modelo KNN de la temperatura de los pasajeros cuando $k $= 4. 
+
+ 
+
+```{r echo=FALSE}
+library(FNN)
+r <- day
+r$temp_rounded <- round(r$temp,2)
+library(dplyr)
+knn <- knn.reg(train=r$temperature, y=r$count, k=4, algorithm="brute")
+r$knn <- knn$pred
+ 
+est <-  r %>% group_by(temp_rounded) %>%  dplyr::summarize(count=mean(count), knn=mean(knn))
+
+plot(x=est$temp_rounded, y=est$count, pch=20, ylab="mean riders",
+      xlab="temperature", main ="KNN fit for riders ~  temperature, k = 4")
+lines(x=est$temp_rounded, y=est$knn, col=2)
+```
+
+El sesgo en este modelo es presumiblemente bajo porque el ajuste es muy flexible: los valores ajustados están muy cerca de los valores reales. El problema es que la función de regresión KNN en $k $= 4 podría estar haciendo * demasiado * un buen trabajo al describir la muestra. Cuando este modelo encuentra nuevos datos, sin las mismas idiosincrasias, su rendimiento puede ser muy pobre, con una gran variación. Es posible que el modelo se sobreajuste a la muestra. La compensación de sesgo-varianza expresa esta idea: cuando el sesgo es bajo, es probable que la varianza sea alta, y viceversa.
+
+ 
+
+A continuación se muestra un ejemplo de un sesgo más alto, posiblemente un caso de varianza menor cuando $k $= 40.
+
+ 
+```{r echo=FALSE}
+r <- day
+r$temp_rounded <- round(r$temp,2)
+library(dplyr)
+knn <- knn.reg(train=r$temperature, y=r$count, k=40, algorithm="brute")
+r$knn <- knn$pred
+ 
+est <-  r %>% group_by(temp_rounded) %>%  dplyr::summarize(count=mean(count), knn=mean(knn))
+
+plot(x=est$temp_rounded, y=est$count, pch=20, ylab="mean riders",
+      xlab="temperature", main ="KNN fit for riders ~ temperature, k = 40")
+lines(x=est$temp_rounded, y=est$knn, col=2)
+```
+
+ 
+
+El sesgo es mayor aquí porque el error del modelo en la muestra es visiblemente mayor que en el caso de $k $= 4, pero por esa misma razón es probable que la varianza sea menor. * No hay forma de lograr un sesgo bajo y una varianza baja simultáneamente. * Todo lo que puede hacer es tratar de equilibrar los dos, aceptando un sesgo moderado para lograr un mejor rendimiento fuera de la muestra. La técnica que usamos para lograr este equilibrio es la validación cruzada, que cubriremos más adelante en el curso. Por ahora podemos notar que el mejor valor para $k $en la regresión KNN es el que minimiza la varianza, no el sesgo. 
+
+ 
+
+Como referencia, aquí hay un código para ajustar una regresión KNN usando el paquete `caret` en R. Usaremos` caret` frecuentemente en el curso porque proporciona una sintaxis consistente para ajustar una amplia gama de modelos (incluyendo, si quisiéramos, regresión lineal) y porque, muy convenientemente, ejecuta una validación cruzada en segundo plano para elegir parámetros de modelo óptimos como $k $. Al ajustar un modelo KNN siempre debemos centrar y escalar las variables.
+
+ 
+
+```{r}
+library(caret)
+(knn_fit <- train(count ~ temperature, 
+      preProcess = c("center","scale"), 
+      method = "knn",
+      data = day))
+```
+ 
+
+Los valores de RMSE y R $^ 2 $que imprime el "cursor" en la pantalla son estimaciones del * error fuera de muestra * del modelo para diferentes $k $. Estos * no * son el error en la muestra del modelo. ^ [Es posible personalizar la búsqueda de cuadrícula de intercalación para parámetros especificados por el usuario como $k $.]
+
+ 
+
+```{r}
+knn_data <- day %>%
+  group_by(temperature = round(temperature,2)) %>%
+  dplyr::summarize(`mean riders` = mean(count)) 
+
+knn_data$prediction <- predict(knn_fit, newdata = knn_data) 
+
+ggplot(knn_data, aes(temperature, `mean riders`)) +
+  geom_point() +
+  geom_line(aes(temperature, prediction), col ="red") +
+  ggtitle("KNN fit for riders ~ temperature, k = 9")
+```
+
+
+ 
+
+Tenga en cuenta que, si bien la regresión KNN puede ofrecer un buen ajuste a los datos, no ofrece detalles sobre el ajuste aparte de RMSE: no hay coeficientes ni valores p. La regresión KNN --- y esto es cierto para muchos algoritmos de aprendizaje automático --- es útil para la predicción, no para la descripción.  
+
+ 
+
+## Estimación paramétrica de la función de regresión: regresión lineal
+
+ 
+
+Con la regresión KNN no asumimos nada sobre la forma de la función de regresión, sino que la estimamos directamente a partir de los datos. Supongamos ahora que $\ mu (t) $es lineal y se puede describir con los parámetros de una línea: $\ mu (t) = \beta_0 + \beta_1t $, donde $\beta_0 $es la intersección de la línea y $\beta_1 $es la pendiente. En este caso, entonces, $\ widehat {ciclistas} = \beta_0 + \beta_1 (temperatura) $. Dado que $\ mu (t) $es una función de población, los parámetros $\beta_0 $y $\beta_1 $son valores de población y son desconocidos, pero podemos estimarlos fácilmente.
+
+ 
+
+```{r}
+summary(linear_fit <- lm(count ~ temperature, data = day))
+
+```
+ 
+
+ 
+
+ 
+```{r}
+ggplot(day, aes(temperature, count)) +
+  geom_point() +
+  stat_smooth(method = "lm", se=F) +
+  ggtitle("riders ~ temperature, with linear fit")
+```
+ 
+
+Interpretemos estos coeficientes del modelo:
+
+ 
+
+- *Intercept*: `r round(as.numeric (coef (linear_fit)) [1], 1)` representa el número de pasajeros pronosticado cuando la temperatura es igual a 0. El intercept no es significativo porque la temperatura mínima en el conjunto de datos es `r round ( min (day$temperatura), 2) `. Podríamos hacerlo significativo al centrar la variable de temperatura en 0, en cuyo caso la intersección representaría el número de pasajeros promedio a la temperatura promedio. (Recuerde: las transformaciones lineales como el centrado no cambian el ajuste del modelo). La función `summary()` también genera un error estándar, valor t y valor p ("Pr (> | t |)") para el interceptar. Explicaremos estos valores a continuación cuando revisemos la inferencia en el contexto de la regresión.
+
+ 
+
+- *temperatura*: `r round (as.numeric (coef (linear_fit)) [2], 1)` representa el cambio previsto en el número de pasajeros asociado con un aumento de la temperatura de 1 unidad. Desafortunadamente, este coeficiente, como la intersección, no es muy interpretable porque el rango de la variable de temperatura es solo `r round (max (day$temperatura) -min (day$temperatura), 2)`, lo que significa que la temperatura realmente puede no aumenta en 1 unidad. Podríamos aplicar aquí otra transformación lineal, para desnormalizar la temperatura, pero, nuevamente, esa transformación no cambiaría el ajuste: la pendiente de la línea de regresión permanecería igual.
+
+ 
+
+Ahora podemos preguntar: ¿cuál de estos dos modelos de pasajeros, el modelo paramétrico que usa regresión lineal o el modelo no paramétrico que usa KNN, es mejor? ¿Qué entendemos por mejor? Una respuesta a esa pregunta está en términos del ajuste en la muestra. ¿Cuál es el RMSE del modelo KNN en comparación con el RMSE del modelo lineal? 
+
+ 
+
+```{r}
+rmse(predict(linear_fit), day$count)
+rmse(predict(knn_fit), day$count)
+```
+ 
+
+(`predict()` es equivalente a `adjust()` en este contexto.) Aquí podemos ver que el modelo KNN supera al modelo lineal en la muestra: en promedio, el modelo KNN está desfasado en aproximadamente `r round (rmse ( predict (knn_fit), day $count)) `ciclistas por día, mientras que el modelo lineal tiene una diferencia de` r round (rmse (predict (linear_fit), day $count)) `. Este tipo de comparación de modelos puede resultar muy útil. En este caso, sugiere que hay margen de mejora en el modelo lineal. Por un lado, podemos ver que la relación entre la temperatura y los pasajeros no es exactamente lineal: el número de pasajeros aumenta con la temperatura hasta aproximadamente .6, momento en el que se estabiliza y disminuye. La regresión KNN es mejor para modelar esta no linealidad. Sin embargo, podemos usar un modelo lineal para modelar un resultado no lineal agregando predictores.
+
+ 
+
+ 
+
+Es probable que el número de pasajeros varíe bastante según la temporada. Agreguemos una variable por temporada para ver si mejora el modelo. Necesitamos definir la temporada explícitamente como un factor, lo cual podemos hacer dentro de la función `lm ()` usando `factor ()`. Esto es apropiado porque la estación no es una variable continua, sino un número entero que representa las diferentes estaciones y que toma solo cuatro valores: 1 - 4. R malinterpretará la estación como una variable continua a menos que la definamos explícitamente como un factor. El orden numérico de los valores de temporada definirá automáticamente los niveles. La función `lm ()` tratará el primer nivel, temporada = 1, como el nivel de referencia, con el que se compararán los otros niveles.
+
+ 
+
+¿Cómo sabemos cuándo un predictor debe definirse como continuo y cuándo debe definirse como factor? Aquí hay una regla general: si restamos un nivel de otro y la diferencia tiene sentido, entonces podemos representar con seguridad esa variable como un número entero. Piense en años de educación. La diferencia entre 10 años de escolaridad y 11 años es un año de educación, lo cual es una diferencia significativa. No estamos * obligados * a representar la educación como una variable continua, pero podríamos. (Codificar la educación como un factor esencialmente encajaría en una regresión separada para cada nivel, lo que podría correr el riesgo de sobreajuste.) Por el contrario, considere el código postal: una diferencia de 1 entre dos códigos postales de 5 dígitos no tiene sentido porque los códigos postales no tienen un orden intrínseco; representan diferencias categóricas, que nunca deben codificarse como números enteros. En cambio, estas variables siempre deben codificarse como factores. (Para obtener información adicional, consulte la página de UCLA que describe [diferentes tipos de variables] (https://stats.idre.ucla.edu/other/mult-pkg/whatstat/what-is-the-difference-between-categorical-ordinal-and-variables-de-intervalo/).)
+
+ 
+
+```{r}
+
+summary(linear_fit2 <- lm(count ~ temperature + factor(season), data = day))
+
+rmse(predict(linear_fit), day$count)
+rmse(predict(linear_fit2), day$count)
+```
+ 
+
+El ajuste ha mejorado; el modelo con temporada tiene un RMSE más bajo.
+
+ 
+
+¿Cómo interpretamos los coeficientes de una variable factorial?
+
+ 
+
+Observe que solo hay 3 coeficientes para 4 temporadas. ¿No debería haber 4 coeficientes? ¿Ha cometido un error la función `lm ()`? No. Para una variable de factor como la temporada, cada coeficiente representa el cambio en la respuesta asociado con un cambio en el predictor desde el primer nivel o nivel de referencia a cada nivel de factor subsiguiente. (Esta codificación, la predeterminada en `lm ()`, se puede ajustar con el argumento `contrastes`). El nivel de referencia normalmente no se muestra en la salida del modelo. Si un predictor tiene niveles de $k $, entonces habrá coeficientes de $k - 1 $que representan los cambios previstos en el resultado asociados con aumentos desde el nivel de referencia en el predictor.
+
+ 
+
+- * factor (temporada) 2 *: 848,7 es el cambio previsto en los ciclistas de primavera con respecto al invierno (temporada = 1).
+
+ 
+
+- * factor (temporada) 3 *: 490,2 es el cambio previsto en los ciclistas de verano, nuevamente durante el invierno, el caso de referencia. 
+
+ 
+
+Los aumentos de temperatura pueden tener diferentes impactos en el número de pasajeros en diferentes estaciones. Podríamos probar esta noción al incluir una interacción entre la estación y la temperatura. 
+
+ 
+
+La salida de la función `summary ()` puede volverse difícil de manejar. En su lugar, usaremos la función `display ()` del paquete arm, que ofrece un resumen del modelo más conciso.
+
+ 
+```{r}
+display(linear_fit3 <- lm(count ~ temperature * factor(season), data = day))
+
+rmse(predict(linear_fit2), day$count)
+rmse(predict(linear_fit3), day$count)
+```
+
+ 
+
+La interacción mejora el ajuste del modelo.
+
+ 
+
+- *temperatura: factor (temporada) 2*: `r round (coef (linear_fit3) [6], 1)` representa la diferencia en la pendiente de la temperatura comparando la temporada 2 con la temporada 1. El coeficiente negativo significa que un aumento de 1 unidad la temperatura se asocia con un cambio * menor * en el número de pasajeros en primavera en comparación con el invierno.
+
+ 
+
+- *temperatura: factor (temporada) 3*: `r round (coef (linear_fit3) [7], 1)` representa la diferencia en la pendiente de la temperatura comparando la temporada 3 con la temporada 1 Y así sucesivamente. 
+
+ 
+
+En un modelo con interacciones, debemos tener cuidado de interpretar los efectos principales con precisión.
+
+ 
+
+- *temperatura *: `r round (coef (linear_fit3) [2], 1)` es el efecto principal de la temperatura y representa el cambio previsto en los ciclistas asociado con un aumento de 1 unidad en la temperatura cuando la temporada = 1 (la categoría de referencia) . En un modelo sin la interacción, el coeficiente de temperatura representaría el cambio promedio en los ciclistas asociado con un cambio de 1 unidad en la temperatura * manteniendo constante la temporada *.
+
+ 
+
+- *factor (temporada) 2 *: `r round (coef (linear_fit3) [3], 1)` representa el cambio previsto en los ciclistas asociado con un aumento de 1 unidad en la temporada (es decir, de la temporada 1 a la temporada 2) cuando la temperatura = 0. Y así sucesivamente. Debido a que la temperatura no es igual a 0 en estos datos, los efectos principales de la temporada no son significativos.
+
+ 
+
+Para entender una interacción, ¡es fundamental visualizarla!
+
+ 
+
+```{r}
+ggplot(day, aes(temperature, count)) +
+  geom_point() +
+  stat_smooth(aes(group = factor(season), col = factor(season)), method="lm", se = F) +
+  ggtitle("Riders ~ temperature, varying by season")
+```
+
+ 
+
+Aquí podemos ver que la relación entre la temperatura y los ciclistas es más fuertemente positiva (más pronunciada) en la temporada 1, más plana en las temporadas 2 y 4, y negativa en la temporada 3. Claramente, la temperatura tiene diferentes efectos en diferentes estaciones. En enero y febrero, un día más cálido provoca un gran aumento de ciclistas: el clima es mejor para montar. En julio, un día más cálido provoca una disminución de ciclistas: el clima es * peor * para montar.
+
+ 
+
+Los coeficientes del modelo lineal proporcionan una gran comprensión de los factores que influyen en el número de pasajeros. Sin embargo, nuestro modelo lineal todavía tiene un rendimiento inferior al modelo KNN. 
+
+ 
+
+```{r}
+rmse(predict(knn_fit), day$count)
+rmse(predict(linear_fit3), day$count)
+```
+ 
+
+La regresión lineal a menudo tendrá un sesgo más alto que un método flexible como la regresión KNN, pero también tenderá a tener una varianza más baja. Exploraremos estas propiedades más a fondo cuando lleguemos a la validación cruzada.
+
+ 
+
+Echemos un vistazo a la matriz del modelo.
+
+ 
+
+```{r}
+head(model.matrix(linear_fit3))
+```
+
+ 
+
+Podemos ver que `lm()` ha convertido la variable de temporada en 3 vectores variables ficticias: factor (temporada) 2, factor (temporada) 3 y factor (temporada) 4. (Si un factor tiene niveles de $k $, entonces una variable ficticia para ese factor codifica $k - 1 $de esos niveles como variables binarias, con los valores 0 o 1 indicando la ausencia o presencia de ese nivel). Los términos de interacción consisten en los productos de los vectores componentes.
+
+ 
+
+## Predicción usando el objeto modelo
+
+ 
+
+Podemos usar un modelo lineal no solo para la descripción sino también para la predicción. Si, por ejemplo, estuviéramos interesados en usar el modelo anterior para predecir el número de pasajeros para una temporada y temperatura en particular, digamos, un día caluroso en primavera, simplemente podríamos usar la ecuación de regresión. Definiremos un día caluroso como .85. Así:
+
+ 
+
+```{r}
+-111 + 9119*.85 + 1513*1 + 6233*0 + 2189*0 - 2525*.85*1 - 9795*.85*0 - 2851*.85*0 
+```
+ 
+
+
+
+
+Aquí hay una forma más precisa de hacer el cálculo que evita errores de redondeo al hacer referencia al objeto del modelo:
+
+ 
+
+```{r}
+t <- .85
+coefs <- coef(linear_fit3)
+coefs[1] + coefs[2]*t + coefs[3]*1 + coefs[4]*0 + 
+  coefs[5]*0 + coefs[6]*t*1 + coefs[7]*t*0 + coefs[8]*t*0  
+
+```
+
+ 
+
+Los resultados son diferentes debido al error de redondeo en el primer caso. El segundo método es más preciso.
+
+ 
+
+Podemos hacer el mismo cálculo tratando el vector de coeficientes como una matriz y usando la multiplicación de matrices. Esto requiere menos escritura pero, al igual que con el método anterior, requiere prestar mucha atención al orden de los términos.
+
+ 
+
+```{r}
+coefs %*% c(1, t, 1, 0, 0, t*1, 0, 0)
+```
+
+ 
+
+Lo más simple de todo es definir un marco de datos con nuestros valores deseados y usar `predecir ()`:
+
+ 
+
+ ```{r}
+predict(linear_fit3, newdata = data.frame(season = 2, temperature = .85))
+```
+
+ 
+
+## Inferencia en el contexto de regresión
+
+ 
+
+Además de las estimaciones de coeficientes para cada variable predictora (incluida la intersección), la salida de `lm ()` (usando `summary ()`) contiene lo siguiente: "Error estándar", "valor t" y "Pr (> | t |) "(el valor p). Repasemos estos.
+
+ 
+
+Recuerde que la inferencia estadística nos permite estimar las características de la población a partir de las propiedades de una muestra. Por lo general, queremos saber si una diferencia o una relación que observamos en una muestra es verdadera en la población --- es "estadísticamente significativa" --- o es probable que se deba al azar. En el contexto de la regresión, queremos saber específicamente si la pendiente de la línea de regresión, $\beta $, que resume la relación de una variable con el resultado es diferente de 0. ¿Existe una relación positiva o negativa? En el paradigma frecuentista, respondemos a esta pregunta utilizando pruebas estadísticas de hipótesis nulas (NHST).
+
+ 
+
+Recuerde que NHST funciona afirmando una "hipótesis nula", $H_0 $. En la regresión, $H_0 $es que la pendiente de la línea de regresión, $\beta $, es 0. Una pendiente de 0 significa que un predictor no tiene efecto o no tiene relación con el resultado. El software de regresión calcula automáticamente una prueba de hipótesis para $\beta $usando la estadística t, definida como: 
+
+$$
+t = \frac {\beta - 0} {SE (\beta)}
+$$
+
+El estadístico $t $para una muestra sigue la distribución $t $de Student con n - 2 grados de libertad. (Para la regresión lineal multivariable, el estadístico $t $sigue la distribución $t $de Student con $n - k - 1 $grados de libertad, donde $k $representa el número de predictores en el modelo). Se utiliza la distribución $t $porque es más conservadora que una distribución normal a $n $más bajos (tiene una cola más gruesa) pero converge a la normal a $n $más altos (por encima de aproximadamente $n $= 30). $SE (\beta) $se define como
+
+$$
+SE (\beta) = \frac {RSE} {\sqrt {\sum_{i = 1} ^ n (x_i - \bar {x} _i)}},
+$$
+
+ 
+
+donde error estándar residual (RSE) =
+
+ 
+
+$$
+RSE = \sqrt {\frac {RSS} {n - 2}},
+$$
+
+y la suma de cuadrados residual (RSS) se puede definir como (en una formulación ligeramente diferente a la que hemos usado antes):
+
+ 
+
+$$
+RSS = \sum_ {i = 1} ^ n (y_i - f (x_i)) ^ 2.
+$$
+
+ 
+
+Después de calcular el estadístico t, usamos una prueba t para compararlo con el valor crítico relevante para la distribución $t$ con n - 2 grados de libertad.
+
+ 
+```{r}
+summary(linear_fit)
+rse <- sqrt(sum((day$count - predict(linear_fit))^2)/(nrow(day) - 2))
+(seb <- rse/sqrt(sum((day$temperature - mean(day$temperature))^2)))
+(t <- as.numeric((coef(linear_fit)[2] - 0) / seb))
+```
+
+Nuestro cálculo coincide exactamente con la salida del modelo lineal. 
+
+ 
+
+Grafiquemos este estadístico t contra la distribución nula de T (729). Usamos la función `dt ()` para generar una gráfica de densidad para una distribución t con 729 grados de libertad, y `qt ()` para identificar los valores críticos para un IC del 95% en la distribución nula; los valores con baja probabilidad (p <.05) estarán a la izquierda del IC inferior oa la derecha del IC superior. Los valores P y los IC proporcionan la misma información sobre lo inusual de un valor observado bajo el nulo.
+
+ 
+
+```{r}
+tdist <- data.frame(x = seq(-5, 25, .01), y = dt(seq(-5, 25, .01), df = 729))
+
+qt(c(.025, .975), df = 729)
+
+ggplot(tdist, aes(x, y)) +
+  geom_line() + 
+  geom_vline(xintercept = t, col = "red", lty = 2) + 
+  geom_vline(xintercept = qt(.025, df = 729), lty = 2) +
+  geom_vline(xintercept = qt(.975, df = 729), lty = 2) +
+  ggtitle("T(n - 2 = 729) with critical values (black) and observed t-statistic (red)") +
+  xlab("t-statistic") +
+  ylab("density")
+```
+
+ 
+
+ 
+
+Una estadística t de `r round (as.numeric (t), 2)` esencialmente nunca ocurriría bajo la distribución nula, lo que nos permite "rechazar la nula" con confianza. El valor p asociado con el coeficiente $\beta $para la temperatura en el resumen del modelo --- esencialmente cero --- refleja este resultado. Podemos calcular nuestro propio valor p con el siguiente código:
+
+ 
+
+```{r}
+2 * pt(t, df = 729, lower.tail = FALSE)
+```
+
+Usamos `lower.tail = F` porque estamos interesados en la probabilidad de t =` r round (as.numeric (t), 2) `en la cola * superior *.
+
+ 
+
+El resumen del modelo también genera algo llamado estadístico F con un valor p asociado:
+
+ 
+
+$$
+F = \frac{\frac{TSS - RSS}{p - 1}}{\frac{RSS}{n - p}}
+$$
+
+ 
+
+La hipótesis nula para la prueba f es: $H_0: \beta_1 = ... \beta_ {p-1} = 0 $. En otras palabras, la prueba responde a la pregunta: "¿Alguno de los predictores es útil para predecir la respuesta?" Esta no es una medida muy útil del rendimiento del modelo, ya que los modelos casi siempre tienen * algún * valor predictivo.
+
+ 
+
+Podríamos estimar muy fácilmente $SE (\beta) $usando el bootstrap. Utilice este enfoque si tiene motivos para desconfiar de $SE (\beta) $calculado analíticamente por `lm ()`. Por ejemplo, en el caso de errores heterocedásticos (discutidos a continuación) `lm ()` tenderá a subestimar $SE (\beta) $. Como mínimo, resultados similares para bootstrapped $SE (\beta) $indicarían la confiabilidad de los resultados reportados por `lm ()`.
+
+ 
+
+```{r}
+temperature_coef <- NULL
+
+for(i in 1:1000){
+  rows <- sample(nrow(day), replace = T)
+  boot_sample <- day[rows, ]
+  model <- lm(count ~ temperature, data = boot_sample)
+  temperature_coef[i] <- coef(model)[2]
+}
+
+sd(temperature_coef)
+```
+
+ 
+
+En este caso, la estimación de arranque de $SE (\beta_{temp})$ es similar pero menor que la calculada analíticamente. Por lo tanto, la estimación `lm()` es en realidad más conservadora en este caso.
+
+ 
+
+El $SE $para los coeficientes en la salida de `lm ()` se puede usar para calcular los IC para la estimación del coeficiente. $\ hat {\beta} + 1.96 (SE) $da el IC del 95% superior, y $\ hat {\beta} - 1.96 (SE) $da el menor. Los IC del 95% que no incluyen 0 indican que el coeficiente es estadísticamente significativo, equivalente a un valor p del coeficiente de menos de .05.  
+
+ 
+
+<!-- Debemos señalar que el valor p estima $p (D | H) $(donde $D $son los datos observados y $H $es la hipótesis nula), mientras que los IC del 95% representan un rango de valores para $\ hat \beta $dados los datos. Técnicamente, un IC del 95% para $\ hat \beta $significa que si tuviéramos que tomar muestras repetidamente de la población y calcular intervalos para $\ hat \beta $, entonces el parámetro de población, el valor verdadero, $\beta $, sería estar en el 95% de esos intervalos. Entonces, las dos cantidades, los valores p y los IC, son diferentes, pero brindan información similar. -->
+
+ 
+
+ 
+
+ 
+
+Como se señaló en el capítulo anterior, el uso de IC en lugar de valores p promueve un pensamiento más flexible sobre los datos. Ésta es otra razón para usar la función `display ()` del paquete arm. No solo presenta la salida de `lm ()` de manera más compacta, sino que tampoco reporta estadísticas t ni valores p. Como hemos visto, $SE $s transmiten la misma información.
+
+ 
+```{r}
+display(linear_fit)
+```
+
+ 
+
+Los valores plausibles para la temperatura son 6641 $\pm 2(305) $ o aproximadamente [`r 6641-2 * 305`,` r 6641 + 2 * 305`].^[Usamos 2 aquí en lugar de 1,96 para un cálculo rápido. ] Este IC no incluye 0, de lo cual podemos concluir que la temperatura es estadísticamente significativa. (El valor p para la temperatura informado en el `summary()` concuerda).
+
+ 
+
+ 
+
+## Supuestos de regresión
+
+Los resultados de la regresión solo son precisos si se dan un conjunto de supuestos (en orden de importancia): ^ [De Gelman y Hill (2007). * Análisis de datos mediante regresión y modelos jerárquicos / multinivel *. Cambridge: Cambridge UP.]
+
+ 
+
+1. * Validez de los datos * para responder a la pregunta de investigación.
+
+ 
+
+2. * Linealidad de la relación * entre el resultado y las variables predictoras.
+
+ 
+
+3. * Independencia de los errores * (en particular, sin correlación entre errores consecutivos como en el caso de los datos de series de tiempo).
+
+ 
+
+4. * Varianza igual de errores * (homocedasticidad).
+
+ 
+
+5. * Normalidad de errores. *
+
+ 
+
+No se preocupe por estas suposiciones: la mayoría de estos problemas no son fatales y se pueden solucionar mejorando su modelo, seleccionando variables diferentes o adicionales o utilizando una distribución o marco de modelado diferente. Los gráficos de residuos son la mejor herramienta para evaluar si se han cumplido los supuestos del modelo.
+
+ 
+
+* 1. Validez de los datos para responder a la pregunta de investigación *
+
+ 
+
+Esto puede parecer obvio pero es necesario enfatizarlo:
+
+ 
+
+- La medida de resultado debe reflejar con precisión el fenómeno de interés.
+
+ 
+
+- El modelo debe incluir todas las variables relevantes.
+
+ 
+
+- El modelo debe generalizarse a todos los casos a los que se aplica. 
+
+ 
+
+Por ejemplo, un modelo de ganancias no necesariamente le informará sobre los activos totales, ni un modelo de puntajes de prueba le informará sobre la inteligencia o el desarrollo cognitivo. ¡Asegúrese de que sus datos proporcionen información * precisa * y * relevante * para responder a su pregunta de investigación!
+
+ 
+
+* 2. Supuesto de linealidad *
+
+ 
+
+La suposición matemática más importante del modelo de regresión es que el resultado es una función lineal determinista de los predictores separados: $y = \beta_{0} + \beta_{1}x_{1} + \beta_{2}x_{2}...$. Podemos comprobar este supuesto visualmente trazando las variables predictoras contra el resultado:
+
+ 
+
+```{r}
+ggplot(day, aes(temperature, count)) + 
+  geom_point() + 
+  stat_smooth(method = "lm", se = F) +
+  ggtitle("count ~ temperature")
+```
+ 
+
+Los datos son claramente * no * lineales. qué hacemos? Podemos agregar predictores al modelo, como la temporada, que permiten que un modelo * lineal * se ajuste a datos * no * lineales. También podríamos considerar agregar un término cuadrático al modelo: conteo ~ temperatura + temperatura $^ 2 $. 
+
+ 
+
+```{r}
+linear_fit4 <- lm(count ~ temperature + I(temperature^2), data = day)
+ggplot(day, aes(temperature, count)) +
+  geom_point() +
+  geom_line(aes(temperature, fitted(linear_fit4)), col= "red") +
+  ggtitle("count ~ temperature + temperature^2")
+```
+ 
+
+ 
+
+ 
+
+Una vez que se han agregado predictores adicionales, podemos verificar los gráficos de residuos, ya que la falla en el modelo de no linealidad se mostrará en los residuos. `plot ()` es una función R incorporada para verificar la distribución de errores de un modelo.
+
+ 
+
+```{r}
+plot(linear_fit, which = 1)
+```
+
+ 
+
+ 
+
+Podemos ver, como era de esperar, una no linealidad significativa en la gráfica residual para el modelo con temperatura solamente. Esperamos que los residuos no tengan una estructura visible, ningún patrón. En términos del supuesto de linealidad, la línea de resumen roja no debe tener curvatura. Cuando agregamos temporada, la parcela residual, aunque no es perfecta, mejora mucho. 
+
+ 
+
+```{r}
+plot(linear_fit2, which = 1)
+```
+
+ 
+
+ 
+
+ 
+
+Sin embargo, el modelo todavía lucha con días de gran volumen, con más de 5000 ciclistas previstos. Veamos si agregar una interacción entre la estación y la temperatura ayuda:
+
+ 
+
+```{r}
+plot(linear_fit3, which = 1)
+```
+
+ 
+
+Quizás esto sea mejor. La no linealidad implica menos observaciones, la mayoría de ellas en los días con valores ajustados superiores a 6000. Pero ha surgido otro problema con este modelo: los errores heterocedásticos. Discutiremos este supuesto antes de la independencia de errores.
+
+ 
+
+* 4. Igual varianza de errores * (homocedasticidad)
+
+ 
+
+Observe cómo los errores en el gráfico residual anterior tienen forma de embudo. Los errores del modelo no se distribuyen por igual en el rango de los valores ajustados, una situación conocida como heterocedasticidad. Una solución es transformar la variable de resultado tomando el registro (solo funciona con valores positivos). Si esto no funciona, recuerde que la principal consecuencia de los errores heterocedásticos es que los $SE (\beta) $s son más pequeños de lo que deberían ser, lo que lleva a valores p más significativos de los que debería haber. Un remedio para este problema inferencial es calcular los errores estándar ajustados que son robustos a la varianza desigual; el paquete MASS ofrece la función `rlm ()` para ajustar tal modelo.
+
+ 
+
+Aquí está la gráfica residual para un modelo de log (recuento):
+
+ 
+
+```{r}
+plot(lm(log(count) ~ temperature * season, data = day), which = 1)
+```
+ 
+
+Es posible que la heterocedasticidad haya mejorado, pero ahora han surgido algunos valores atípicos y todavía tenemos un problema de no linealidad. ¿Qué hacer?
+
+ 
+
+Después de revisar estos gráficos de residuos, deberíamos dar un paso atrás y pensar en nuestros datos. Un problema queda claro. Es probable que el número de pasajeros en los días siguientes sea muy similar debido a la temperatura, el clima y la temporada. En consecuencia, los residuos del modelo se agruparán. Si el modelo no hace un buen trabajo al contabilizar el número de pasajeros en, digamos, días de alta temperatura, los errores grandes no se distribuirán al azar sino que ocurrirán juntos, producidos por una ola de calor en julio, por ejemplo. Los errores de los días siguientes serán similares. La regresión lineal puede no ser un gran método para estos datos, porque depende del supuesto de independencia del error. Esta puede ser la razón por la que la regresión KNN ha superado consistentemente a nuestros diversos modelos lineales. Sin embargo, tenga en cuenta que la regresión KNN puede ajustarse mejor a los datos y posiblemente ofrecer mejores predicciones, pero no ofrece ninguna ayuda para comprender las relaciones entre las variables. La regresión lineal, incluso si el modelo no es perfecto, proporciona información sobre los factores que afectan a la cantidad de usuarios, información que puede ser extremadamente valiosa, por ejemplo, para los administradores del programa de bicicletas compartidas, mientras que la regresión KNN solo puede ofrecer una predicción.
+
+ 
+
+* 3. No independencia de errores (residuales correlacionados) *
+
+ 
+
+La falta de independencia de los errores ocurre en los datos de series de tiempo o en los datos con observaciones agrupadas, cuando, por ejemplo, varios puntos de datos provienen de individuos individuales, tiendas o aulas. Podemos diagnosticar los residuos correlacionados en los datos de los usuarios de bicicletas mirando un gráfico de residuos por fecha.
+
+ 
+
+```{r}
+data.frame(day = seq(1,nrow(day)),
+             residuals = residuals(linear_fit3)) %>%
+ggplot(aes(day, residuals)) +
+  geom_point() +
+  ggtitle("Residuals by day: count ~ temperature * season") +
+  geom_hline(yintercept = 0, lty = 2, col = "red")
+```
+ 
+
+Podemos ver muy claramente que los errores ocurren en grupos relacionados con la fecha. Quizás el patrón más grande sea por año. Sin un término por año, el modelo tiene dificultades, prediciendo de forma insuficiente en el primer año y prediciendo de más en el segundo. Si agregamos un año al modelo, los residuos se ven mejor pero la agrupación sigue siendo evidente.
+
+ 
+
+ 
+```{r}
+data.frame(day = seq(1,nrow(day)),
+             residuals = residuals(update(linear_fit3, ~ . + year))) %>%
+ggplot(aes(day, residuals)) +
+  geom_point() +
+  ggtitle("Residuals by day: count ~ temperature * season + year") +
+  geom_hline(yintercept = 0, lty = 2, col = "red")
+```
+ 
+
+¿Cómo abordamos los errores no independientes? Si la no independencia está relacionada con el tiempo, entonces deberíamos usar un modelo apropiado para datos de series de tiempo, como ARIMA. Si la agrupación se debe a alguna otra estructura en los datos, por ejemplo, la agrupación debido a la ubicación, entonces podríamos considerar el uso de un modelo jerárquico o multinivel. Para manejar errores no independientes con un modelo lineal, necesitamos agregar variables que controlen el agrupamiento. La agrupación en este caso se debe a la estacionalidad, por lo que agregamos predictores como año, temporada, mes o día de la semana. Si el modelo resultante aún no se ajusta bien a los datos y solo nos interesa la predicción, entonces podríamos considerar el uso de un modelo no paramétrico como KNN.
+
+ 
+
+ 
+
+* 5. Normalidad de los residuales *
+
+ 
+
+Comparado con los otros supuestos, este no es muy importante. La regresión lineal es extremadamente robusta a las violaciones de la normalidad. Podemos comprobar visualmente la normalidad de los residuales con un histograma: 
+
+ 
+
+```{r, warning = F}
+data.frame(residuals = residuals(linear_fit3)) %>%
+  ggplot(aes(residuals)) +
+geom_histogram() +
+  ggtitle("Residuals:  count ~ temperature * season")
+```
+
+
+ 
+
+¡El modelo sin año definitivamente no es normal! La bimodalidad de esta distribución ofrece una pista de que el año es un término estacional clave. El paquete de coche incluye una función, `qqPlot ()` que (de la documentación) "traza cuantiles empíricos de una variable, o de residuales studentizados de un modelo lineal, contra cuantiles teóricos de una distribución de comparación".
+
+ 
+
+```{r}
+library(car)
+qqPlot(linear_fit3, pch = 20)
+```
+
+ 
+
+Aquí podemos ver desviaciones de la normalidad que también tienen una estructura anual discernible.
+
+ 
+
+En resumen, utilizamos gráficos de residuos para interrogar y mejorar el ajuste del modelo. Si bien hay funciones disponibles para probar formalmente la mayoría de los supuestos del modelo anterior, es mejor (en mi opinión) evitar tales pruebas binarias a favor de graficar los residuos y pensar en los datos y cómo mejorar un modelo.
+
+ 
+
+ 
+
+## Ejemplos adicionales de interpretación de modelos
+
+ 
+
+Para estos ejemplos, usaremos el conjunto de datos de vivienda de Boston, que registra los precios de la vivienda en el área de Boston en la década de 1970 junto con varios predictores. La variable de resultado es el valor mediano de las viviendas ocupadas por sus propietarios en \$1000, codificado como "medv". Los predictores incluyen lo siguiente:
+
+ 
+
+- chas: variable ficticia de Charles River (= 1 si el tramo limita con el río; 0 en caso contrario).
+
+- lstat: menor estatus de la población (porcentaje). El diccionario de datos no es explícito, pero esta variable parece ser una medida del estatus socioeconómico de un barrio, representado como el porcentaje de clase trabajadora o familias pobres. Centraremos esta variable para que los efectos principales sean interpretables.
+
+- rm: número medio de habitaciones por vivienda en un área geográfica determinada. Centraremos esta variable para que los efectos principales sean interpretables.
+
+ 
+
+### Interpretación de la intersección y los coeficientes $\beta $para un modelo con predictores continuos
+
+ 
+
+```{r b}
+library(MASS); data(Boston)
+Boston$rm_centered  <- Boston$rm - mean(Boston$rm)
+Boston$lstat_centered <-  Boston$lstat - mean(Boston$lstat)
+display(lm(medv ~ rm_centered + lstat_centered, data = Boston))
+```
+
+ 
+
+- La intersección (intercept) es el valor predicho de la variable de resultado cuando los predictores son 0. A veces, la intersección no será interpretable porque un predictor no puede = 0. La solución es centrar la variable para que 0 tenga sentido.
+
+- *Intercept*: El valor predicho de medv cuando todos los predictores son 0: 22.53 + 5.09 (0) - .64 (0).
+
+- *rm_centered*: 5.09 representa el cambio predicho en medv cuando rm_centered aumenta en una unidad (1 habitación), mientras se mantienen constantes las otras variables.
+
+- *lstat_centered*: -.64 representa el cambio predicho en medv cuando lstat_centered aumenta en una unidad, mientras se mantienen constantes las otras variables.
+
+ 
+
+ 
+
+### Interpretación de la intersección y los coeficientes $\beta$ para un modelo con predictores binarios y continuos
+
+ 
+
+ 
+
+```{r }
+display(lm(medv ~ rm_centered + lstat_centered + chas, data = Boston))
+```
+
+ 
+
+- La intersección es el valor predicho de la variable de resultado cuando el predictor binario es 0 y la variable continua es 0 (que, para las variables centradas, es el promedio).
+
+- *Intercept*: El valor predicho de medv cuando todos los predictores son 0: 22.25 + 4.96 (0) -.64 (0) + 4.12 (0).
+
+- *rm_centered*: 4.96 representa el cambio predicho en medv cuando rm_centered aumenta en una unidad (1 habitación), mientras se mantienen constantes las otras variables.
+
+- *lstat_centered*: -.64 representa el cambio predicho en medv cuando lstat_centered aumenta en una unidad, mientras se mantienen constantes las otras variables.
+
+- *chas*: 4.12 representa el cambio predicho en medv cuando chas aumenta en una unidad, mientras se mantienen constantes las otras variables.
+
+ 
+
+ 
+
+ 
+
+### Interpretación de la intersección y los coeficientes $\beta$ para un modelo con predictores binarios y continuos, con interacciones
+
+ 
+
+```{r}
+
+display(lm(medv ~ rm_centered* chas + lstat_centered, data = Boston))
+
+```
+
+Recordemos que la visualización de datos en estadística es muy necesaria!
+
+```{r }
+ggplot(Boston, aes(rm_centered, medv, col= factor(chas))) + 
+  geom_point() + 
+  stat_smooth(method="lm", se=F)+
+  ggtitle("medv ~ rm_centered by chas")
+```
+
+ 
+
+Estas rectas de regresión son prácticamente paralelas, lo que indica que no hay interacción. Este resultado se confirma por el hecho de que el valor p para rm_centered: chas es .85 (p> .05).
+
+ 
+
+- *Intercept*: 4.98 es el valor predicho de medv cuando todos los predictores son 0.
+
+- *rm_centered*: 4.98 representa el cambio predicho en medv cuando rm_centered aumenta en una unidad (1 habitación), entre aquellas casas donde chas = 0.
+
+- *chas*: 4.17 representa el cambio predicho en medv cuando chas aumenta en una unidad, entre hogares con habitaciones promedio (rm_centered = 0).
+
+- *lstat_centered*: -.64 representa el cambio predicho en medv cuando lstat_centered aumenta en una unidad, mientras se mantienen constantes las otras variables.
+
+- *rm_centered: chas*: -.21 se agrega a la pendiente de rm_centered, 4.98, para chas aumenta de 0 a 1. O, alternativamente, se agrega -.21 a la pendiente de chas, 4.17, por cada unidad adicional de rm__centrado.
+
+ 
+
+### Interpretación de la intersección y los coeficientes $\beta$ para un modelo con predictores continuos, con interacciones
+
+ 
+
+```{r}
+display(lm(medv ~ rm_centered * lstat_centered, data = Boston))
+```
+
+ 
+
+Primero, visualizaremos la interacción dicotomizando lstat.
+
+```{r}
+Boston$lstat_bin <- ifelse(Boston$lstat > mean(Boston$lstat), "above avg","below avg")
+ggplot(Boston, aes(rm_centered, medv, col= lstat_bin) ) + 
+  geom_point() + 
+  stat_smooth(method="lm") +
+  ggtitle("medv ~ rm varying by lstat")
+```
+ 
+
+El número de habitaciones en una casa claramente afecta el valor --- ambas líneas de regresión son positivas. Pero esta relación positiva es más pronunciada entre los hogares con menor lstat. Aumentar la cantidad de habitaciones tiene un impacto mayor en los vecindarios más pobres que en los vecindarios más ricos.
+
+ 
+
+A continuación, dicotomizamos rm.
+
+```{r}
+Boston$rm_bin <- ifelse(Boston$rm > mean(Boston$rm), "above avg","below avg")
+ggplot(Boston, aes(lstat_centered, medv, col = rm_bin) ) + 
+  geom_point() + 
+  stat_smooth(method="lm") +
+  ggtitle("medv ~ lstat varying by rm")
+```
+ 
+
+El nivel socioeconómico promedio en un vecindario afecta claramente el valor de la vivienda; ambas líneas de regresión son negativas. Pero esta relación negativa es más pronunciada entre los hogares con habitaciones por encima del promedio. El nivel socioeconómico bajo (lstat aumentado) tiene un mayor impacto en el valor de las viviendas con habitaciones por encima del promedio que en las casas con habitaciones por debajo del promedio.
+
+ 
+
+ 
+
+- *Intercept*: 21.04 es el valor predicho de medv cuando tanto rm como lstat son promedios.
+
+- *rm_centered*: 3.57 es el cambio predicho en medv si rm_centered aumenta en 1 unidad, entre aquellos hogares donde lstat_centered es promedio (= 0).
+
+- *lstat_centered*: .85 es el cambio predicho en medv si lstat_centered aumenta en 1 unidad, entre aquellos hogares donde rm_centered es promedio (= 0)
+
+- *rm_centered: lstat_centered*: .48 se agrega a la pendiente de rm_centered, 3.57, por cada unidad adicional de lstat_centered. O, alternativamente, se agrega -.48 a la pendiente de lstat_centered, -.85, para cada unidad adicional de rm__centered. Podemos entender la interacción diciendo que la importancia de lstat como predictor de medv disminuye a mayor número de habitaciones y, de manera similar, que la importancia de rm como predictor de medv disminuye a niveles más altos de lstat.
+
+ 
+
+## Centrado y escalado
+
+ 
+
+Hemos visto cómo los predictores centrados pueden ayudar a la interpretación del modelo. Además de centrar, podemos * escalar * predictores, lo que hace que los coeficientes del modelo resultante sean directamente comparables. La función `rescale ()` en el paquete arm automáticamente centra una variable y divide por 2 desviaciones estándar ($ \frac {x_i - \bar {x}}{2sd} $). La configuración predeterminada ignora las variables binarias. La división por 2 desviaciones estándar, en lugar de 1 (como cuando se calcula una puntuación z tradicional), hace que las variables continuas reescaladas sean comparables a las variables binarias no transformadas. Después de centrar y escalar, los coeficientes del modelo se pueden usar para evaluar los tamaños del efecto e identificar los predictores más fuertes. 
+
+ 
+
+¿Cuál es un predictor más sólido del número de ciclistas, la velocidad del viento o el año?
+
+ 
+
+```{r}
+display(lm(count ~ windspeed + year, data = day))
+```
+
+ 
+
+Este modelo hace que parezca que windpseed es, con mucho, el predictor más fuerte: el valor absoluto del coeficiente es más de 2 veces mayor. Pero este resultado es engañoso, un artefacto de escala variable.
+
+ 
+```{r}
+display(lm(count ~ arm::rescale(windspeed) + year, data = day))
+```
+ 
+
+El ajuste del modelo no ha cambiado --- $R ^ 2 $es el mismo en ambos modelos --- pero el centrado y la escala nos permiten ver que el año en realidad tiene un tamaño de efecto mucho mayor que la velocidad del viento: se asocia un aumento de 1 unidad en el año con un mayor cambio en el número de pasajeros. Podríamos, de manera equivalente, usar la función `estandarizar ()`, también del paquete arm, que convenientemente cambia la escala de todas las variables en un modelo a la vez.
+
+ 
+
+```{r}
+display(standardize(lm(count ~ windspeed + year, data= day)))
+```
+ 
+
+La función `standardize()` nos advierte que la velocidad del viento es ahora un z-score (z.windspeed), y que ese año se ha centrado (c.year). La interpretación de c.year es la misma que para año: un aumento de 1 unidad (-.5 a .5) se asocia con un aumento previsto de 2183,75 pasajeros. Sin embargo, la interpretación de z.windspeed ahora es diferente, ya que un aumento de 1 unidad en z.windspeed es 2 desviaciones estándar. Por lo tanto, un aumento de 2 desviaciones estándar en la velocidad del viento (`r round(2*sd(day$windspeed),2)`) se asocia con un cambio previsto en el número de pasajeros de -882.
+
+ 
+
+¿Por qué nos importa poder comparar coeficientes? El valor absoluto de $\beta $es una medida de la fuerza de la relación entre un predictor y el resultado y, por lo tanto, de la importancia de ese predictor para explicar el resultado. Los valores p no ofrecen orientación sobre la * fuerza * de un predictor: un predictor estadísticamente significativo podría tener un tamaño de efecto minúsculo y prácticamente intrascendente. El valor absoluto de $\beta $es, por tanto, una medida de importancia práctica, en oposición a la significación estadística. La significancia estadística expresa la improbabilidad de un resultado, mientras que $\beta $representa el tamaño del efecto, cuánto esperamos que cambie el resultado como resultado de variar el predictor. Estandarizar $\beta $nos permite interpretar el tamaño del efecto sin dejarnos engañar por diferencias arbitrarias en la escala variable.
+
+ 
+
+## Transformación de datos
+
+ 
+
+Hasta ahora hemos considerado transformaciones que no cambian el ajuste del modelo, sino que simplemente ayudan a la interpretación. A veces, sin embargo, queremos cambiar las variables para que un modelo lineal se ajuste mejor. La transformación logarítmica ampliamente utilizada es un ejemplo. Deberíamos considerar una transformación logarítmica si nuestros datos están sesgados, muestran un aumento no lineal o tienen un rango grande. Regla empírica: si una variable tiene un margen superior a dos órdenes de magnitud (x 100), la transformación logarítmica probablemente mejorará el modelo.
+
+ 
+
+Para la transformación logarítmica usaremos el logaritmo natural, designado $\log_e$, o $\ln$, o, en código R: `log()`. El logaritmo natural es la función inversa de la función exponencial (y viceversa): se deshacen entre sí. Por lo tanto, estas identidades: $e ^ {\ln (x)} = x $(si $x> 0 $); $\ln (e ^ x) = x $. Para volver a poner una variable transformada logarítmica en la escala original, simplemente exponenciamos: $x = e ^ {\ln (x)} $. En código R: `x = exp (log (x)`). Una razón para usar registros naturales es que * los coeficientes en la escala logarítmica natural son, aproximadamente, interpretables como diferencias proporcionales. * Ejemplo: para una variable transformada logarítmicamente, un coeficiente de .06 significa que una diferencia de 1 unidad en $x $ corresponde a una diferencia aproximada del 6% en $y$, y así sucesivamente. ¿Por qué? `exp (.06)` = 1.06, un aumento del 6% desde 1 como referencia. Sin embargo, con coeficientes más grandes, esto no funciona exactamente: `exp (.42)` = 1.52, una diferencia del 52%.
+
+ 
+
+La población de EE. UU. De 1790 a 1970 es un ejemplo de una variable que nos gustaría transformar, ya que el aumento no es lineal y es grande:
+
+```{r}
+data("uspop")
+plot(uspop, main = "US population, 1790 - 1970, in millions")
+```
+
+ 
+
+Pero cuando tomamos el logaritmo de la población, el aumento es (más) lineal:
+
+ 
+
+```{r }
+
+plot(log(uspop), main = "Logged US population, 1790 - 1970, in millions")
+
+```
+
+ 
+
+La transformación logarítmica se usa con frecuencia con precios o ingresos, ya que el extremo superior de la escala para tales variables suele ser exponencialmente mayor que el inferior. Podemos registrar los valores de las viviendas en el conjunto de datos de viviendas de Boston para mejorar el ajuste del modelo.
+
+ 
+
+ 
+
+```{r}
+Boston %>%
+  arrange(medv) %>%
+  mutate(observations = seq(1, length(medv)),
+         log_medv = log(medv)) %>%
+  dplyr::select(medv, log_medv, observations) %>%
+  gather(type, home_value, -observations) %>%
+  ggplot(aes(observations, home_value)) +
+  geom_line() +
+  facet_wrap(~type, scales = "free_y")+
+  ggtitle("Comparison of log(medv) and medv")
+
+```
+ 
+
+ 
+
+Tomar el logaritmo de medv no ha desplazado medv hacia la linealidad tanto como podríamos haber esperado. No obstante, ¿mejorará el ajuste?
+
+ 
+
+```{r}
+display(standardize(lm(medv ~ rm + lstat, data = Boston)))
+display(standardize(lm(log(medv) ~ rm + lstat, data = Boston)))
+```
+ 
+
+Un poco. $R^2 $ha mejorado de .64 a .68.
+
+ 
+
+Se debe tener cuidado al interpretar un modelo transformado logarítmicamente.
+
+ 
+
+- *Intercept*: 3.03 representa el valor log (medv) predicho cuando tanto rm como lstat son promedios (ya que ambas variables se han centrado y escalado). Para volver a poner esto en la escala original, exponencial: $e ^ {3.03} $= `r round (exp (3.03), 2)`. Por lo tanto, el medv predicho del modelo para hogares con lstat y rm promedio en dólares es $`r round (exp (3.03), 2) * 1000`.
+
+- *z.rm*: .18 o 18% representa el cambio porcentual previsto en medv asociado con un aumento de dos desviaciones estándar en rm (`r round (2 * sd (Boston $rm), 2)`).
+
+- *z.lstat*: .55 o 55% representa el cambio porcentual previsto en medv asociado con un aumento de dos desviaciones estándar en lstat (`r round (2 * sd (Boston $lstat), 2)`).
+
+- *residual se*: .23 es la desviación estándar de los residuos registrados. Para volver a poner esto en la escala original, exponencial: $e ^ .23 $= $`r exp (.23)`.
+
+ 
+
+¿Y si tanto el resultado como el predictor se transforman logarítmicamente?
+
+```{r}
+display(lm(log(medv) ~ log(lstat), data = Boston))
+```
+
+ 
+
+La transformación del registro de un predictor, así como el resultado, es una táctica perfectamente razonable si cree que la no normalidad en ambos podría estar contribuyendo a gráficos residuales problemáticos. En este caso, $R ^ 2 $no ha cambiado, lo que sugiere que la transformación logarítmica de lstat no es necesaria.
+
+ 
+
+Recuerde: log (lstat) = 0 cuando lstat = 1 (ya que log (1) = 0)
+
+ 
+
+- *Intercept*: log (medv) es 4.36 cuando lstat = 1. (Tenga en cuenta que no podemos centrar lstat en este caso porque no podemos tomar el logaritmo de un número negativo).
+
+- *log (lstat)*: -.56 o -56% representa el cambio porcentual previsto en medv asociado con un aumento del 1% en lstat.
+
+ 
+
+## Colinealidad
+
+ 
+
+La colinealidad ocurre cuando dos variables predictoras están fuertemente correlacionadas entre sí. Si bien no es un supuesto de regresión per se, la colinealidad puede afectar la precisión de los coeficientes, así como inflar los errores estándar. La colinealidad es menos preocupante cuando solo nos interesa la predicción. 
+
+ 
+
+Un buen ejemplo es la temperatura y la temperatura percibida, atemp, en los datos de la bicicleta. Estas medidas de temperatura están muy cerca:
+
+ 
+
+```{r}
+ggplot(day, aes(temperature)) + 
+  geom_density()+
+  geom_density(aes(atemp), col= "red") +
+  ggtitle("Density of temp (black) vs. percieved temp (red)")
+```
+
+ 
+
+Ahora compare el modelo de uso de la bicicleta con solo la temperatura como predictor con el modelo con temperatura y temperatura. Observe lo que sucede con los errores estándar y los coeficientes:
+
+ 
+
+```{r}
+display(standardize(lm(count ~ temperature, data = day)))
+display(model <- standardize(lm(count ~ temperature + atemp, data = day)))
+```
+
+ 
+
+Los $SE$s se hacen enormes y los coeficientes se vuelven poco fiables.
+
+ 
+
+La solución práctica en el caso anterior es usar solo una de estas variables sabiendo que contienen la misma información. Pero las variables a menudo están correlacionadas. ¿Cuánta correlación está bien? El factor de inflación de la varianza (VIF) puede ayudarnos a decidir.
+
+ 
+
+La varianza muestral estimada del coeficiente de regresión $j ^ {th} $se puede escribir como:
+
+ 
+
+$$ {\rm \widehat {var}} (\hat {\beta} _j) = \frac {\hat {\sigma} ^ 2} {(n-1) s_j ^ 2} \cdot \frac {1} {1-R_j ^ 2} $$
+
+ 
+
+donde $\hat {\sigma} ^ 2$ es la varianza del error estimada, $s_j ^ 2 $ es la varianza muestral de $x_j $y $\frac {1} {1-R_j ^ 2}$ es el factor de inflación de la varianza o $VIF_j$.
+
+ 
+
+El término $R_j ^ 2$ es el $R ^ 2$ de un modelo de regresión lineal en el que el predictor $X_j$ se utiliza como variable de respuesta y todas las demás covariables como variables explicativas. Un $R ^ 2$ alto en dicho modelo significa que la mayor parte de la variación en el predictor $X_j$ se explica por todas las demás covariables, lo que significa que hay colinealidad. Esto infla los errores estándar, ensanchando los IC y disminuyendo la probabilidad de detectar un efecto. Para evaluar la colinealidad entre los predictores, use `vif ()` del paquete del automóvil:
+
+ 
+
+```{r}
+cor(day$temperature, day$atemp)
+```
+
+ 
+
+Estas variables están casi perfectamente correlacionadas.
+
+ 
+
+```{r}
+car::vif(model)
+```
+
+ 
+
+Este resultado significa que los errores estándar son aproximadamente $\ sqrt {60.5} $= `r round (sqrt (60.5), 1)` más grandes de lo que serían sin la otra variable! He visto umbrales de VIF de 4 (John Fox) o 5-10 (Hastie & Tibshirani) recomendados para eliminar una variable.
+
+ 
+
+## Valores atípicos
+
+ 
+
+Los valores atípicos pueden afectar el ajuste de un modelo de regresión. Es mejor no eliminarlos (al menos no al principio) sino comprenderlos. (Por supuesto, algunos valores extremos podrían ser errores de codificación, en cuyo caso querrá eliminarlos). Recuerde que los valores atípicos son principalmente una preocupación * después * de que el modelo se ha ajustado, en cuyo caso aparecen entre los residuos. Los predictores incluidos en el modelo pueden ocuparse de las observaciones que aparecen como valores atípicos en el análisis univariado o bivariado. Como ejemplo, consideremos un conjunto de datos incluido en la biblioteca de ISLR, Hitters, que contiene información de las estadísticas de rendimiento y los salarios de los jugadores de béisbol de las grandes ligas en la temporada de 1986. Creemos un modelo de registro (salario) usando turnos al bate, hits, años en la liga, jonrones, carreras impulsadas, bases por bolas y asistencias.
+
+ 
+
+```{r}
+library(ISLR)
+data(Hitters)
+
+display(standardize(m <- lm(log(Salary) ~ AtBat + Hits + Years +
+                              HmRun + RBI + Walks + Assists, data = Hitters)))
+
+plot(m, which=1)
+```
+ 
+
+Los salarios de tres jugadores --- Mike Schmidt, Terry Kennedy y Steve Sax --- claramente no están muy bien explicados por este modelo. El modelo predice que a los dos primeros se les debería pagar menos y que al tercero se les debería pagar más. Podemos obtener otra perspectiva de estas observaciones utilizando una métrica llamada "distancia de Cook", que es una medida de influencia de uso común.
+
+ 
+
+```{r }
+plot(m, which=4)
+```
+
+ 
+
+Un punto influyente es aquel que, si se elimina de los datos, cambiaría significativamente el ajuste. El punto podría ser un valor atípico o tener un alto apalancamiento. La distancia de Cook> 1 se usa a menudo como un umbral aproximado para identificar puntos influyentes. La diferencia de Cook para estos tres jugadores es menor que 1, pero al mismo tiempo no están bien explicados por el modelo. ¿Qué hacer?
+
+ 
+
+Primero, piense en sus datos. Habla con expertos en dominios para que te ayuden a comprenderlo.
+
+ 
+
+- En el caso del conjunto de datos de los bateadores, tenemos datos de solo un año, 1986 --- ¡potencialmente muy ruidoso! Pero tenemos estadísticas de carrera en el conjunto de datos. ¿Quizás deberíamos usar estadísticas de carrera promedio como predictores en su lugar?
+
+ 
+
+- Podríamos hacer una investigación histórica para averiguar por qué a Schmidt y Kennedy se les pagó tanto en relación con su desempeño (¿quizás se lesionaron durante la temporada?) Y por qué a Sax se le pagó comparativamente poco. Dicha investigación podría ayudarnos a identificar información explicativa adicional que podría codificarse en variables e incluirse en el modelo y que podría mejorar el ajuste del modelo. 
+
+ 
+
+- ¿Hay alguna característica compartida por estos valores atípicos que podamos codificar en una variable e incluir como predictor en la regresión?
+
+ 
+
+En pocas palabras: no existen reglas estrictas y rápidas sobre qué hacer con los valores atípicos (o incluso lo que cuenta como un valor atípico). Usamos estas herramientas de diagnóstico, las gráficas de distancia y residuales de Cook, para comprender mejor nuestros datos y diseñar enfoques que tengan sentido en el contexto de nuestro proyecto. Tenga mucho cuidado al descartar datos.
+
+ 
+
+ 
+ 
+
+ 
+
+ 
