@@ -12,30 +12,20 @@ encoding: latin1
 
 # Introducción
 
-This bookdown is written as a supporting material for the subject sirven como notas para el curso [Aprendizaje Automático 1](https://guies.uab.cat/guies_docents/public/portal/html/2020/assignatura/104870/es) impartido en el [Grado de Estadística](https://www.uab.cat/web/estudiar/listado-de-grados/informacion-general-1216708258897.html?param1=1264404714557) de la UAB
+This bookdown is written as a supporting material for the subject sirven como notas para el curso [Aprendizaje Automático 1](https://guies.uab.cat/guies_docents/public/portal/html/2020/assignatura/104870/es) given at [Master for Modelling in Science and Engineering](https://www.uab.cat/web/estudiar/official-master-s-degrees/general-information/modelling-for-science-and-engineering-1096480962610.html?param1=1307112830469) from [Autonomous University of Barelona](https://www.uab.cat/web/universitat-autonoma-de-barcelona-1345467954774.html) (UAB).
 
-El objetivo de este material es familiarizar al alumno con diferentes métodos de aprendizaje automático (machine learning en inglés) desde un punto de vista aplicado haciendo énfasis a situaciones donde se dispone de grandes cantidades de datos.
+The contents are:
 
-Los contenidos incluyen los siguientes temas:
+*Big data analysis
+     - Parallelization in R
+     - Linear regression for Big Data
 
-- Breve introducción a Tidyverse
-- Introducción al aprendizaje automático
-- Regresión lineal y logística
-- Pasos previos a la creación de un modelo predictivo y medidas de validación
-- Métodos de aprendizaje automático
-    - Arboles de clasificación
-    - K-vecinos más cercanos
-    - Random Forest
-    - Boosting
-    - Métodos de aprendizaje para datos n<<p
-    - Métodos de penalización (shrinkage)
-    - Métodos de regularización
-- La librería ‘caret’
-- Métodos de aprendizaje para datos grandes (big data)
-    - XGBoost
-    - Lasso
-    - La librería ‘H20’
-
+*Model fitting
+     - Multivariate linear regression
+     - General rules for variable selection
+     - Stepwise variable selection
+     - Comparing models
+     - Automatic variable selection
 
 En el aula virtual de la asignatura (Moodle) se dispondrán de numerosas preguntas de autoevaluación para que el alumno pueda ver si adquiere los conocimientos descritos en cada sesión teórica, así como varias prácticas que permitirán formar al alumno en el análisis de datos mediante las principales técnicas de aprendizaje automático utilizando datos reales usando el software R.
 
