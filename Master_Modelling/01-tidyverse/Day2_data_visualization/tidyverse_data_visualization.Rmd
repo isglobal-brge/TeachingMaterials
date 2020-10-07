@@ -17,9 +17,92 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, comment="", message=FALSE, warning=FALSE, cache=TRUE, fig.width = 4, fig.height = 4)
+knitr::opts_chunk$set(echo = TRUE, comment="", message=FALSE, warning=FALSE, cache=TRUE, fig.width = 3, fig.height = 3)
 options(width=80)
 ```
+
+
+## ggplot2
+
+Every visualization in ggplot2 is composed of the following:
+
+* Data: the raw material of your visualization
+* Layers: what you see on the plot (e.g., points, lines, ...)
+* Scales: Maps the data to graphical output
+* Coordinates: The visualization's perspective (e.g., grids)
+* Faceting: Provides "visual drill-down" into the data
+* Themes: Controls the details of the display (e.g. fonts)
+
+**plot = data + Aesthetics + geometry**
+
+----
+
+![ggplot cheat seet: https://www.rstudio.com/resources/cheatsheets/](figures/grammargraphics.jpg)
+
+----
+
+```{r mtcars}
+mtcars[1:5,1:8]
+```
+
+----
+
+```{r plot_mtcars}
+library(ggplot2)
+ggplot(mtcars) +         # data
+  aes(x = mpg, y=wt) +   # Aesthetics
+  geom_point()           # geometry (layer)  
+```
+
+----
+
+## Possible aesthetics 
+
+These are some:
+
+* `theme_dark()`
+* `theme_minimal()`
+* `theme_classic()` 
+* `theme_void()` 
+* `theme_test()`
+
+----
+
+```{r plot_mtcars2}
+ggplot(mtcars) +         # data
+  aes(x = mpg, y=wt) +   # Aesthetics
+  geom_point() +         # geometry (layer)  
+  theme_minimal()        # theme 
+```
+
+## Possible geometry (layers)
+
+* For one continuous variable:
+    - `geom_area()` for area plot
+    - `geom_density()` for density plot
+    - `geom_dotplot()` for dot plot
+    - `geom_freqpoly()` for frequency polygon
+    - `geom_histogram()` for histogram plot
+    - `stat_ecdf()` for empirical cumulative density function
+    - `stat_qq()` for quantile - quantile plot
+
+* For one discrete variable:
+    - `geom_bar()` for bar plot
+
+-----
+
+![Possible layers](figures/layers.png)
+
+----
+
+```{r area}
+ggplot(mtcars) +        
+  aes(sample = mpg) + stat_qq()
+```
+
+
+---- 
+
 
 ## Data distribution (categorical)
 
@@ -70,8 +153,7 @@ ggplot(data = mpg, mapping = aes(x = class, y = hwy)) +
 ```{r boxplot2}
 ggplot(data = mpg) +
   geom_boxplot(mapping = aes(x = reorder(class, hwy, 
-                                         FUN = median), 
-                             y = hwy))
+                             FUN = median), y = hwy))
 ```
 
 ----
@@ -186,20 +268,12 @@ ggplot(iris, aes(x = Sepal.Width, y = Y)) +
 
 ## Why using ggplot2?
 
-Let's image we want to compare gene expression by growth rate in twenty genes in six conditions\footnote(example obtained from http://varianceexplained.org/r/why-I-use-ggplot2/) 
+Let's image we want to compare gene expression by growth rate in twenty genes in six conditions (example obtained from http://varianceexplained.org/r/why-I-use-ggplot2/) 
 
 ```{r get_gene_expr}
-load("../../data/genes.Rdata")
+ff <- "c:/Juan/CREAL/GitHub/TeachingMaterials/Master_Modelling/"
+load(file.path(ff, "data/genes.Rdata"))
 genes
-```
-
-----
-
-```{r plot_genes, fig.width=7}
-ggplot(genes, aes(rate, expression, color = nutrient)) +
-    geom_point() +
-    geom_smooth(method = "lm", se = FALSE) +
-    facet_wrap(~name + systematic_name, scales = "free_y")
 ```
 
 ---- 
@@ -235,7 +309,7 @@ legend("top", names(colors), col = colors, horiz = TRUE, lwd = 4)
 
 ----
 
-```{r plot_with_r_show, echo=FALSE}
+```{r plot_with_r_show, echo=FALSE, fig.width = 4, fig.height = 4}
 par(mar = c(1.5, 1.5, 1.5, 1.5))
 
 colors <- 1:6
@@ -263,81 +337,16 @@ legend("top", names(colors), col = colors, horiz = TRUE, lwd = 4)
 ```
 
 
-
-## ggplot2
-
-Every visualization in ggplot2 is composed of the following:
-
-* Data: the raw material of your visualization
-* Layers: what you see on the plot (e.g., points, lines, ...)
-* Scales: Maps the data to graphical output
-* Coordinates: The visualization's perspective (e.g., grids)
-* Faceting: Provides "visual drill-down" into the data
-* Themes: Controls the details of the display (e.g. fonts)
-
-**plot = data + Aesthetics + geometry**
-
 ----
 
-![ggplot cheat seet: https://www.rstudio.com/resources/cheatsheets/](figures/grammargraphics.jpg)
-
----- 
-
-```{r mtcars}
-mtcars[1:5,1:8]
+```{r plot_genes, fig.width=7, fig.height= 4}
+ggplot(genes, aes(rate, expression, color = nutrient)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE) +
+    facet_wrap(~name + systematic_name, scales = "free_y")
 ```
 
-----
 
-```{r plot_mtcars}
-ggplot(mtcars) +         # data
-  aes(x = mpg, y=wt) +   # Aesthetics
-  geom_point()           # geometry (layer)  
-```
-
-## Possible aesthetics 
-
-These are some:
-
-* `theme_dark()`
-* `theme_minimal()`
-* `theme_classic()` 
-* `theme_void()` 
-* `theme_test()`
-
-----
-
-```{r plot_mtcars2}
-ggplot(mtcars) +         # data
-  aes(x = mpg, y=wt) +   # Aesthetics
-  geom_point() +         # geometry (layer)  
-  theme_minimal()        # theme 
-```
-
-## Possible geometry (layers)
-
-* For one continuous variable:
-    - `geom_area()` for area plot
-    - `geom_density()` for density plot
-    - `geom_dotplot()` for dot plot
-    - `geom_freqpoly()` for frequency polygon
-    - `geom_histogram()` for histogram plot
-    - `stat_ecdf()` for empirical cumulative density function
-    - `stat_qq()` for quantile - quantile plot
-
-* For one discrete variable:
-    - `geom_bar()` for bar plot
-
------
-
-![Possible layers](figures/layers.png)
-
-----
-
-```{r area}
-ggplot(mtcars) +        
-  aes(sample = mpg) + stat_qq()
-```
 
 ## Facets
 
@@ -452,9 +461,16 @@ The file is containing information about
 * Log.R.Ratio: log-ratio intensity of the two alleles
 * B.Allele.Freq: frequency of the alternative allele
 
-      + 6.1 Which is the expected value of `Log.R.Ratio` and `B.Allel.Freq` for each chromosome? (show the R code to get your answer)
-      + 6.2 Create a facet plot that represent the `Log.R.Ratio` for each chromosome
-      + 6.3 Create a facet plot of `B.Allele.Freq` for chromosomes 1, 2, 3, ..., 6 drawing `B.Allele.Freq` information in red color.
+
+----
+
+Do the following tasks:
+
+**6.1:** Which is the expected value of `Log.R.Ratio` and `B.Allel.Freq` for each chromosome? (show the R code to get your answer)
+
+**6.2:** Create a facet plot that represent the `Log.R.Ratio` for each chromosome
+
+**6.3:** Create a facet plot of `B.Allele.Freq` for chromosomes 1, 2, 3, ..., 6 drawing `B.Allele.Freq` information in red color.
 
 
 

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>2 Regresion lineal con Big Data | Data Modelling</title>
+  <meta name="description" content="2 Regresion lineal con Big Data | Data Modelling" />
+  <meta name="generator" content="bookdown 0.20 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="2 Regresion lineal con Big Data | Data Modelling" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="2 Regresion lineal con Big Data | Data Modelling" />
+  
+  
+  
+
+<meta name="author" content="Juan R González" />
+
+
+<meta name="date" content="2020-10-07" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="index.html"/>
+
+<script src="libs/header-attrs-2.3/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Aprendizaje Automático 1</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introducción</a></li>
+<li class="chapter" data-level="2" data-path="regresion-lineal-con-big-data.html"><a href="regresion-lineal-con-big-data.html"><i class="fa fa-check"></i><b>2</b> Regresion lineal con Big Data</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="regresion-lineal-con-big-data.html"><a href="regresion-lineal-con-big-data.html#paralelización"><i class="fa fa-check"></i><b>2.1</b> Paralelización</a></li>
+<li class="chapter" data-level="2.2" data-path="regresion-lineal-con-big-data.html"><a href="regresion-lineal-con-big-data.html#mapreduce"><i class="fa fa-check"></i><b>2.2</b> MapReduce</a>
+<ul>
+<li class="chapter" data-level="2.2.1" data-path="regresion-lineal-con-big-data.html"><a href="regresion-lineal-con-big-data.html#map"><i class="fa fa-check"></i><b>2.2.1</b> Map</a></li>
+<li class="chapter" data-level="2.2.2" data-path="regresion-lineal-con-big-data.html"><a href="regresion-lineal-con-big-data.html#reduce"><i class="fa fa-check"></i><b>2.2.2</b> Reduce</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="regresion-lineal-con-big-data.html"><a href="regresion-lineal-con-big-data.html#linear-regression-for-big-data"><i class="fa fa-check"></i><b>2.3</b> Linear regression for Big Data</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Data Modelling</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="regresion-lineal-con-big-data" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Regresion lineal con Big Data</h1>
+<p>En la era de los macrodatos (Big Data), podemos tener acceso a grandes volúmenes de datos obtenidos de nuestra población de interés teniendo así la oportunidad de analizar la población prácticamente en su totalidad. Sin embargo, los algoritmos tradicionales para incluso los métodos estadísticos más sencillos (descriptivas, regresión lineal, …) necesitan mucho tiempo de computación. Para resolver este problema de computación, una de las aproximaciones que disponemos es dividir nuestros datos en conjuntos más pequeños que no requieran tanto coste computacional y combinar estos resultados de forma inteligente de forma que nos permita resolver el problema más grande. Esto se puede hacer paralelizando los cálculos puesto que incluso los ordenadores portátiles ya disponen de multiples cores de computación, y/o combinar los cálculos con paradigmas como <em>MapReduce</em> que ha diseñado para tratar Big Data de forma eficiente. Es por ello que en esta sección aprenderemos a:</p>
+<ul>
+<li>Paralelizar en R</li>
+<li>Usar MapReduce</li>
+<li>Ver una aplicación de cómo implementar la regresión lineal múltiple en un sistema distribuido</li>
+</ul>
+<div id="paralelización" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Paralelización</h2>
+<p>There are several R packages to perform parallel computing. The reason for using <code>doParallel</code> package, and not <code>parallel</code>, is that the <code>parallel</code> package is not working entirely on Windows and you had to write different code for it to work. The <code>doParallel</code> package is trying to make it happen on all platforms: UNIX, LINUX and WINDOWS, so it’s a pretty decent wrapper. To me, the most simple way of doing parallelization is to use <code>mclapply()</code> function from <code>parallel</code> but this cannot be used in Window.</p>
+<p>Let us assume we want to compute <span class="math inline">\(f(x)=x^2 + x\)</span> of 10 numbers stored in a vector called <code>vec</code>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="regresion-lineal-con-big-data.html#cb1-1"></a><span class="kw">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb1-2"><a href="regresion-lineal-con-big-data.html#cb1-2"></a>f &lt;-<span class="st"> </span><span class="cf">function</span>(x) x<span class="op">^</span><span class="dv">2</span> <span class="op">+</span><span class="st"> </span>x</span>
+<span id="cb1-3"><a href="regresion-lineal-con-big-data.html#cb1-3"></a>vec &lt;-<span class="st"> </span><span class="kw">rpois</span>(<span class="dv">10</span>, <span class="dt">lambda=</span><span class="dv">200</span>)</span></code></pre></div>
+<p>We can do the following strategies:</p>
+<ol style="list-style-type: decimal">
+<li>Looping</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="regresion-lineal-con-big-data.html#cb2-1"></a>forFunction &lt;-<span class="st"> </span><span class="cf">function</span>(x) {  </span>
+<span id="cb2-2"><a href="regresion-lineal-con-big-data.html#cb2-2"></a>  ans &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="kw">length</span>(x))</span>
+<span id="cb2-3"><a href="regresion-lineal-con-big-data.html#cb2-3"></a>  <span class="cf">for</span>(i <span class="cf">in</span> vec)</span>
+<span id="cb2-4"><a href="regresion-lineal-con-big-data.html#cb2-4"></a>   {</span>
+<span id="cb2-5"><a href="regresion-lineal-con-big-data.html#cb2-5"></a>    ans[i] &lt;-<span class="st"> </span><span class="kw">f</span>(i)</span>
+<span id="cb2-6"><a href="regresion-lineal-con-big-data.html#cb2-6"></a>  }</span>
+<span id="cb2-7"><a href="regresion-lineal-con-big-data.html#cb2-7"></a>  ans</span>
+<span id="cb2-8"><a href="regresion-lineal-con-big-data.html#cb2-8"></a>}</span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>Using <code>lapply ()</code> or <code>sapply ()</code> function</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="regresion-lineal-con-big-data.html#cb3-1"></a>lapplyFunction &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</span>
+<span id="cb3-2"><a href="regresion-lineal-con-big-data.html#cb3-2"></a>  ans &lt;-<span class="st"> </span><span class="kw">sapply</span>(x, f)</span>
+<span id="cb3-3"><a href="regresion-lineal-con-big-data.html#cb3-3"></a>  ans</span>
+<span id="cb3-4"><a href="regresion-lineal-con-big-data.html#cb3-4"></a>}</span></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>Using <code>doParallel::parLapply()</code> function</li>
+</ol>
+<p>We need first to create the cluster</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="regresion-lineal-con-big-data.html#cb4-1"></a><span class="kw">library</span>(doParallel)</span>
+<span id="cb4-2"><a href="regresion-lineal-con-big-data.html#cb4-2"></a>ncores &lt;-<span class="st"> </span><span class="kw">detectCores</span>() <span class="op">-</span><span class="st"> </span><span class="dv">1</span>  </span>
+<span id="cb4-3"><a href="regresion-lineal-con-big-data.html#cb4-3"></a><span class="kw">registerDoParallel</span>(<span class="dt">cores=</span>ncores)  </span>
+<span id="cb4-4"><a href="regresion-lineal-con-big-data.html#cb4-4"></a>cl &lt;-<span class="st"> </span><span class="kw">makeCluster</span>(ncores) </span></code></pre></div>
+<p>Then, we can use the parallel implementation of <code>lapply</code></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="regresion-lineal-con-big-data.html#cb5-1"></a>parLapplyFunction &lt;-<span class="st"> </span><span class="cf">function</span>(cl, x, f){</span>
+<span id="cb5-2"><a href="regresion-lineal-con-big-data.html#cb5-2"></a>  result &lt;-<span class="st"> </span><span class="kw">parLapply</span>(<span class="dt">cl=</span>cl, <span class="dt">X=</span>x, <span class="dt">fun=</span>f)  </span>
+<span id="cb5-3"><a href="regresion-lineal-con-big-data.html#cb5-3"></a>  result</span>
+<span id="cb5-4"><a href="regresion-lineal-con-big-data.html#cb5-4"></a>}</span></code></pre></div>
+<ol start="4" style="list-style-type: decimal">
+<li>Using <code>doParallel::foreach()</code> function</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="regresion-lineal-con-big-data.html#cb6-1"></a>foreachDoParFunction &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</span>
+<span id="cb6-2"><a href="regresion-lineal-con-big-data.html#cb6-2"></a>  result &lt;-<span class="st"> </span><span class="kw">foreach</span>(<span class="dt">i=</span>x, <span class="dt">.export=</span><span class="st">&quot;f&quot;</span>) <span class="op">%dopar%</span><span class="st"> </span><span class="kw">f</span>(i)</span>
+<span id="cb6-3"><a href="regresion-lineal-con-big-data.html#cb6-3"></a>  result</span>
+<span id="cb6-4"><a href="regresion-lineal-con-big-data.html#cb6-4"></a>}  </span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="regresion-lineal-con-big-data.html#cb7-1"></a>foreachDoFunction &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</span>
+<span id="cb7-2"><a href="regresion-lineal-con-big-data.html#cb7-2"></a>  result &lt;-<span class="st"> </span><span class="kw">foreach</span>(<span class="dt">i=</span>x, <span class="dt">.export=</span><span class="st">&quot;f&quot;</span>) <span class="op">%do%</span><span class="st"> </span><span class="kw">f</span>(i)</span>
+<span id="cb7-3"><a href="regresion-lineal-con-big-data.html#cb7-3"></a>  result</span>
+<span id="cb7-4"><a href="regresion-lineal-con-big-data.html#cb7-4"></a>}  </span></code></pre></div>
+<ol start="5" style="list-style-type: decimal">
+<li>Using <code>parallel::mclapply()</code> function</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="regresion-lineal-con-big-data.html#cb8-1"></a><span class="co"># Only works in Linux (Windows ncores must be set equal to 1)</span></span>
+<span id="cb8-2"><a href="regresion-lineal-con-big-data.html#cb8-2"></a>result &lt;-<span class="st"> </span><span class="kw">mclapply</span>(x, f, <span class="dt">mc.cores=</span>ncores)</span></code></pre></div>
+<p>In order to compare computation time, we can run</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="regresion-lineal-con-big-data.html#cb9-1"></a><span class="kw">system.time</span>(result &lt;-<span class="st"> </span><span class="kw">lapply</span>(vec, f))</span></code></pre></div>
+<pre><code>##    user  system elapsed 
+##       0       0       0</code></pre>
+<p>Nonetheless, <code>rbenchmark</code> function serves as a more accurate replacement of the often seen <code>system.time()</code> function and the more sophisticated <code>system.time(replicate(1000, expr))</code> expression (that incorporates variability). It tries hard to accurately measure only the time it takes to evaluate expr. To achieved this, the sub-millisecond (supposedly nanosecond) accurate timing functions most modern operating systems provide are used. Additionally all evaluations of the expressions are done in C code to minimize any overhead. In our example:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="regresion-lineal-con-big-data.html#cb11-1"></a><span class="kw">library</span>(rbenchmark)</span>
+<span id="cb11-2"><a href="regresion-lineal-con-big-data.html#cb11-2"></a><span class="kw">library</span>(doParallel)</span>
+<span id="cb11-3"><a href="regresion-lineal-con-big-data.html#cb11-3"></a></span>
+<span id="cb11-4"><a href="regresion-lineal-con-big-data.html#cb11-4"></a>ncores &lt;-<span class="st"> </span><span class="kw">detectCores</span>() <span class="op">-</span><span class="st"> </span><span class="dv">1</span>  </span>
+<span id="cb11-5"><a href="regresion-lineal-con-big-data.html#cb11-5"></a><span class="kw">registerDoParallel</span>(<span class="dt">cores=</span>ncores)  </span>
+<span id="cb11-6"><a href="regresion-lineal-con-big-data.html#cb11-6"></a>cl &lt;-<span class="st"> </span><span class="kw">makeCluster</span>(ncores) </span>
+<span id="cb11-7"><a href="regresion-lineal-con-big-data.html#cb11-7"></a></span>
+<span id="cb11-8"><a href="regresion-lineal-con-big-data.html#cb11-8"></a>testdata1 &lt;-<span class="st"> </span><span class="kw">benchmark</span>(<span class="st">&quot;For loop&quot;</span> =<span class="st"> </span><span class="kw">forFunction</span>(vec),</span>
+<span id="cb11-9"><a href="regresion-lineal-con-big-data.html#cb11-9"></a>                      <span class="st">&quot;lapply&quot;</span> =<span class="st"> </span><span class="kw">lapplyFunction</span>(vec),</span>
+<span id="cb11-10"><a href="regresion-lineal-con-big-data.html#cb11-10"></a>                      <span class="st">&quot;Foreach dopar&quot;</span> =<span class="st"> </span><span class="kw">foreachDoParFunction</span>(vec),</span>
+<span id="cb11-11"><a href="regresion-lineal-con-big-data.html#cb11-11"></a>                      <span class="st">&quot;Foreach do&quot;</span> =<span class="st"> </span><span class="kw">foreachDoFunction</span>(vec),</span>
+<span id="cb11-12"><a href="regresion-lineal-con-big-data.html#cb11-12"></a>                      <span class="st">&quot;parLapply&quot;</span> =<span class="st"> </span><span class="kw">parLapplyFunction</span>(<span class="dt">cl=</span>cl, <span class="dt">x=</span>vec, <span class="dt">f=</span>f),</span>
+<span id="cb11-13"><a href="regresion-lineal-con-big-data.html#cb11-13"></a>                      <span class="dt">columns=</span><span class="kw">c</span>(<span class="st">&#39;test&#39;</span>, <span class="st">&#39;elapsed&#39;</span>, <span class="st">&#39;replications&#39;</span>),</span>
+<span id="cb11-14"><a href="regresion-lineal-con-big-data.html#cb11-14"></a>                      <span class="dt">replications =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>, <span class="dv">400</span>, <span class="dv">500</span>))</span>
+<span id="cb11-15"><a href="regresion-lineal-con-big-data.html#cb11-15"></a></span>
+<span id="cb11-16"><a href="regresion-lineal-con-big-data.html#cb11-16"></a></span>
+<span id="cb11-17"><a href="regresion-lineal-con-big-data.html#cb11-17"></a></span>
+<span id="cb11-18"><a href="regresion-lineal-con-big-data.html#cb11-18"></a></span>
+<span id="cb11-19"><a href="regresion-lineal-con-big-data.html#cb11-19"></a><span class="kw">ggplot</span>() <span class="op">+</span></span>
+<span id="cb11-20"><a href="regresion-lineal-con-big-data.html#cb11-20"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> replications, <span class="dt">y =</span> elapsed, <span class="dt">colour =</span> test), <span class="dt">data =</span> testdata1)</span></code></pre></div>
+<p><img src="fig/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Another example could be to compare the performance of the five methods for matrix multiplication</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="regresion-lineal-con-big-data.html#cb12-1"></a><span class="kw">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb12-2"><a href="regresion-lineal-con-big-data.html#cb12-2"></a>A &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">20</span>), <span class="dt">nrow=</span><span class="dv">4</span>, <span class="dt">ncol=</span><span class="dv">5</span>)</span>
+<span id="cb12-3"><a href="regresion-lineal-con-big-data.html#cb12-3"></a>B &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">20</span>), <span class="dt">nrow=</span><span class="dv">4</span>, <span class="dt">ncol=</span><span class="dv">5</span>)</span>
+<span id="cb12-4"><a href="regresion-lineal-con-big-data.html#cb12-4"></a></span>
+<span id="cb12-5"><a href="regresion-lineal-con-big-data.html#cb12-5"></a>FUN &lt;-<span class="st"> </span><span class="cf">function</span>(i, A, B){</span>
+<span id="cb12-6"><a href="regresion-lineal-con-big-data.html#cb12-6"></a>  <span class="kw">crossprod</span>(A,B)</span>
+<span id="cb12-7"><a href="regresion-lineal-con-big-data.html#cb12-7"></a>}</span>
+<span id="cb12-8"><a href="regresion-lineal-con-big-data.html#cb12-8"></a></span>
+<span id="cb12-9"><a href="regresion-lineal-con-big-data.html#cb12-9"></a>a &lt;-<span class="st"> </span><span class="kw">as.list</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</span>
+<span id="cb12-10"><a href="regresion-lineal-con-big-data.html#cb12-10"></a>testdata2 &lt;-<span class="st"> </span><span class="kw">benchmark</span>(<span class="st">&quot;For loop&quot;</span> =<span class="st"> </span><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(a)){<span class="kw">FUN</span>(i, A, B)},</span>
+<span id="cb12-11"><a href="regresion-lineal-con-big-data.html#cb12-11"></a>                       <span class="st">&quot;lapply&quot;</span> =<span class="st"> </span><span class="kw">lapply</span>(a, <span class="dt">FUN =</span> FUN, <span class="dt">A=</span>A, <span class="dt">B=</span>B), </span>
+<span id="cb12-12"><a href="regresion-lineal-con-big-data.html#cb12-12"></a>                       <span class="st">&quot;Foreach dopar&quot;</span> =<span class="st"> </span><span class="kw">foreach</span>(<span class="dt">i =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>) <span class="op">%dopar%</span><span class="st"> </span><span class="kw">FUN</span>(i, A, B),</span>
+<span id="cb12-13"><a href="regresion-lineal-con-big-data.html#cb12-13"></a>                       <span class="st">&quot;Foreach do&quot;</span> =<span class="st"> </span><span class="kw">foreach</span>(<span class="dt">i =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>) <span class="op">%do%</span><span class="st"> </span><span class="kw">FUN</span>(i, A, B),</span>
+<span id="cb12-14"><a href="regresion-lineal-con-big-data.html#cb12-14"></a>                       <span class="st">&quot;parLapply&quot;</span> =<span class="st"> </span><span class="kw">parLapply</span>(<span class="dt">cl =</span> cl, <span class="dt">X =</span> a, <span class="dt">fun =</span> FUN, <span class="dt">A=</span>A, <span class="dt">B=</span>B),</span>
+<span id="cb12-15"><a href="regresion-lineal-con-big-data.html#cb12-15"></a>                       <span class="st">&quot;parSapply&quot;</span> =<span class="st"> </span><span class="kw">parSapply</span>(<span class="dt">cl =</span> cl, <span class="dt">X =</span> a, <span class="dt">FUN =</span> FUN, <span class="dt">A=</span>A, <span class="dt">B=</span>B),</span>
+<span id="cb12-16"><a href="regresion-lineal-con-big-data.html#cb12-16"></a>                       <span class="dt">columns=</span><span class="kw">c</span>(<span class="st">&#39;test&#39;</span>, <span class="st">&#39;elapsed&#39;</span>, <span class="st">&#39;replications&#39;</span>),</span>
+<span id="cb12-17"><a href="regresion-lineal-con-big-data.html#cb12-17"></a>                       <span class="dt">replications =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>, <span class="dv">400</span>, <span class="dv">500</span>))</span>
+<span id="cb12-18"><a href="regresion-lineal-con-big-data.html#cb12-18"></a></span>
+<span id="cb12-19"><a href="regresion-lineal-con-big-data.html#cb12-19"></a><span class="kw">ggplot</span>() <span class="op">+</span></span>
+<span id="cb12-20"><a href="regresion-lineal-con-big-data.html#cb12-20"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> replications, <span class="dt">y =</span> elapsed, <span class="dt">colour =</span> test), <span class="dt">data =</span> testdata2)</span></code></pre></div>
+<p><img src="fig/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Finally, another example could be to compare the performance of the five methods for fitting generalized linear model</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="regresion-lineal-con-big-data.html#cb13-1"></a>FUN &lt;-<span class="st"> </span><span class="cf">function</span>(i) {</span>
+<span id="cb13-2"><a href="regresion-lineal-con-big-data.html#cb13-2"></a>  ind &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">100</span>, <span class="dv">100</span>, <span class="dt">replace=</span><span class="ot">TRUE</span>)</span>
+<span id="cb13-3"><a href="regresion-lineal-con-big-data.html#cb13-3"></a>  mod &lt;-<span class="st"> </span><span class="kw">glm</span>(Species <span class="op">~</span><span class="st"> </span>Sepal.Length, <span class="dt">family=</span><span class="kw">binomial</span>(logit), <span class="dt">data =</span> iris[ind,])</span>
+<span id="cb13-4"><a href="regresion-lineal-con-big-data.html#cb13-4"></a>  <span class="kw">coefficients</span>(mod)</span>
+<span id="cb13-5"><a href="regresion-lineal-con-big-data.html#cb13-5"></a>}</span>
+<span id="cb13-6"><a href="regresion-lineal-con-big-data.html#cb13-6"></a></span>
+<span id="cb13-7"><a href="regresion-lineal-con-big-data.html#cb13-7"></a>a &lt;-<span class="st"> </span><span class="kw">as.list</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</span>
+<span id="cb13-8"><a href="regresion-lineal-con-big-data.html#cb13-8"></a>testdata3 &lt;-<span class="st"> </span><span class="kw">benchmark</span>(<span class="st">&quot;For loop&quot;</span> =<span class="st"> </span><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(a)){ <span class="kw">FUN</span>(a[[i]])},</span>
+<span id="cb13-9"><a href="regresion-lineal-con-big-data.html#cb13-9"></a>                       <span class="st">&quot;lapply&quot;</span> =<span class="st"> </span><span class="kw">lapply</span>(a, <span class="dt">FUN =</span> FUN), </span>
+<span id="cb13-10"><a href="regresion-lineal-con-big-data.html#cb13-10"></a>                       <span class="st">&quot;Foreach dopar&quot;</span> =<span class="st"> </span><span class="kw">foreach</span>(<span class="dt">i =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>) <span class="op">%dopar%</span><span class="st"> </span><span class="kw">FUN</span>(i),</span>
+<span id="cb13-11"><a href="regresion-lineal-con-big-data.html#cb13-11"></a>                       <span class="st">&quot;Foreach do&quot;</span> =<span class="st"> </span><span class="kw">foreach</span>(<span class="dt">i =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>) <span class="op">%do%</span><span class="st"> </span><span class="kw">FUN</span>(i),</span>
+<span id="cb13-12"><a href="regresion-lineal-con-big-data.html#cb13-12"></a>                       <span class="st">&quot;parLapply&quot;</span> =<span class="st"> </span><span class="kw">parLapply</span>(<span class="dt">cl =</span> cl, <span class="dt">X =</span> a, <span class="dt">fun =</span> FUN),</span>
+<span id="cb13-13"><a href="regresion-lineal-con-big-data.html#cb13-13"></a>                       <span class="st">&quot;parSapply&quot;</span> =<span class="st"> </span><span class="kw">parSapply</span>(<span class="dt">cl =</span> cl, <span class="dt">X =</span> a, <span class="dt">FUN =</span> FUN),</span>
+<span id="cb13-14"><a href="regresion-lineal-con-big-data.html#cb13-14"></a>                       <span class="dt">columns=</span><span class="kw">c</span>(<span class="st">&#39;test&#39;</span>, <span class="st">&#39;elapsed&#39;</span>, <span class="st">&#39;replications&#39;</span>),</span>
+<span id="cb13-15"><a href="regresion-lineal-con-big-data.html#cb13-15"></a>                       <span class="dt">replications =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>, <span class="dv">400</span>, <span class="dv">500</span>))</span>
+<span id="cb13-16"><a href="regresion-lineal-con-big-data.html#cb13-16"></a></span>
+<span id="cb13-17"><a href="regresion-lineal-con-big-data.html#cb13-17"></a><span class="kw">ggplot</span>() <span class="op">+</span></span>
+<span id="cb13-18"><a href="regresion-lineal-con-big-data.html#cb13-18"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> replications, <span class="dt">y =</span> elapsed, <span class="dt">colour =</span> test), <span class="dt">data =</span> testdata3)</span></code></pre></div>
+<p><img src="fig/unnamed-chunk-5-1.png" width="672" /></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="regresion-lineal-con-big-data.html#cb14-1"></a><span class="kw">stopCluster</span>(cl)</span></code></pre></div>
+<p>To sum up, generally, <code>parLapply ()</code> perform better than <code>foreach ()</code>. However, for all parallel implementation methods, the increase in terms of efficiency is not proportional to the number of cores being used (Theoretical efficiency).</p>
+</div>
+<div id="mapreduce" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> MapReduce</h2>
+<p>One year later, Google published a new paper describing how to perform operations across the Google File System, an approach that came to be known as MapReduce.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> As you would expect, there are two operations in MapReduce: map and reduce. The map operation provides an arbitrary way to transform each file into a new file, whereas the reduce operation combines two files. Both operations require custom computer code, but the MapReduce framework takes care of automatically executing them across many computers at once. These two operations are sufficient to process all the data available on the web, while also providing enough flexibility to extract meaningful information from it.</p>
+<p>For example, as illustrated in next Figure, we can use MapReduce to count words in two different text files stored in different machines. The map operation splits each word in the original file and outputs a new word-counting file with a mapping of words and counts. The reduce operation can be defined to take two word-counting files and combine them by aggregating the totals for each word; this last file will contain a list of word counts across all the original files. Counting words is often the most basic MapReduce example, but we can also use MapReduce for much more sophisticated and interesting applications in statistics.</p>
+<div class="figure">
+<img src="figures/mapreduce.png" style="width:40.0%" alt="" />
+<p class="caption">MapReduce example counting words across files</p>
+</div>
+<p>After these papers were released by Google, a team at Yahoo worked on implementing the Google File System and MapReduce as a single open source project. This project was released in 2006 as <em>Hadoop</em>, with the Google File System implemented as the Hadoop Distributed File System (HDFS). The Hadoop project made distributed file-based computing accessible to a wider range of users and organizations, making MapReduce useful beyond web data processing. In the R language, processing data via MapReduce is accomplished by the <code>rmr2</code> and <code>rhdfs</code> packages. The R programmer needs to just divide their application logic into the map and reduce phases and submit it with the rmr2 methods. Once this has been performed, `rmr2 calls the Hadoop streaming MapReduce API with several job parameters as input directory, output directory, mapper, reducer, and so on, to perform the R MapReduce job over Hadoop cluster.</p>
+<p>The MapReduce paradigm has long been a staple of big data computational strategies. However, properly leveraging MapReduce in R can be a challenge, even for experienced users. To get the most out of MapReduce, it is helpful to understand its relationship to functional programming.</p>
+<p>La programación funcional, en un sentido amplio, es aquella en que determinadas funciones admiten otras como argumento. Por ejemplo, la función <code>sapply()</code>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="regresion-lineal-con-big-data.html#cb15-1"></a>ff &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="cf">if</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) <span class="kw">log</span>(x) <span class="cf">else</span> <span class="kw">log</span>(<span class="op">-</span>x)<span class="op">^</span><span class="dv">2</span></span>
+<span id="cb15-2"><a href="regresion-lineal-con-big-data.html#cb15-2"></a><span class="kw">sapply</span>(<span class="op">-</span><span class="dv">4</span><span class="op">:</span><span class="dv">10</span>, ff)</span></code></pre></div>
+<pre><code>##  [1] 1.9218121 1.2069490 0.4804530 0.0000000       Inf 0.0000000 0.6931472 1.0986123 1.3862944 1.6094379 1.7917595 1.9459101
+## [13] 2.0794415 2.1972246 2.3025851</code></pre>
+<p>La programación funcional es una herramienta muy potente que permite programar de la siguiente manera:</p>
+<ul>
+<li>Crear funciones pequeñas y simples que resuelven un problema pequeño y acotado</li>
+<li>Aplicar esas funciones a grupos homogéneos de valores.</li>
+</ul>
+<p>En el ejemplo anterior, hemos construido una función <code>ff</code> y me diante la función <code>sapply()</code> la hemos aplicado a una lista de valores homogéneos, los números del -4 al 10.</p>
+<p>Hay muchas funciones en R, algunas de las cuales ya habéis visto, que admiten otras como argumento. Algunas de las más corrientes son:</p>
+<ul>
+<li>sapply y lapply</li>
+<li>tapply</li>
+<li>apply y mapply</li>
+<li>Las funciones ddply, ldply, etc. del paquete <code>plyr</code></li>
+</ul>
+<p>Un ejemplo muy habitual de este tipo de funciones se usa para inspeccionar el tipo de columnas de una tabla ya que aprovechan el hecho que una tabla es una lista de columnas y las recorren una a una</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="regresion-lineal-con-big-data.html#cb17-1"></a><span class="kw">lapply</span>(iris, class)</span></code></pre></div>
+<pre><code>## $Sepal.Length
+## [1] &quot;numeric&quot;
+## 
+## $Sepal.Width
+## [1] &quot;numeric&quot;
+## 
+## $Petal.Length
+## [1] &quot;numeric&quot;
+## 
+## $Petal.Width
+## [1] &quot;numeric&quot;
+## 
+## $Species
+## [1] &quot;factor&quot;</code></pre>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="regresion-lineal-con-big-data.html#cb19-1"></a><span class="kw">sapply</span>(iris, length)</span></code></pre></div>
+<pre><code>## Sepal.Length  Sepal.Width Petal.Length  Petal.Width      Species 
+##          150          150          150          150          150</code></pre>
+<p>Una de las ventajas de este tipo de programación es que el código es más breve y legible. Debemos recordar que estas fuciones incluyen el argumento <code>...</code> que permite pasar argumentos adicionales a la función a la que llaman. Por ejemplo esta función haría lo mismo que la anterior, pero sería más genérica ya que permitiría hacer cálculos variando el argumento <code>s</code>.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="regresion-lineal-con-big-data.html#cb21-1"></a>ff2 &lt;-<span class="st"> </span><span class="cf">function</span>(x, s) {</span>
+<span id="cb21-2"><a href="regresion-lineal-con-big-data.html#cb21-2"></a>  <span class="cf">if</span>(x <span class="op">&gt;</span><span class="st"> </span>s) <span class="kw">log</span>(x) <span class="cf">else</span> <span class="kw">log</span>(<span class="op">-</span>x)<span class="op">^</span><span class="dv">2</span></span>
+<span id="cb21-3"><a href="regresion-lineal-con-big-data.html#cb21-3"></a>}</span>
+<span id="cb21-4"><a href="regresion-lineal-con-big-data.html#cb21-4"></a><span class="kw">sapply</span>(<span class="op">-</span><span class="dv">4</span><span class="op">:</span><span class="dv">10</span>, ff2, <span class="dt">s=</span><span class="dv">0</span>)</span></code></pre></div>
+<pre><code>##  [1] 1.9218121 1.2069490 0.4804530 0.0000000       Inf 0.0000000 0.6931472 1.0986123 1.3862944 1.6094379 1.7917595 1.9459101
+## [13] 2.0794415 2.1972246 2.3025851</code></pre>
+<div id="map" class="section level3" number="2.2.1">
+<h3><span class="header-section-number">2.2.1</span> Map</h3>
+<p>The MapReduce methodology is also implemented in base R (<code>Map ()</code> and <code>Reduce ()</code> functions) as well as in <code>tidyverse</code>. La función <code>Map ()</code> consiste en aplicar una función a todos los elementos de una lista o vector:</p>
+<p><code>map(YOUR_LIST, YOUR_FUNCTION)</code></p>
+<p>Las operaciones que hemos realizado anteriormente podrían ejecutarse también como (<code>sapply ()</code> es un caso especial de la función <code>Map ()</code>):</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="regresion-lineal-con-big-data.html#cb23-1"></a><span class="kw">Map</span>(ff, <span class="kw">c</span>(<span class="dv">9</span>, <span class="dv">16</span>, <span class="dv">25</span>))</span></code></pre></div>
+<pre><code>## [[1]]
+## [1] 2.197225
+## 
+## [[2]]
+## [1] 2.772589
+## 
+## [[3]]
+## [1] 3.218876</code></pre>
+<p>y</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="regresion-lineal-con-big-data.html#cb25-1"></a><span class="kw">Map</span>(ff2, <span class="kw">c</span>(<span class="dv">9</span>, <span class="dv">16</span>, <span class="dv">25</span>), <span class="dt">s=</span><span class="dv">0</span>)</span></code></pre></div>
+<pre><code>## [[1]]
+## [1] 2.197225
+## 
+## [[2]]
+## [1] 2.772589
+## 
+## [[3]]
+## [1] 3.218876</code></pre>
+<p>Otra de las ventajas aparece cuando queremos variar más de un argumento. With lapply(), only one argument to the function varies; the others are fixed. For example, how would you find a weighted mean when you have two lists, one of observations and the other of weights?</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="regresion-lineal-con-big-data.html#cb27-1"></a><span class="co"># Generate some sample data</span></span>
+<span id="cb27-2"><a href="regresion-lineal-con-big-data.html#cb27-2"></a>xs &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">5</span>, <span class="kw">runif</span>(<span class="dv">10</span>), <span class="dt">simplify =</span> <span class="ot">FALSE</span>)</span>
+<span id="cb27-3"><a href="regresion-lineal-con-big-data.html#cb27-3"></a>ws &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">5</span>, <span class="kw">rpois</span>(<span class="dv">10</span>, <span class="dv">5</span>) <span class="op">+</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">simplify =</span> <span class="ot">FALSE</span>)</span>
+<span id="cb27-4"><a href="regresion-lineal-con-big-data.html#cb27-4"></a><span class="kw">str</span>(xs)</span></code></pre></div>
+<pre><code>## List of 5
+##  $ : num [1:10] 0.767 0.671 0.909 0.198 0.436 ...
+##  $ : num [1:10] 0.296 0.306 0.126 0.518 0.831 ...
+##  $ : num [1:10] 0.607 0.6956 0.1348 0.0715 0.1021 ...
+##  $ : num [1:10] 0.655 0.107 0.925 0.557 0.742 ...
+##  $ : num [1:10] 0.149 0.47 0.668 0.194 0.451 ...</code></pre>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="regresion-lineal-con-big-data.html#cb29-1"></a><span class="kw">str</span>(ws)</span></code></pre></div>
+<pre><code>## List of 5
+##  $ : num [1:10] 6 3 5 4 8 13 5 5 3 5
+##  $ : num [1:10] 3 9 6 5 6 4 6 6 6 5
+##  $ : num [1:10] 3 14 12 4 8 8 4 8 3 4
+##  $ : num [1:10] 7 7 8 5 9 7 6 6 8 4
+##  $ : num [1:10] 4 5 7 4 3 4 8 4 4 7</code></pre>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="regresion-lineal-con-big-data.html#cb31-1"></a><span class="co"># compute the weighted.mean</span></span>
+<span id="cb31-2"><a href="regresion-lineal-con-big-data.html#cb31-2"></a><span class="kw">unlist</span>(<span class="kw">Map</span>(weighted.mean, xs, ws))</span></code></pre></div>
+<pre><code>## [1] 0.4676235 0.5447004 0.3928258 0.4760168 0.5505697</code></pre>
+<p>If some of the arguments should be fixed and constant, use an anonymous function:</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="regresion-lineal-con-big-data.html#cb33-1"></a><span class="kw">Map</span>(<span class="cf">function</span>(x, w) <span class="kw">weighted.mean</span>(x, w, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>), xs, ws)</span></code></pre></div>
+<pre><code>## [[1]]
+## [1] 0.4676235
+## 
+## [[2]]
+## [1] 0.5447004
+## 
+## [[3]]
+## [1] 0.3928258
+## 
+## [[4]]
+## [1] 0.4760168
+## 
+## [[5]]
+## [1] 0.5505697</code></pre>
+</div>
+<div id="reduce" class="section level3" number="2.2.2">
+<h3><span class="header-section-number">2.2.2</span> Reduce</h3>
+<p>Another way of thinking about functionals is as a set of general tools for altering, subsetting, and collapsing lists. Every functional programming language has three tools for this: <code>Map()</code>, <code>Reduce()</code>, and <code>Filter()</code>. We have seen <code>Map()</code> already, and next we describe <code>Reduce()</code>, a powerful tool for extending two-argument functions. <code>Filter()</code> is a member of an important class of functionals that work with predicates, functions that return a single TRUE or FALSE (we will not cover that).</p>
+<p><code>Reduce()</code> reduces a vector, x, to a single value by recursively calling a function, f, two arguments at a time. It combines the first two elements with f, then combines the result of that call with the third element, and so on. Calling <code>Reduce(f, 1:3)</code> is equivalent to <code>f(f(1, 2), 3)</code>. Reduce is also known as fold, because it folds together adjacent elements in the list.</p>
+<p>The following two examples show what Reduce does with an infix and prefix function:</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="regresion-lineal-con-big-data.html#cb35-1"></a><span class="kw">Reduce</span>(<span class="st">`</span><span class="dt">+</span><span class="st">`</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>) <span class="co"># -&gt; ((1 + 2) + 3)</span></span></code></pre></div>
+<pre><code>## [1] 6</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="regresion-lineal-con-big-data.html#cb37-1"></a><span class="kw">Reduce</span>(sum, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>) <span class="co"># -&gt; sum(sum(1, 2), 3)</span></span></code></pre></div>
+<pre><code>## [1] 6</code></pre>
+<p>The essence of <code>Reduce()</code> can be described by a simple for loop:</p>
+<pre><code>Reduce2 &lt;- function(f, x) {
+  out &lt;- x[[1]]
+  for(i in seq(2, length(x))) {
+    out &lt;- f(out, x[[i]])
+  }
+  out
+}</code></pre>
+<p><code>Reduce()</code> is also an elegant way of extending a function that works with two inputs into a function that can deal with any number of inputs. It is useful for implementing many types of recursive operations, like merges and intersections. Imagine you have a list of numeric vectors, and you want to find the values that occur in every element:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="regresion-lineal-con-big-data.html#cb40-1"></a>l &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">5</span>, <span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="dv">15</span>, <span class="dt">replace =</span> T), <span class="dt">simplify =</span> <span class="ot">FALSE</span>)</span>
+<span id="cb40-2"><a href="regresion-lineal-con-big-data.html#cb40-2"></a><span class="kw">str</span>(l)</span></code></pre></div>
+<pre><code>## List of 5
+##  $ : int [1:15] 9 7 9 6 6 6 10 4 3 8 ...
+##  $ : int [1:15] 8 3 7 1 9 5 3 8 10 7 ...
+##  $ : int [1:15] 8 6 9 8 9 3 9 10 9 4 ...
+##  $ : int [1:15] 7 4 10 8 6 6 3 7 6 4 ...
+##  $ : int [1:15] 10 7 8 10 5 1 6 9 6 8 ...</code></pre>
+<p>You could do that by intersecting each element in turn:</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="regresion-lineal-con-big-data.html#cb42-1"></a><span class="kw">intersect</span>(<span class="kw">intersect</span>(<span class="kw">intersect</span>(<span class="kw">intersect</span>(l[[<span class="dv">1</span>]], l[[<span class="dv">2</span>]]),</span>
+<span id="cb42-2"><a href="regresion-lineal-con-big-data.html#cb42-2"></a>                              l[[<span class="dv">3</span>]]), l[[<span class="dv">4</span>]]), l[[<span class="dv">5</span>]])</span></code></pre></div>
+<pre><code>## [1]  9  6 10  8</code></pre>
+<p>That’s hard to read. With <code>Reduce()</code>, the equivalent is:</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="regresion-lineal-con-big-data.html#cb44-1"></a><span class="kw">Reduce</span>(intersect, l)</span></code></pre></div>
+<pre><code>## [1]  9  6 10  8</code></pre>
+</div>
+</div>
+<div id="linear-regression-for-big-data" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Linear regression for Big Data</h2>
+<p>In this section, we describe a very nice application of MapReduce framework to a Big Data problem.</p>
+<p>There are several problems that require the analysis of large volumes of information. The analysis at very large scale of data is a challenging task since the available information cannot be practically analyzed on a single machine due to the sheer size of the data to fit in memory. In order to overcome this difficulty, high-performance analytical systems running on distributed environments can be used. To this end standard analytics algorithms need to be adapted to take advantage of cloud computing models which provide scalability and flexibility. Here, we describe an approach that introduces a new distributed training method for Multiple Linear Regression which will be based on the QR decomposition and the ordinary least squares method adapted to MapReduce framework. The method is called MLR-MR and is described in (<a href="https://ieeexplore.ieee.org/document/7345473">Moufida Adjout Rehab and Faouzi Boufares, 2105</a>). The paper is also available in our Moodle.</p>
+<p>Let us start by recalling how to describe linear regression using the classical matrix notation:</p>
+<p><span class="math display">\[\mathbf{Y}=\mathbf{X}\mathbf{\beta}+\mathbf{\varepsilon}.\]</span></p>
+<p>The OLS estimate of <span class="math inline">\(\mathbf{\beta}\)</span> is <span class="math display">\[\widehat{\mathbf{\beta}}=[\mathbf{X}^T\mathbf{X}]^{-1}\mathbf{X}^T\mathbf{y}\]</span>. To illustrate, let us consider the “mtcars” example, and run this regression:</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="regresion-lineal-con-big-data.html#cb46-1"></a><span class="kw">data</span>(mtcars)</span>
+<span id="cb46-2"><a href="regresion-lineal-con-big-data.html#cb46-2"></a>mod &lt;-<span class="st"> </span>(<span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>wt <span class="op">+</span><span class="st"> </span>cyl, <span class="dt">data =</span> mtcars))</span></code></pre></div>
+<p>The algorithm implemented in the <code>lm ()</code> function uses the QR decomposition of <span class="math inline">\(\mathbf{X},\)</span> <span class="math display">\[\mathbf{X}=\mathbf{Q}\mathbf{R},\]</span> where <span class="math inline">\(\mathbf{Q}\)</span> is an orthogonal matrix (i.e. <span class="math inline">\(\mathbf{Q}^T\mathbf{Q}=\mathbb{I}\)</span>).Then,</p>
+<p><span class="math display">\[\widehat{\mathbf{\beta}}=[\mathbf{X}^T\mathbf{X}]^{-1}\mathbf{X}^T\mathbf{y}=\mathbf{R}^{-1}\mathbf{Q}^T\mathbf{y}\]</span></p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="regresion-lineal-con-big-data.html#cb47-1"></a>Y &lt;-<span class="st"> </span>mtcars<span class="op">$</span>mpg</span>
+<span id="cb47-2"><a href="regresion-lineal-con-big-data.html#cb47-2"></a><span class="co">#similar to cbind(1, mtcars$wt, mtcars$cyl)</span></span>
+<span id="cb47-3"><a href="regresion-lineal-con-big-data.html#cb47-3"></a>X &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(<span class="op">~</span><span class="st"> </span>wt <span class="op">+</span><span class="st"> </span>cyl, <span class="dt">data=</span>mtcars)</span>
+<span id="cb47-4"><a href="regresion-lineal-con-big-data.html#cb47-4"></a>QR &lt;-<span class="st"> </span><span class="kw">qr</span>(<span class="kw">as.matrix</span>(X))</span>
+<span id="cb47-5"><a href="regresion-lineal-con-big-data.html#cb47-5"></a>R &lt;-<span class="st"> </span><span class="kw">qr.R</span>(QR)</span>
+<span id="cb47-6"><a href="regresion-lineal-con-big-data.html#cb47-6"></a>Q &lt;-<span class="st"> </span><span class="kw">qr.Q</span>(QR)</span>
+<span id="cb47-7"><a href="regresion-lineal-con-big-data.html#cb47-7"></a><span class="kw">solve</span>(R) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(Q) <span class="op">%*%</span><span class="st"> </span>Y</span></code></pre></div>
+<pre><code>##                  [,1]
+## (Intercept) 39.686261
+## wt          -3.190972
+## cyl         -1.507795</code></pre>
+<p>We can parallelise computations using the MLR-MR method as follows:</p>
+<p>Consider <span class="math inline">\(m\)</span> blocks, for instance 3 (given tha we have 4 cores)</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="regresion-lineal-con-big-data.html#cb49-1"></a>m &lt;-<span class="st"> </span><span class="dv">3</span></span></code></pre></div>
+<p>and split vectors and matrices</p>
+<p><span class="math display">\[\mathbf{y}=\left[\begin{matrix}\mathbf{y}_1\\\mathbf{y}_2\\\vdots \\\mathbf{y}_m\end{matrix}\right]\]</span></p>
+<p>and</p>
+<p><span class="math display">\[\mathbf{X}=\left[\begin{matrix}\mathbf{X}_1\\\mathbf{X}_2\\\vdots\\\mathbf{X}_m\end{matrix}\right]=\left[\begin{matrix}\mathbf{Q}_1^{(1)}\mathbf{R}_1^{(1)}\\\mathbf{Q}_2^{(1)}\mathbf{R}_2^{(1)}\\\vdots \\\mathbf{Q}_m^{(1)}\mathbf{R}_m^{(1)}\end{matrix}\right]\]</span></p>
+<p>In R to split vectors and matrices we can use these two functions:</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="regresion-lineal-con-big-data.html#cb50-1"></a>chunk &lt;-<span class="st"> </span><span class="cf">function</span>(x,n) <span class="kw">split</span>(x, <span class="kw">cut</span>(<span class="kw">seq_along</span>(x), n, <span class="dt">labels =</span> <span class="ot">FALSE</span>)) </span>
+<span id="cb50-2"><a href="regresion-lineal-con-big-data.html#cb50-2"></a></span>
+<span id="cb50-3"><a href="regresion-lineal-con-big-data.html#cb50-3"></a>splitMatByRow =<span class="st"> </span><span class="cf">function</span>(mat, size){</span>
+<span id="cb50-4"><a href="regresion-lineal-con-big-data.html#cb50-4"></a>  row.index &lt;-<span class="st"> </span><span class="kw">chunk</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(mat), size)</span>
+<span id="cb50-5"><a href="regresion-lineal-con-big-data.html#cb50-5"></a>  <span class="kw">lapply</span>(row.index, <span class="cf">function</span>(val) mat[val, ])</span>
+<span id="cb50-6"><a href="regresion-lineal-con-big-data.html#cb50-6"></a>}</span></code></pre></div>
+<p>We can do that with our data</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="regresion-lineal-con-big-data.html#cb51-1"></a>x.block &lt;-<span class="st"> </span><span class="kw">splitMatByRow</span>(X, m)</span>
+<span id="cb51-2"><a href="regresion-lineal-con-big-data.html#cb51-2"></a>y.block &lt;-<span class="st"> </span><span class="kw">splitMatByRow</span>(<span class="kw">matrix</span>(Y, <span class="dt">ncol =</span> <span class="dv">1</span>), m)</span></code></pre></div>
+<p>Then, we get small QR decomposition (per subset). This step correspond to de <strong>Map</strong> step in the <code>MapReduce</code> framework</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="regresion-lineal-con-big-data.html#cb52-1"></a><span class="co"># Algorithm 2 Mapper function in step1</span></span>
+<span id="cb52-2"><a href="regresion-lineal-con-big-data.html#cb52-2"></a>x.block.qr &lt;-<span class="st"> </span><span class="kw">lapply</span>(x.block, <span class="cf">function</span>(val){</span>
+<span id="cb52-3"><a href="regresion-lineal-con-big-data.html#cb52-3"></a>  qrresult &lt;-<span class="st"> </span><span class="kw">qr</span>(val)</span>
+<span id="cb52-4"><a href="regresion-lineal-con-big-data.html#cb52-4"></a>  <span class="kw">list</span>(<span class="dt">Q=</span><span class="kw">qr.Q</span>(qrresult), <span class="dt">R=</span><span class="kw">qr.R</span>(qrresult))</span>
+<span id="cb52-5"><a href="regresion-lineal-con-big-data.html#cb52-5"></a>})</span></code></pre></div>
+<p>Now, consider the QR decomposition of <span class="math inline">\(\mathbf{R}^{(1)}\)</span> which is the first step of the reduce part</p>
+<p><span class="math display">\[\mathbf{R}^{(1)}=\left[\begin{matrix}\mathbf{R}_1^{(1)}\\\mathbf{R}_2^{(1)}\\\vdots \\\mathbf{R}_m^{(1)}\end{matrix}\right]=\mathbf{Q}^{(2)}\mathbf{R}^{(2)}\]</span> where</p>
+<p><span class="math display">\[\mathbf{Q}^{(2)}=\left[\begin{matrix}\mathbf{Q}^{(2)}_1\\\mathbf{Q}^{(2)}_2\\\vdots\\\mathbf{Q}^{(2)}_m\end{matrix}\right]\]</span></p>
+<p>that can be computed as</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="regresion-lineal-con-big-data.html#cb53-1"></a><span class="co"># Algorithm 3 Reducer function in step1</span></span>
+<span id="cb53-2"><a href="regresion-lineal-con-big-data.html#cb53-2"></a>Rtemp &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, <span class="kw">lapply</span>(x.block.qr, <span class="cf">function</span> (l) l<span class="op">$</span>R))</span>
+<span id="cb53-3"><a href="regresion-lineal-con-big-data.html#cb53-3"></a>qrresult &lt;-<span class="st"> </span><span class="kw">qr</span>(Rtemp)</span>
+<span id="cb53-4"><a href="regresion-lineal-con-big-data.html#cb53-4"></a>Rtemp.qr &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">Q=</span><span class="kw">qr.Q</span>(qrresult), <span class="dt">R=</span><span class="kw">qr.R</span>(qrresult))</span>
+<span id="cb53-5"><a href="regresion-lineal-con-big-data.html#cb53-5"></a></span>
+<span id="cb53-6"><a href="regresion-lineal-con-big-data.html#cb53-6"></a>R.final &lt;-<span class="st"> </span>Rtemp.qr<span class="op">$</span>R</span>
+<span id="cb53-7"><a href="regresion-lineal-con-big-data.html#cb53-7"></a>Rtemp.Q.divide &lt;-<span class="st"> </span><span class="kw">splitMatByRow</span>(Rtemp.qr<span class="op">$</span>Q, m)</span>
+<span id="cb53-8"><a href="regresion-lineal-con-big-data.html#cb53-8"></a></span>
+<span id="cb53-9"><a href="regresion-lineal-con-big-data.html#cb53-9"></a></span>
+<span id="cb53-10"><a href="regresion-lineal-con-big-data.html#cb53-10"></a>Q.result =<span class="st"> </span><span class="kw">list</span>()</span>
+<span id="cb53-11"><a href="regresion-lineal-con-big-data.html#cb53-11"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>m){</span>
+<span id="cb53-12"><a href="regresion-lineal-con-big-data.html#cb53-12"></a>  Q.result[[i]] &lt;-<span class="st"> </span>x.block.qr[[i]]<span class="op">$</span>Q <span class="op">%*%</span><span class="st"> </span>Rtemp.Q.divide[[i]]</span>
+<span id="cb53-13"><a href="regresion-lineal-con-big-data.html#cb53-13"></a>}</span></code></pre></div>
+<p>Define – as step 2 of the reduce part</p>
+<p><span class="math display">\[\mathbf{Q}^{(3)}_j=\mathbf{Q}^{(2)}_j\mathbf{Q}^{(1)}_j\]</span></p>
+<p>and</p>
+<p><span class="math display">\[\mathbf{V}_j=\mathbf{Q}^{(3)T}_j\mathbf{y}_j\]</span></p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="regresion-lineal-con-big-data.html#cb54-1"></a><span class="co"># Algorithm 4 Reduce function in step2</span></span>
+<span id="cb54-2"><a href="regresion-lineal-con-big-data.html#cb54-2"></a>V =<span class="st"> </span><span class="kw">list</span>()</span>
+<span id="cb54-3"><a href="regresion-lineal-con-big-data.html#cb54-3"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>m){</span>
+<span id="cb54-4"><a href="regresion-lineal-con-big-data.html#cb54-4"></a>  V[[i]]  &lt;-<span class="st">  </span><span class="kw">crossprod</span>(Q.result[[i]], y.block[[i]])  </span>
+<span id="cb54-5"><a href="regresion-lineal-con-big-data.html#cb54-5"></a>}</span></code></pre></div>
+<p>and finally set – as the step 3 of the reduce part</p>
+<p><span class="math display">\[\widehat{\mathbf{\beta}}=[\mathbf{R}^{(2)}]^{-1}\sum_{j=1}^m\mathbf{V}_j\]</span></p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="regresion-lineal-con-big-data.html#cb55-1"></a><span class="co"># Algorithm 5 Reduce function in step3</span></span>
+<span id="cb55-2"><a href="regresion-lineal-con-big-data.html#cb55-2"></a>V.sum &lt;-<span class="st"> </span><span class="kw">Reduce</span>(<span class="st">&#39;+&#39;</span>, V)</span>
+<span id="cb55-3"><a href="regresion-lineal-con-big-data.html#cb55-3"></a>beta &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(<span class="kw">solve</span>(R.final) <span class="op">%*%</span><span class="st"> </span>V.sum)</span></code></pre></div>
+<p>Let us compare the results</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="regresion-lineal-con-big-data.html#cb56-1"></a><span class="kw">cbind</span>(<span class="dt">lm=</span><span class="kw">coef</span>(mod), <span class="dt">parallel=</span>beta)</span></code></pre></div>
+<pre><code>##                    lm  parallel
+## (Intercept) 39.686261 39.686261
+## wt          -3.190972 -3.190972
+## cyl         -1.507795 -1.507795</code></pre>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="regresion-lineal-con-big-data.html#cb58-1"></a><span class="co"># error</span></span>
+<span id="cb58-2"><a href="regresion-lineal-con-big-data.html#cb58-2"></a><span class="kw">sum</span>((beta <span class="op">-</span><span class="st"> </span><span class="kw">coef</span>(mod)) <span class="op">**</span><span class="st"> </span><span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] 2.607678e-28</code></pre>
+
+</div>
+</div>
+
+
+
+
+
+
+<div class="footnotes">
+<hr />
+<ol start="1">
+<li id="fn1"><p>Dean J, Ghemawat S (2004). “MapReduce: Simplified data processing on large clusters.” In USENIX Symposium on Operating System Design and Implementation (OSDI).<a href="regresion-lineal-con-big-data.html#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/isglobal-brge/Aprendizaje_Automatico_1/tree/master/docs0X-paralelizacion.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["_main.pdf", "_main.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
