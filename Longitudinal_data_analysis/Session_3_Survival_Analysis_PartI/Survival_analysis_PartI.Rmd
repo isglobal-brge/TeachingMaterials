@@ -2,9 +2,9 @@
 title: "Survival analysis with `R` (Part I)"
 author: "Juan R Gonzalez"
 output:
-  BiocStyle::html_document:
-    toc_depth: 2
   BiocStyle::pdf_document:
+    toc_depth: 2
+  BiocStyle::html_document:
     toc_depth: 2
 ---
 
@@ -16,8 +16,8 @@ or just call make
 
 ```{r style, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
 library("knitr")
-#options(width=100)
-opts_chunk$set(message = FALSE, error = TRUE, warning = TRUE)
+options(width=100)
+opts_chunk$set(message = FALSE, error = TRUE, warning = FALSE, comment="")
 ```
 
 
@@ -76,10 +76,20 @@ ans <- survfit(Surv(time, event)~1, datos)
 ans
 ```
 
-The Kaplan-Meier table can be obtained by:
+The `survfit` object contains more variables, including detailed time points with the number at risk `n.risk`, events `n.event`, and censors `n.censor` at each time point. Therefore, the Kaplan-Meier table can be obtained by:
 
 ```{r, table_km}
-summary(ans)
+library(tidyverse)
+km <- tibble(
+  time = ans$time,
+  n.risk = ans$n.risk,
+  n.event = ans$n.event,
+  n.censor = ans$n.censor,
+  surv = ans$surv,
+  upper = ans$upper,
+  lower = ans$lower
+)
+km
 ```
 
 The survival curve can be visualized by
@@ -87,6 +97,26 @@ The survival curve can be visualized by
 ```{r, plotkm}
 plot(ans, xlab="Time", ylab="Survival probability")
 ```
+
+We can also use `ggsurvplot ()` function from `survminer` package. A vertical drop in the curves indicates an event. The vertical tick mark on the curves means that a patient was censored.
+
+
+
+```{r plotkm2}
+library(survminer)
+ggsurvplot(
+  ans,
+  pval = TRUE,
+  conf.int = TRUE,
+  risk.table = TRUE,
+  surv.median.line = "hv", # median horizontal and vertical ref lines
+  ggtheme = theme_bw(),
+  palette = c("#E7B800", "#2E9FDF"),
+  title = "Kaplan-Meier Survival Function Estimate"
+)
+```
+
+
 
 # Comparing survival curves
 
@@ -118,9 +148,9 @@ The comparison across time is computed by using log-rank test
 ans.logrank<-survdiff(Surv(time, event)~as.factor(therapy), datos,
                               rho=0) 
 ans.logrank
-````
+```
 
-We observe that the differences we observe in the curves, are statistically significant at 5% level. Notice that the argument `rho` is not necessary since it is the default value. It corresponds to the log-rank test. Wilcoxon test is computed by setting `rho=1`
+We observe that the differences in the curves, are statistically significant at 5% level. Notice that the argument `rho` is not necessary since it is the default value. It corresponds to the log-rank test. Wilcoxon test is computed by setting `rho=1`
 
 ```{r, wilcox}
 ans.wilcox<-survdiff(Surv(time, event)~as.factor(therapy), datos,
@@ -128,7 +158,25 @@ ans.wilcox<-survdiff(Surv(time, event)~as.factor(therapy), datos,
 ans.wilcox
 ```
 
-We observe that both tests are providing the same conclusion. 
+We also observe that both tests are providing the same conclusion. We can produce a figure containing all this information by using the `survminer`package. To this end, `survfit` object should be created instead of a `survdiff`. In that case, log-rank test is used. 
+
+
+```{r plot_lr}
+ans.km <- survfit(Surv(time, event) ~ therapy, datos) 
+
+ggsurvplot(
+  ans.km,
+  linetype = "strata", # Change line type by groups
+  pval = TRUE,
+  conf.int = TRUE,
+  risk.table = TRUE,
+  surv.median.line = "hv", # median horizontal and vertical ref lines
+  ggtheme = theme_bw(),
+  palette = c("#E7B800", "#2E9FDF"),
+  title = "Kaplan-Meier Survival Function Estimate"
+)
+```
+
 
 # Adjusting for other covariates: stratified analysis
 
@@ -162,6 +210,8 @@ survdiff(Surv(time, event)~as.factor(tumor.grade), datos)
 ```
 
 Further information about survival data analysis with `R` can be found in this tutorial [Tutorial Survival Analysis](https://folk.ntnu.no/bo/TMA4275/Download/R.tutorialDiez.pdf). 
+
+
 
 # Exercise (to deliver)
 
