@@ -2,9 +2,9 @@
 title: "Survival analysis with `R` (Part I)"
 author: "Juan R Gonzalez"
 output:
-  BiocStyle::pdf_document:
-    toc_depth: 2
   BiocStyle::html_document:
+    toc_depth: 2
+  BiocStyle::pdf_document:
     toc_depth: 2
 ---
 
@@ -245,7 +245,6 @@ File *pulmon.sav* contains data about a survival study about lung cancer (NOTE: 
 - Compare survival curves of patients receiving chemotherapy, radiotherapy, surgery and clinical stage by using log-rank test. Identify those variables significantly assoicuated with survival
 - Are there statistical differences depending on chemotherapy after adjusting by clinical stage?
 - Is there any trend in the survival with regard to the Karnofski index. Answer this question by visualy inspecting the required plot
-\end{enumerate}
 
 
 ---------------------
