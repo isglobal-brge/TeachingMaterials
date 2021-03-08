@@ -2,9 +2,9 @@
 title: "Survival analysis with `R` (Part I)"
 author: "Juan R Gonzalez"
 output:
-  BiocStyle::html_document:
-    toc_depth: 2
   BiocStyle::pdf_document:
+    toc_depth: 2
+  BiocStyle::html_document:
     toc_depth: 2
 ---
 
@@ -178,9 +178,41 @@ ggsurvplot(
 ```
 
 
+
+`ggsurvplot()` can plot the cumulative risk function (aka "cumulative incidence", "cumulative events" or "distribution function"), $F(t) = 1 - S(t)$, with argument `fun = "event"`, and the cumulative hazard function with argument fun = "cumhaz", $H(t) = - \log(S(t))$ . This can be represented when we are interested in represent the probability of observing the event of interest rather than the probability of survival. 
+
+```{r F}
+ggsurvplot(
+  ans.km,
+  fun = "event",
+  linetype = "strata", # Change line type by groups
+  pval = TRUE,
+  conf.int = TRUE,
+  ggtheme = theme_bw(),
+  palette = c("#E7B800", "#2E9FDF"),
+  title = "Kaplan-Meier Cumulative Risk Function Estimate"
+)
+``` 
+
+
+
+```{r H}
+ggsurvplot(
+  ans.km,
+  fun = "cumhaz",
+  linetype = "strata", # Change line type by groups
+  pval = TRUE,
+  conf.int = TRUE,
+  ggtheme = theme_bw(),
+  palette = c("#E7B800", "#2E9FDF"),
+  title = "Kaplan-Meier Cumulative Hazard Function Estimate"
+)
+```
+
+
 # Adjusting for other covariates: stratified analysis
 
-In some occassions researchers are interested in comparing survival curves between two groups of patients but they know that there are differences in the survival due to a third variable. For instance, in this data, menopausal status influence survival. Therefore, observed differences between women receiven therapy or not must be adjusted for this third variable. This can be performed by using an stratified test
+In some occasions researchers are interested in comparing survival curves between two groups of patients but they know that there are differences in the survival due to a third variable. For instance, in this data, menopausal status influence survival. Therefore, observed differences between women receiven therapy or not must be adjusted for this third variable. This can be performed by using an stratified test
 
 ```{r, stratified}
 ans.strat<-survdiff(Surv(time, event)~as.factor(therapy)
