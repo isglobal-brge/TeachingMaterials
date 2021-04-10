@@ -2,10 +2,10 @@
 title: "Recurrent events with `R` (Part II)"
 author: "Juan R Gonzalez"
 output:
-  BiocStyle::html_document:
-    toc_depth: 2
   BiocStyle::pdf_document:
     fig_caption: yes
+    toc_depth: 2
+  BiocStyle::html_document:
     toc_depth: 2
 ---
 
@@ -220,7 +220,32 @@ the reduction is statistically significant at the 1\% level.
 pchisq(deviance.1 - deviance.2, df=1, lower=FALSE)
 ```
 
-So the risk of hospital admissions increases 12% (exp(0.1061)=1.11) as the number of prior hospital admissions increases. The AG model assumes a common baseline risk function for all admissions. So, we may think that using a stratified model (PWP model) per hospital admission number could be more appropriate.
+So the risk of hospital admissions increases 12% (exp(0.1061)=1.11) as the number of prior hospital admissions increases. The AG model assumes a common baseline risk function for all admissions. So, we may think that using a stratified model (PWP model) per hospital admission number could be more appropriate. This is estimating the \textbf{PWG total time model} since the `stop` variables is annotated in the calendar time. 
+
+```
+hc    time start stop event
+5634    24     0   24     1
+5634   433    24  433     1
+5634   580   433  580     0
+10767  489     0  489     1
+10767  693   489  693     0
+...
+```
+
+The \textbf{PWG gap time model} would require to have data as
+
+
+```
+hc    time start stop event
+5634    24     0   24     1
+5634   433     0  409     1
+5634   580     0  147     0
+10767  489     0  489     1
+10767  693     0  204     0
+...
+```
+
+This is PWP total time
 
 ```{r, model_pwp}
 pwp.fit <- coxph(Surv(start, stop, event) ~ as.factor(dukes)+
@@ -257,18 +282,31 @@ legend("topright", c("1st admission", "2nd admission", "3rd and 4th admission"),
 Which is different of the baseline hazard function assumed in the AG model
 
 ```{r, plot_ag}
-ag.fit. <- coxph(Surv(start, stop, event) ~ as.factor(dukes) +
+ag.fit <- coxph(Surv(start, stop, event) ~ as.factor(dukes) +
                       cluster(hc), 
                       data=subset(colon2, enum<5))
 plot(survfit(ag.fit))
 ```
 
-\emph{Gap-time} and \emph{Total-time} scales can also be used. This corresponds to the [Wei, Lin and Weisfeld]() (WLW) model. This only requires one time variable. In our case, the variable _time_ corresponds to the \emph{Total-time} scale. The model can be fitted by
+The [Wei, Lin and Weisfeld]() (WLW) requires total time formulation but it is required to have the same number of entries for each individual. Let us assume that in this example we are considering 3 recurrences. The data should be:
+
+
+```
+hc    time start stop event enum
+5634    24     0   24     1    1
+5634   433     0  409     1    2
+5634   580     0  147     0    3
+10767  489     0  489     1    1
+10767  693     0  204     0    2
+10767  693     0  204     0    3
+...
+```
+
+And the model is equally fitted by
 
 ```{r, model_pwp_total}
 wlw.fit.total <- coxph(Surv(time, event) ~ as.factor(dukes) + strata(enum) +
                   cluster(hc) , data=subset(colon2, enum<5))
-wlw.fit.total
 ```
 
 [Kelly and Lim]() review all these models in a paper by providing some examples of real data analysis and further discussion about the use of these models. The paper can be found in the repository.
@@ -290,7 +328,7 @@ NOTE: variable _time_ contains inter-occurrence times, _event_ is the censoring 
 
 **Exercise 1:** 
 
-- Estimate the AG, PWP, WLW-Gap time and WLW-Total time models to determine whether there are differences in the relapsing time depending on the number of lesions at diagnosis (variable _distrib_).
+- Estimate the AG, PWP-Gap time, PWP-Total time and WLW models to determine whether there are differences in the relapsing time depending on the number of lesions at diagnosis (variable _distrib_). NOTE: you will need to create the proper data frames for PWT-Gap time and WLW models.
 - Do we obtain the same conclusion by using the three models? (NOTE: use some of the functions we have seen in the lectures to prepare the required data)
 - Repeat the same analyses adjusting for sex and response to the treatment (variable _tt effage_). Do we obtain the same conclusion as in the models without such adjustment?
 
