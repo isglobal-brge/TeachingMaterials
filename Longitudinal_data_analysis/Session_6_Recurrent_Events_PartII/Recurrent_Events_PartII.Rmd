@@ -2,10 +2,10 @@
 title: "Recurrent events with `R` (Part II)"
 author: "Juan R Gonzalez"
 output:
+  BiocStyle::html_document:
+    toc_depth: 2
   BiocStyle::pdf_document:
     fig_caption: yes
-    toc_depth: 2
-  BiocStyle::html_document:
     toc_depth: 2
 ---
 
@@ -220,7 +220,7 @@ the reduction is statistically significant at the 1\% level.
 pchisq(deviance.1 - deviance.2, df=1, lower=FALSE)
 ```
 
-So the risk of hospital admissions increases 12% (exp(0.1061)=1.11) as the number of prior hospital admissions increases. The AG model assumes a common baseline risk function for all admissions. So, we may think that using a stratified model (PWP model) per hospital admission number could be more appropriate. This is estimating the \textbf{PWG total time model} since the `stop` variables is annotated in the calendar time. 
+So the risk of hospital admissions increases 12% (exp(0.1061)=1.11) as the number of prior hospital admissions increases. The AG model assumes a common baseline risk function for all admissions. So, we may think that using a stratified model (PWP model) per hospital admission number could be more appropriate. This is estimating the \textbf{PWP total time model} since the `stop` variables is annotated in the calendar time. 
 
 ```
 hc    time start stop event
@@ -232,7 +232,7 @@ hc    time start stop event
 ...
 ```
 
-The \textbf{PWG gap time model} would require to have data as
+The \textbf{PWP gap time model} would require to have data as
 
 
 ```
@@ -288,19 +288,21 @@ ag.fit <- coxph(Surv(start, stop, event) ~ as.factor(dukes) +
 plot(survfit(ag.fit))
 ```
 
-The [Wei, Lin and Weisfeld]() (WLW) requires total time formulation but it is required to have the same number of entries for each individual. Let us assume that in this example we are considering 3 recurrences. The data should be:
+The [Wei, Lin and Weisfeld]() (WLW) requires total time formulation which also needs to have the same number of entries for each individual. Let us assume that in this example we are considering 3 recurrences. The data should be:
 
 
 ```
 hc    time start stop event enum
 5634    24     0   24     1    1
-5634   433     0  409     1    2
-5634   580     0  147     0    3
-10767  489     0  489     1    1
-10767  693     0  204     0    2
-10767  693     0  204     0    3
+5634   433    24  433     1    2
+5634   580   433  580     0    3
+10767  489     0  489     1    1  
+10767  693   489  693     0    2
+10767  693   489  693     0    3
 ...
 ```
+
+
 
 And the model is equally fitted by
 
